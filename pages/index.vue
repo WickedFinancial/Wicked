@@ -2,8 +2,8 @@
   <v-row justify="center" align="center">
     <v-col cols="12" sm="8" md="6">
       <div class="text-center">
-        <logo/>
-        <vuetify-logo/>
+        <logo />
+        <vuetify-logo />
       </div>
       <v-card>
         <v-card-title class="headline">
@@ -54,7 +54,7 @@
           <div class="text-xs-right">
             <em><small>&mdash; John Leider</small></em>
           </div>
-          <hr class="my-3"/>
+          <hr class="my-3" />
           <a
             href="https://nuxtjs.org/"
             target="_blank"
@@ -62,7 +62,7 @@
           >
             Nuxt Documentation
           </a>
-          <br/>
+          <br />
           <a
             href="https://github.com/nuxt/nuxt.js"
             target="_blank"
@@ -72,7 +72,7 @@
           </a>
         </v-card-text>
         <v-card-actions>
-          <v-spacer/>
+          <v-spacer />
           <v-btn color="primary" nuxt to="/inspire"> Continue</v-btn>
         </v-card-actions>
       </v-card>
@@ -81,14 +81,12 @@
 </template>
 
 <script lang="ts">
+import { Vue, Component } from 'vue-property-decorator'
 import Logo from '~/components/Logo.vue'
 import VuetifyLogo from '~/components/VuetifyLogo.vue'
-import {Vue, Component} from "vue-property-decorator"
-
 
 @Component({
-  components: {Logo, VuetifyLogo}
+  components: { Logo, VuetifyLogo },
 })
-export default class Index extends Vue {
-}
+export default class Index extends Vue {}
 </script>

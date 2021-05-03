@@ -12,11 +12,11 @@ export default {
       lang: 'en',
     },
     meta: [
-      {charset: 'utf-8'},
-      {name: 'viewport', content: 'width=device-width, initial-scale=1'},
-      {hid: 'description', name: 'description', content: ''},
+      { charset: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { hid: 'description', name: 'description', content: '' },
     ],
-    link: [{rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'}],
+    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
@@ -68,14 +68,14 @@ export default {
 
   purgeCSS: {
     mode: 'webpack',
-    enabled: ({isDev}) => (!isDev), // or `false` when in dev/debug mode
+    enabled: ({ isDev }) => !isDev, // or `false` when in dev/debug mode
     paths: [
       'components/**/*.vue',
       'layouts/**/*.vue',
       'pages/**/*.vue',
       'plugins/**/*.js',
       'node_modules/vuetify/src/**/*.ts',
-      'node_modules/vuetify/dist/vuetify.css'
+      'node_modules/vuetify/dist/vuetify.css',
     ],
     styleExtensions: ['.css'],
     whitelist: ['body', 'html', 'nuxt-progress'],
@@ -87,28 +87,28 @@ export default {
     ],
     extractors: [
       {
-        extractor: content => {
+        extractor: (content) => {
           const contentWithoutStyleBlocks = content.replace(
             /<style[^]+?<\/style>/gi,
-            ""
-          );
+            ''
+          )
 
           return (
-            contentWithoutStyleBlocks.match(/[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g) || []
-          );
+            contentWithoutStyleBlocks.match(
+              /[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g
+            ) || []
+          )
         },
-        extensions: ['html', 'vue', 'js', 'ts']
-      }
-    ]
+        extensions: ['html', 'vue', 'js', 'ts'],
+      },
+    ],
   },
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     analyze: true,
     extractCSS: true,
     babel: {
-      plugins: [
-        ['@babel/plugin-proposal-private-methods', {loose: true}]
-      ]
-    }
-  }
+      plugins: [['@babel/plugin-proposal-private-methods', { loose: true }]],
+    },
+  },
 }

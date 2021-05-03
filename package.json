@@ -8,7 +8,7 @@
     "start": "nuxt start",
     "generate": "nuxt generate",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
-    "lint": "yarn lint:js",
+    "lint": "yarn lint:js --fix",
     "test": "jest --coverage"
   },
   "dependencies": {
