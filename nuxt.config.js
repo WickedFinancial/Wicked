@@ -34,6 +34,7 @@ export default {
     '@nuxt/typescript-build',
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
+    'nuxt-purgecss',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -48,7 +49,7 @@ export default {
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
-    treeShake:true,
+    treeShake: true,
     theme: {
       dark: true,
       themes: {
@@ -65,6 +66,41 @@ export default {
     },
   },
 
+  purgeCSS: {
+    mode: 'webpack',
+    enabled: ({isDev}) => (!isDev), // or `false` when in dev/debug mode
+    paths: [
+      'components/**/*.vue',
+      'layouts/**/*.vue',
+      'pages/**/*.vue',
+      'plugins/**/*.js',
+      'node_modules/vuetify/src/**/*.ts',
+      'node_modules/vuetify/dist/vuetify.css'
+    ],
+    styleExtensions: ['.css'],
+    whitelist: ['body', 'html', 'nuxt-progress'],
+    whitelistPatterns: [
+      /-(leave|enter|appear)(|-(to|from|active))$/,
+      /^(?!(|.*?:)cursor-move).+-move$/,
+      /^router-link(|-exact)-active$/,
+      /data-v-.*/,
+    ],
+    extractors: [
+      {
+        extractor: content => {
+          const contentWithoutStyleBlocks = content.replace(
+            /<style[^]+?<\/style>/gi,
+            ""
+          );
+
+          return (
+            contentWithoutStyleBlocks.match(/[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g) || []
+          );
+        },
+        extensions: ['html', 'vue', 'js', 'ts']
+      }
+    ]
+  },
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     analyze: true,

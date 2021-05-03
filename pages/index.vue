@@ -83,15 +83,11 @@
 <script lang="ts">
 import Logo from '~/components/Logo.vue'
 import VuetifyLogo from '~/components/VuetifyLogo.vue'
-import {Vue, Component, Prop} from "vue-property-decorator"
+import {Vue, Component} from "vue-property-decorator"
 
-console.log("here")
+
 @Component({
-  components: {
-    Logo,
-    VuetifyLogo,
-
-  }
+  components: {Logo, VuetifyLogo}
 })
 export default class Index extends Vue {
 }

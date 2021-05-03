@@ -33,6 +33,7 @@
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-vue": "^7.7.0",
     "jest": "^26.6.3",
+    "nuxt-purgecss": "^1.0.0",
     "prettier": "^2.2.1",
     "ts-jest": "^26.5.4",
     "vue-class-component": "^7.2.6",
