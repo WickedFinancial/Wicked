@@ -1,5 +1,5 @@
 <template>
-  <div class="VueToNuxtLogo">
+  <div class="VueToNuxtLogo" role="img" aria-label="Nuxt Logo">
     <div class="Triangle Triangle--two" />
     <div class="Triangle Triangle--one" />
     <div class="Triangle Triangle--three" />
@@ -36,8 +36,8 @@
   top: 30px;
   left: 35px;
   animation: goright 0.5s linear forwards 3.5s;
-  border-left: 87.5px solid transparent;
-  border-right: 87.5px solid transparent;
+  border-left: 88px solid transparent;
+  border-right: 88px solid transparent;
   border-bottom: 150px solid #3b8070;
 }
 
