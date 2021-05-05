@@ -35,6 +35,7 @@ export default {
     // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
     'nuxt-purgecss',
+    'nuxt-typed-vuex',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -105,7 +106,6 @@ export default {
   },
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
-    analyze: true,
     extractCSS: true,
     babel: {
       plugins: [['@babel/plugin-proposal-private-methods', { loose: true }]],
