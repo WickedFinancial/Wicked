@@ -1,4 +1,4 @@
-import colors from "vuetify/es5/util/colors";
+import colors from "vuetify/es5/util/colors"
 
 export default {
   // Target: https://go.nuxtjs.dev/config-target
@@ -92,13 +92,13 @@ export default {
           const contentWithoutStyleBlocks = content.replace(
             /<style[^]+?<\/style>/gi,
             ""
-          );
+          )
 
           return (
             contentWithoutStyleBlocks.match(
               /[A-Za-z0-9-_/:]*[A-Za-z0-9-_/]+/g
             ) || []
-          );
+          )
         },
         extensions: ["html", "vue", "js", "ts"],
       },
@@ -111,4 +111,4 @@ export default {
       plugins: [["@babel/plugin-proposal-private-methods", { loose: true }]],
     },
   },
-};
+}

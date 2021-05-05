@@ -6,13 +6,15 @@ module.exports = {
   },
   extends: [
     "@nuxtjs/eslint-config-typescript",
-    "plugin:prettier/recommended",
     "plugin:nuxt/recommended",
     "eslint:recommended",
+    "plugin:vue/recommended",
+    "plugin:prettier-vue/recommended",
+    "prettier",
   ],
   plugins: [],
   // add your custom rules here
   rules: {
     "@typescript-eslint/no-empty-interface": 1,
   },
-};
+}

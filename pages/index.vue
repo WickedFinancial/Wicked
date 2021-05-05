@@ -81,13 +81,12 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from "vue-property-decorator";
-import Logo from "~/components/Logo.vue";
-import VuetifyLogo from "~/components/VuetifyLogo.vue";
+import { Vue, Component } from "vue-property-decorator"
+import Logo from "~/components/Logo.vue"
+import VuetifyLogo from "~/components/VuetifyLogo.vue"
 
 @Component({
-  components: { Logo, VuetifyLogo }
+  components: { Logo, VuetifyLogo },
 })
-export default class Index extends Vue {
-}
+export default class Index extends Vue {}
 </script>

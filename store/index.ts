@@ -1,7 +1,7 @@
-import { getAccessorType, mutationTree, actionTree } from 'typed-vuex'
+import { getAccessorType, mutationTree, actionTree } from "typed-vuex"
 
 export const state = () => ({
-  email: 'example@example.org',
+  email: "example@example.org",
 })
 
 export type RootState = ReturnType<typeof state>
@@ -23,7 +23,7 @@ export const actions = actionTree(
   { state, getters, mutations },
   {
     resetEmail({ commit }) {
-      commit('setEmail', 'a@a.com')
+      commit("setEmail", "a@a.com")
     },
   }
 )

@@ -21,4 +21,4 @@ module.exports = {
     "<rootDir>/plugins/**/*.ts",
     "<rootDir>/store/**/*.ts",
   ],
-};
+}
