@@ -1,12 +1,12 @@
-import { render } from '@testing-library/vue'
-import Logo from '~/components/Logo.vue'
-import '@testing-library/jest-dom'
+import Logo from "~/components/AvowLogo.vue"
+import "@testing-library/jest-dom"
+import { renderWithVuetify as render } from "~/test/utils"
 
-describe('Logo', () => {
-  it('should have an image role', () => {
-    expect(render(Logo).getByRole('img')).toBeTruthy()
+describe("Logo", () => {
+  it("should have an image role", () => {
+    expect(render(Logo).getByRole("img")).toBeTruthy()
   })
-  it('should have class VueToNuxtLogo', () => {
-    expect(render(Logo).getByRole('img')).toHaveClass('VueToNuxtLogo')
+  it("should match a snapshot", () => {
+    expect(render(Logo).getByRole("img")).toMatchSnapshot()
   })
 })
