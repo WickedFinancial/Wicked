@@ -1,4 +1,4 @@
-import Vuetify from "Vuetify"
+import Vuetify from "vuetify"
 import {
   ConfigurationCallback,
   render,
