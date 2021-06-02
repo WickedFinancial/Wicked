@@ -1,6 +1,7 @@
 <template>
   <v-img
-    max-width="40"
+    id="Logo"
+    max-width="35"
     alt="Avow Logo"
     src="/avow-logo.svg"
     position="left center"

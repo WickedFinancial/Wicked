@@ -1,10 +1,10 @@
 <template>
   <v-app dark>
-    <v-app-bar :clipped-left="clipped" fixed app>
-      <div id="site-title" class="text-md-h4 d-none d-md-inline">
+    <v-app-bar fixed app min-height="">
+      <div id="site-title" class="text-md-h3 d-md-inline">
         {{ title }}
       </div>
-      <avow-logo />
+      <avow-logo id="Logo" />
       <v-spacer />
     </v-app-bar>
     <v-main>
@@ -12,36 +12,17 @@
         <nuxt />
       </v-container>
     </v-main>
-    <v-footer :absolute="!fixed" app>
+    <v-footer app>
       <span>&copy; {{ new Date().getFullYear() }}</span>
     </v-footer>
   </v-app>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      clipped: false,
-      drawer: false,
-      fixed: false,
-      items: [
-        {
-          icon: "mdi-apps",
-          title: "Welcome",
-          to: "/",
-        },
-        {
-          icon: "mdi-chart-bubble",
-          title: "Inspire",
-          to: "/inspire",
-        },
-      ],
-      miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      title: "Avow",
-    }
-  },
+<script lang="ts">
+import { Vue, Component } from "vue-property-decorator"
+
+@Component
+export default class DefaultLayout extends Vue {
+  title = "Avow"
 }
 </script>

@@ -4,8 +4,9 @@ exports[`Logo should match a snapshot 1`] = `
 <div
   aria-label="Site Logo"
   class="v-image v-responsive theme--light"
+  id="Logo"
   role="img"
-  style="max-width: 40px;"
+  style="max-width: 35px;"
 >
   <transition-stub
     mode="in-out"
