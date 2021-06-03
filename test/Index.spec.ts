@@ -4,17 +4,18 @@ import Vuex, { Store } from "vuex"
 import { useAccessor } from "typed-vuex"
 import Vue from "vue"
 import { storePattern, RootState } from "~/store"
-import { renderWithVuetify } from "~/test/utils"
+import { renderWithVuetify as render } from "~/test/utils"
 
 describe("Index Page", () => {
-  let screen: ReturnType<typeof renderWithVuetify>
+  let screen: ReturnType<typeof render>
   let store: Store<RootState>
+  Vue.use(Vuex)
 
   beforeEach(() => {
-    Vue.use(Vuex)
     store = new Store(storePattern)
+    // changes to the default store can be made here.
     useAccessor(store, storePattern)
-    screen = renderWithVuetify(Index)
+    screen = render(Index)
   })
 
   it("should be justified to the center", () => {

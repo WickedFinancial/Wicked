@@ -1,32 +1,14 @@
 import { getAccessorType, mutationTree, actionTree } from "typed-vuex"
 
-export const state = () => ({
-  email: "example@example.org",
-})
+export const state = () => ({})
 
 export type RootState = ReturnType<typeof state>
 
-export const getters = {
-  email: (state: RootState) => state.email,
-  fullEmail: (state: RootState) => state.email,
-}
+export const getters = {}
 
-export const mutations = mutationTree(state, {
-  setEmail(state, newValue: string) {
-    state.email = newValue
-  },
+export const mutations = mutationTree(state, {})
 
-  initialiseStore() {},
-})
-
-export const actions = actionTree(
-  { state, getters, mutations },
-  {
-    resetEmail({ commit }) {
-      commit("setEmail", "a@a.com")
-    },
-  }
-)
+export const actions = actionTree({ state, getters, mutations }, {})
 
 export const storePattern = {
   state,
