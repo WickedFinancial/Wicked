@@ -10,6 +10,7 @@ module.exports = {
     "^.+\\.js$": "babel-jest",
     ".*\\.(vue)$": "vue-jest",
   },
+  testEnvironment: "jsdom",
   collectCoverage: true,
   collectCoverageFrom: [
     "<rootDir>/components/**/*.vue",
