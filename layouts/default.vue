@@ -1,16 +1,15 @@
 <template>
   <v-app dark>
-    <v-app-bar fixed app min-height="">
+    <v-app-bar fixed app>
       <div id="site-title" class="text-md-h3 d-md-inline">
         {{ title }}
       </div>
       <avow-logo id="Logo" />
       <v-spacer />
+      <v-btn>Connect</v-btn>
     </v-app-bar>
     <v-main>
-      <v-container>
-        <nuxt />
-      </v-container>
+      <nuxt />
     </v-main>
     <v-footer app>
       <span>&copy; {{ new Date().getFullYear() }}</span>
