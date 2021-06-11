@@ -53,6 +53,11 @@ export default {
           title: "Dashboard",
           to: "/",
         },
+        {
+          icon: "mdi-information-outline",
+          title: "About",
+          to: "/about",
+        },
         // {
         //   icon: "mdi-chart-bubble",
         //   title: "Mint",
