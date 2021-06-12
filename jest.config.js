@@ -10,8 +10,15 @@ module.exports = {
     "^.+\\.js$": "babel-jest",
     ".*\\.(vue)$": "vue-jest",
   },
+  globals: {
+    "ts-jest": {
+      tsconfig: "tsconfig.test.json",
+      isolatedModules: true,
+    },
+  },
   testEnvironment: "jsdom",
   collectCoverage: true,
+  testRunner: "jest-circus/runner",
   collectCoverageFrom: [
     "<rootDir>/components/**/*.vue",
     "<rootDir>/pages/**/*.vue",

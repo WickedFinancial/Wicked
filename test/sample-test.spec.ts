@@ -3,6 +3,10 @@
  */
 
 import { ethers } from "hardhat"
+import { waffleJest } from "@ethereum-waffle/jest";
+jest.setTimeout(10000);
+expect.extend(waffleJest);
+
 
 describe("Greeter", function () {
   it("Should return the new greeting once it's changed", async function () {
