@@ -4,6 +4,7 @@
 
 import { ethers, getNamedAccounts } from "hardhat"
 import { waffleJest } from "@ethereum-waffle/jest"
+import { Address } from "hardhat-deploy/dist/types"
 import WETHAbi from "../abis/WETH.json"
 import EMPABI from "../abis/EMP.json"
 import EMPCreatorABI from "../abis/EMPCreator.json"
@@ -30,9 +31,7 @@ describe("EMP", function () {
   it("should have a deployer with at least 20 WETH", async () => {
     const { WETH, deployer } = await setup()
     const balance = await WETH.balanceOf(deployer)
-    expect(
-      parseFloat(ethers.utils.formatUnits(balance))
-    ).toBeGreaterThanOrEqual(20)
+    expect(balance).toBeGtBN(ethers.utils.parseUnits("20"))
   })
   it("Should be able to create EMP instance", async function () {
     const { WETH, deployer } = await setup()
@@ -80,17 +79,41 @@ describe("EMP", function () {
       from: deployer,
     }
 
-    // Simulate transaction to test before sending to the network.
-    const empAddress = await empCreator.createExpiringMultiParty(
+    const createdExpiringMultiPartyPromise = new Promise<void>((resolve) => {
+      empCreator.once(
+        empCreator.filters.CreatedExpiringMultiParty(),
+        (address: Address, _) => {
+          expect(address).toBeProperAddress()
+          resolve(address as any)
+        }
+      )
+    })
+
+    // Sends transaction
+    const tx = await empCreator.createExpiringMultiParty(
       empParams,
       transactionOptions
     )
-    console.log(empAddress)
+    tx.wait()
 
-    // await WETH.approve(
-    //   empAddress.hash,
-    //   ethers.utils.parseUnits("20"),
-    //   transactionOptions
-    // )
+    const empAddress = await createdExpiringMultiPartyPromise
+
+    const approveTx = await WETH.approve(
+      empAddress,
+      ethers.utils.parseUnits("20"),
+      transactionOptions
+    )
+
+    const approvePromise = new Promise<void>((resolve) => {
+      WETH.once(
+        WETH.filters.Approval(null, empAddress),
+        (_1, _2, allowance) => {
+          expect(allowance).toEqBN(ethers.utils.parseUnits("20"))
+          resolve()
+        }
+      )
+    })
+    await approveTx.wait()
+    await approvePromise
   })
 })
