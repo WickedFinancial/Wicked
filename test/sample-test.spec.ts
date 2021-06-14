@@ -8,6 +8,7 @@ import { Address } from "hardhat-deploy/dist/types"
 import WETHAbi from "../abis/WETH.json"
 import EMPABI from "../abis/EMP.json"
 import EMPCreatorABI from "../abis/EMPCreator.json"
+import BigNumber from "ethers"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
@@ -28,6 +29,9 @@ async function setup() {
 }
 
 describe("EMP", function () {
+  let empAddress
+  const gasprice = 50
+
   it("should have a deployer with at least 20 WETH", async () => {
     const { WETH, deployer } = await setup()
     const balance = await WETH.balanceOf(deployer)
@@ -50,7 +54,6 @@ describe("EMP", function () {
     const syntheticSymbol = "YD-ETH-JAN22"
     const minSponsorTokens = "10"
     const libraryAddress = "0x0000000000000000000000000000000000000000"
-    const gasprice = 50
 
     // EMP Parameters. Pass in arguments to customize these.
     const empParams = {
@@ -96,7 +99,7 @@ describe("EMP", function () {
     )
     tx.wait()
 
-    const empAddress = await createdExpiringMultiPartyPromise
+    empAddress = await createdExpiringMultiPartyPromise
 
     const approveTx = await WETH.approve(
       empAddress,
@@ -115,5 +118,51 @@ describe("EMP", function () {
     })
     await approveTx.wait()
     await approvePromise
+  })
+
+  it("Should be able to create a new position providing the required capital", async function () {
+    const { WETH, deployer } = await setup()
+    const oldBalance = await WETH.balanceOf(deployer)
+
+
+    const empContract = await ethers.getContractAt(EMPABI, empAddress)
+
+    const collateralAmount = ethers.utils.parseUnits("20")
+    const numTokens = ethers.utils.parseUnits("10")
+
+    // Transaction parameters
+    const transactionOptions = {
+      gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
+      from: deployer,
+    }
+
+    // Sends transaction
+    const createTx = await empContract.create(
+      { rawValue: collateralAmount },
+      { rawValue: numTokens },
+      transactionOptions
+    )
+
+    const createdPositionPromise = new Promise<void>((resolve) => {
+      empContract.once(
+        empContract.filters.PositionCreated(),
+        (sponsor: Address, collateral: BigNumber, tokens: BigNumber) => {
+          expect(sponsor).toEqual(deployer)
+          expect(collateral).toEqBN(collateralAmount)
+          expect(tokens).toEqBN(numTokens)
+          resolve();
+        }
+      )
+    })
+
+    await createTx.wait()
+    await createdPositionPromise
+
+    const sponsorCollateral = await empContract.getCollateral(deployer)
+    expect(sponsorCollateral[0]).toEqBN(collateralAmount)
+
+    const newBalance = await WETH.balanceOf(deployer)
+    expect(oldBalance.sub(newBalance)).toEqBN(collateralAmount)
+
   })
 })
