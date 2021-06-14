@@ -5,10 +5,10 @@
 import { ethers, getNamedAccounts } from "hardhat"
 import { waffleJest } from "@ethereum-waffle/jest"
 import { Address } from "hardhat-deploy/dist/types"
+import { BigNumber } from "ethers"
 import WETHAbi from "../abis/WETH.json"
 import EMPABI from "../abis/EMP.json"
 import EMPCreatorABI from "../abis/EMPCreator.json"
-import BigNumber from "ethers"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
@@ -29,7 +29,7 @@ async function setup() {
 }
 
 describe("EMP", function () {
-  let empAddress
+  let empAddress: Address
   const gasprice = 50
 
   it("should have a deployer with at least 20 WETH", async () => {
@@ -87,7 +87,8 @@ describe("EMP", function () {
         empCreator.filters.CreatedExpiringMultiParty(),
         (address: Address, _) => {
           expect(address).toBeProperAddress()
-          resolve(address as any)
+          empAddress = address
+          resolve()
         }
       )
     })
@@ -99,7 +100,7 @@ describe("EMP", function () {
     )
     tx.wait()
 
-    empAddress = await createdExpiringMultiPartyPromise
+    await createdExpiringMultiPartyPromise
 
     const approveTx = await WETH.approve(
       empAddress,
@@ -123,7 +124,6 @@ describe("EMP", function () {
   it("Should be able to create a new position providing the required capital", async function () {
     const { WETH, deployer } = await setup()
     const oldBalance = await WETH.balanceOf(deployer)
-
 
     const empContract = await ethers.getContractAt(EMPABI, empAddress)
 
@@ -150,7 +150,7 @@ describe("EMP", function () {
           expect(sponsor).toEqual(deployer)
           expect(collateral).toEqBN(collateralAmount)
           expect(tokens).toEqBN(numTokens)
-          resolve();
+          resolve()
         }
       )
     })
@@ -163,6 +163,5 @@ describe("EMP", function () {
 
     const newBalance = await WETH.balanceOf(deployer)
     expect(oldBalance.sub(newBalance)).toEqBN(collateralAmount)
-
   })
 })
