@@ -8,7 +8,7 @@ import { Address } from "hardhat-deploy/dist/types"
 import WETHAbi from "../abis/WETH.json"
 import EMPABI from "../abis/EMP.json"
 import EMPCreatorABI from "../abis/EMPCreator.json"
-import BigNumber from "bignumber.js"
+import BigNumber from "ethers"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
