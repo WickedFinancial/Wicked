@@ -9,21 +9,8 @@ import { BigNumber } from "ethers"
 import WETHAbi from "../abis/WETH.json"
 import EMPABI from "../abis/EMP.json"
 import EMPCreatorABI from "../abis/EMPCreator.json"
+import ERC20ABI from "../abis/ERC20.json"
 
-// Human readable ethers abi: https://docs.ethers.io/v5/api/contract/example/
-const ERC20ABI = [
-  // Read-Only Functions
-  "function balanceOf(address owner) view returns (uint256)",
-  "function decimals() view returns (uint8)",
-  "function symbol() view returns (string)",
-
-  // Authenticated Functions
-  "function transfer(address to, uint amount) returns (boolean)",
-  "function approve(address spender, uint amount) returns (boolean)",
-
-  // Events
-  "event Transfer(address indexed from, address indexed to, uint amount)",
-]
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
