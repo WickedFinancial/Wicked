@@ -5,34 +5,22 @@
 import { ethers, getNamedAccounts } from "hardhat"
 import { waffleJest } from "@ethereum-waffle/jest"
 import { Address } from "hardhat-deploy/dist/types"
-import { BigNumber } from "ethers"
-import WETHAbi from "../abis/WETH.json"
-import EMPABI from "../abis/EMP.json"
-import EMPCreatorABI from "../abis/EMPCreator.json"
-import ERC20ABI from "../abis/ERC20.json"
-
+import { BigNumber, Contract } from "ethers"
+import WETHAbi from "../../abis/WETH.json"
+import EMPABI from "../../abis/EMP.json"
+import EMPCreatorABI from "../../abis/EMPCreator.json"
+import ERC20ABI from "../../abis/ERC20.json"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
 
-async function setup() {
-  const { deployer, tokenRecipient } = await getNamedAccounts()
-  const contracts = {
-    WETH: await ethers.getContractAt(
-      WETHAbi,
-      "0xd0a1e359811322d97991e03f863a0c30c2cf029c"
-    ),
-  }
-  await contracts.WETH.deposit({
-    value: ethers.utils.parseUnits("20"),
-    from: deployer,
-  })
-  return { ...contracts, deployer, tokenRecipient }
-}
-
 describe("EMP", function () {
-  let empAddress: Address
-  let tokenCurrencyAddress: Address
+  let addresses: Record<string, Address> = {
+    WETH: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
+  }
+  let contracts: Record<string, Contract> = {}
+  let namedAccounts: Record<string, Address>
+
   const gasprice = 50
   const collateralAmount = ethers.utils.parseUnits("20")
   const numTokens = ethers.utils.parseUnits("10")
@@ -41,13 +29,22 @@ describe("EMP", function () {
   const tokensToKeep = numTokens.sub(tokensToTransfer)
   const tokensToRedeem = ethers.utils.parseUnits("1")
 
-  it("should have a deployer with at least 20 WETH", async () => {
-    const { WETH, deployer } = await setup()
-    const balance = await WETH.balanceOf(deployer)
-    expect(balance).toBeGtBN(ethers.utils.parseUnits("20"))
+  beforeAll(async () => {
+    namedAccounts = await getNamedAccounts()
+
+    contracts.WETH = await ethers.getContractAt(WETHAbi, addresses.WETH)
+    await contracts.WETH.deposit({
+      value: collateralAmount,
+      from: namedAccounts.deployer,
+    })
   })
+
+  it("should have a deployer with the configured amount of collateral", async () => {
+    const balance = await contracts.WETH.balanceOf(namedAccounts.deployer)
+    expect(balance).toBeGtBN(collateralAmount)
+  })
+
   it("Should be able to create EMP instance", async function () {
-    const { WETH, deployer } = await setup()
     // This test replicates the behaviour of this script: https://github.com/UMAprotocol/launch-emp/blob/master/index.js
 
     const address = "0x9a689BfD9f3a963b20d5ba4Ed7ed0b7bE16CfCcB"
@@ -67,7 +64,7 @@ describe("EMP", function () {
     // EMP Parameters. Pass in arguments to customize these.
     const empParams = {
       expirationTimestamp, // Timestamp that the contract will expire at.
-      collateralAddress: WETH.address, // Collateral token address.
+      collateralAddress: addresses.WETH, // Collateral token address.
       syntheticName, // Long name.
       syntheticSymbol, // Short name.
       priceFeedIdentifier:
@@ -88,7 +85,7 @@ describe("EMP", function () {
 
     const transactionOptions = {
       gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
-      from: deployer,
+      from: namedAccounts.deployer,
     }
 
     const createdExpiringMultiPartyPromise = new Promise<void>((resolve) => {
@@ -96,7 +93,7 @@ describe("EMP", function () {
         empCreator.filters.CreatedExpiringMultiParty(),
         (address: Address, _) => {
           expect(address).toBeProperAddress()
-          empAddress = address
+          addresses.EMP = address
           resolve()
         }
       )
@@ -111,15 +108,15 @@ describe("EMP", function () {
 
     await createdExpiringMultiPartyPromise
 
-    const approveTx = await WETH.approve(
-      empAddress,
-      ethers.utils.parseUnits("20"),
+    const approveTx = await contracts.WETH.approve(
+      addresses.EMP,
+      collateralAmount,
       transactionOptions
     )
 
     const approvePromise = new Promise<void>((resolve) => {
-      WETH.once(
-        WETH.filters.Approval(null, empAddress),
+      contracts.WETH.once(
+        contracts.WETH.filters.Approval(null, addresses.EMP),
         (_1, _2, allowance) => {
           expect(allowance).toEqBN(ethers.utils.parseUnits("20"))
           resolve()
@@ -131,29 +128,28 @@ describe("EMP", function () {
   })
 
   it("Should be able to create a new position providing the required capital", async function () {
-    const { WETH, deployer } = await setup()
-    const oldBalance = await WETH.balanceOf(deployer)
+    const oldBalance = await contracts.WETH.balanceOf(namedAccounts.deployer)
 
-    const empContract = await ethers.getContractAt(EMPABI, empAddress)
+    contracts.EMP = await ethers.getContractAt(EMPABI, addresses.EMP)
 
     // Transaction parameters
     const transactionOptions = {
       gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
-      from: deployer,
+      from: namedAccounts.deployer,
     }
 
     // Sends transaction
-    const createTx = await empContract.create(
+    const createTx = await contracts.EMP.create(
       { rawValue: collateralAmount },
       { rawValue: numTokens },
       transactionOptions
     )
 
     const createdPositionPromise = new Promise<void>((resolve) => {
-      empContract.once(
-        empContract.filters.PositionCreated(),
+      contracts.EMP.once(
+        contracts.EMP.filters.PositionCreated(),
         (sponsor: Address, collateral: BigNumber, tokens: BigNumber) => {
-          expect(sponsor).toEqual(deployer)
+          expect(sponsor).toEqual(namedAccounts.deployer)
           expect(collateral).toEqBN(collateralAmount)
           expect(tokens).toEqBN(numTokens)
           resolve()
@@ -164,44 +160,41 @@ describe("EMP", function () {
     await createTx.wait()
     await createdPositionPromise
 
-    const sponsorCollateral = await empContract.getCollateral(deployer)
+    const sponsorCollateral = await contracts.EMP.getCollateral(namedAccounts.deployer)
     expect(sponsorCollateral[0]).toEqBN(collateralAmount)
 
-    const newBalance = await WETH.balanceOf(deployer)
+    const newBalance = await contracts.WETH.balanceOf(namedAccounts.deployer)
     expect(oldBalance.sub(newBalance)).toEqBN(collateralAmount)
   })
 
   it("Sponsor receives correct number of synthetic tokens", async function () {
-    const { deployer } = await setup()
-    const empContract = await ethers.getContractAt(EMPABI, empAddress)
 
-    tokenCurrencyAddress = await empContract.tokenCurrency()
+    addresses.syntheticToken = await contracts.EMP.tokenCurrency()
 
     const syntheticTokenContract = await ethers.getContractAt(
       ERC20ABI,
-      tokenCurrencyAddress
+      addresses.syntheticToken
     )
 
-    const syntheticBalance = await syntheticTokenContract.balanceOf(deployer)
+    const syntheticBalance = await syntheticTokenContract.balanceOf(namedAccounts.deployer)
     expect(syntheticBalance).toEqBN(numTokens)
   })
 
   it("Sponsor can transfer token", async function () {
-    const { deployer, tokenRecipient } = await setup()
 
     const syntheticTokenContract = await ethers.getContractAt(
       ERC20ABI,
-      tokenCurrencyAddress
+      addresses.syntheticToken
     )
 
     // Transaction parameters
     const transactionOptions = {
       gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
-      from: deployer,
+      from: namedAccounts.deployer,
     }
 
     const transferTx = await syntheticTokenContract.transfer(
-      tokenRecipient,
+      namedAccounts.tokenRecipient,
       tokensToTransfer,
       transactionOptions
     )
@@ -209,51 +202,49 @@ describe("EMP", function () {
     await transferTx.wait()
 
     const syntheticBalanceRecipient = await syntheticTokenContract.balanceOf(
-      tokenRecipient
+      namedAccounts.tokenRecipient
     )
     expect(syntheticBalanceRecipient).toEqBN(tokensToTransfer)
 
     const syntheticBalanceDeployer = await syntheticTokenContract.balanceOf(
-      deployer
+      namedAccounts.deployer
     )
     expect(syntheticBalanceDeployer).toEqBN(tokensToKeep)
   })
 
   it("Sponsor can redeem remaining tokens", async function () {
-    const { deployer, WETH } = await setup()
 
     // Transaction parameters
     const transactionOptions = {
       gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
-      from: deployer,
+      from: namedAccounts.deployer,
     }
 
-    const empContract = await ethers.getContractAt(EMPABI, empAddress)
     const syntheticTokenContract = await ethers.getContractAt(
       ERC20ABI,
-      tokenCurrencyAddress
+      addresses.syntheticToken
     )
 
-    const oldCollateralBalance = await WETH.balanceOf(deployer)
+    const oldCollateralBalance = await contracts.WETH.balanceOf(namedAccounts.deployer)
 
     const approveTx = await syntheticTokenContract.approve(
-      empAddress,
+      addresses.EMP,
       tokensToRedeem,
       transactionOptions
     )
     await approveTx.wait()
 
-    const redeemTx = await empContract.redeem(
+    const redeemTx = await contracts.EMP.redeem(
       { rawValue: tokensToRedeem },
       transactionOptions
     )
 
     await redeemTx.wait()
 
-    const syntheticBalance = await syntheticTokenContract.balanceOf(deployer)
+    const syntheticBalance = await syntheticTokenContract.balanceOf(namedAccounts.deployer)
     expect(syntheticBalance).toEqBN(tokensToKeep.sub(tokensToRedeem))
 
-    const newCollateralBalance = await WETH.balanceOf(deployer)
+    const newCollateralBalance = await contracts.WETH.balanceOf(namedAccounts.deployer)
     const expectedCollateralBalance = oldCollateralBalance.add(
       tokensToRedeem.mul(collateralizationRatio)
     )
