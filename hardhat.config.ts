@@ -14,7 +14,7 @@ function mnemonic() {
     return fs.readFileSync("./mnemonic.txt").toString().trim()
   } catch (e) {
     console.log(
-      "WARNING: No mnemonic file created for a deploy account. Try `yarn run generate` and then `yarn run account`."
+      "WARNING: No mnemonic file"
     )
   }
   return ""
@@ -178,7 +178,7 @@ const config: HardhatUserConfig = {
       },
     },
     kovan: {
-      url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e", //<---- YOUR INFURA ID! (or it won't work)
+      url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
       accounts: {
         mnemonic: mnemonic(),
       },
