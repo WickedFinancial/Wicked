@@ -29,6 +29,7 @@ describe("LSP", function () {
   const collateralAmount = ethers.utils.parseUnits("20")
   const tokensToCreate = ethers.utils.parseUnits("10")
   const tokensToTransfer = ethers.utils.parseUnits("3")
+  const collateralPerPair = ethers.utils.parseUnits("1")
   const tokensToKeep = tokensToCreate.sub(tokensToTransfer)
   const tokensToRedeem = ethers.utils.parseUnits("1")
 
@@ -61,7 +62,6 @@ describe("LSP", function () {
 
     // LSP Parameters
     const expirationTimestamp = expirationTime.toString()
-    const collateralPerPair = ethers.utils.parseUnits("1")
     const priceIdentifier = ethers.utils.formatBytes32String("USDETH")
     const syntheticName = "Linear USDETH "
     const syntheticSymbol = "LUSDETH"
@@ -210,74 +210,87 @@ describe("LSP", function () {
     expect(syntheticBalance).toEqBN(tokensToCreate)
   })
 
-  /* it("Sponsor can transfer token", async function () { */
+  it("Sponsor can transfer long token", async function () {
+    // Transaction parameters
+    const transactionOptions = {
+      gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
+      from: namedAccounts.deployer,
+    }
 
-  /*   const syntheticTokenContract = await ethers.getContractAt( */
-  /*     ERC20ABI, */
-  /*     addresses.syntheticToken */
-  /*   ) */
+    const transferTx = await contracts.longToken.transfer(
+      namedAccounts.tokenRecipient,
+      tokensToTransfer,
+      transactionOptions
+    )
 
-  /*   // Transaction parameters */
-  /*   const transactionOptions = { */
-  /*     gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI */
-  /*     from: namedAccounts.deployer, */
-  /*   } */
+    await transferTx.wait()
 
-  /*   const transferTx = await syntheticTokenContract.transfer( */
-  /*     namedAccounts.tokenRecipient, */
-  /*     tokensToTransfer, */
-  /*     transactionOptions */
-  /*   ) */
+    const syntheticBalanceRecipient = await contracts.longToken.balanceOf(
+      namedAccounts.tokenRecipient
+    )
+    expect(syntheticBalanceRecipient).toEqBN(tokensToTransfer)
 
-  /*   await transferTx.wait() */
+    const syntheticBalanceDeployer = await contracts.longToken.balanceOf(
+      namedAccounts.deployer
+    )
+    expect(syntheticBalanceDeployer).toEqBN(tokensToKeep)
+  })
 
-  /*   const syntheticBalanceRecipient = await syntheticTokenContract.balanceOf( */
-  /*     namedAccounts.tokenRecipient */
-  /*   ) */
-  /*   expect(syntheticBalanceRecipient).toEqBN(tokensToTransfer) */
+  it("Sponsor can redeem remaining tokens", async function () {
+    // Transaction parameters
+    const transactionOptions = {
+      gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
+      gasLimit: 12000000,
+      from: namedAccounts.deployer,
+    }
 
-  /*   const syntheticBalanceDeployer = await syntheticTokenContract.balanceOf( */
-  /*     namedAccounts.deployer */
-  /*   ) */
-  /*   expect(syntheticBalanceDeployer).toEqBN(tokensToKeep) */
-  /* }) */
+    const oldCollateralBalance = await contracts.WETH.balanceOf(
+      namedAccounts.deployer
+    )
 
-  /* it("Sponsor can redeem remaining tokens", async function () { */
+    const tokenTypes = ["longToken", "shortToken"]
 
-  /*   // Transaction parameters */
-  /*   const transactionOptions = { */
-  /*     gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI */
-  /*     from: namedAccounts.deployer, */
-  /*   } */
+    for (var tokenType of tokenTypes) {
+      const approveTx = await contracts[tokenType].approve(
+        addresses.LSP,
+        tokensToRedeem,
+        transactionOptions
+      )
 
-  /*   const syntheticTokenContract = await ethers.getContractAt( */
-  /*     ERC20ABI, */
-  /*     addresses.syntheticToken */
-  /*   ) */
+      const approvePromise = new Promise<void>((resolve) => {
+        contracts[tokenType].once(
+          contracts[tokenType].filters.Approval(null, addresses.LSP),
+          (_1, _2, allowance) => {
+            expect(allowance).toEqBN(tokensToRedeem)
+            resolve()
+          }
+        )
+      })
 
-  /*   const oldCollateralBalance = await contracts.WETH.balanceOf(namedAccounts.deployer) */
+      await approveTx.wait()
+      await approvePromise
+      console.log(`Approved ${tokenType}`)
+    }
 
-  /*   const approveTx = await syntheticTokenContract.approve( */
-  /*     addresses.LSP, */
-  /*     tokensToRedeem, */
-  /*     transactionOptions */
-  /*   ) */
-  /*   await approveTx.wait() */
+    const redeemTx = await contracts.LSP.redeem(
+      tokensToRedeem,
+      transactionOptions
+    )
 
-  /*   const redeemTx = await contracts.LSP.redeem( */
-  /*     { rawValue: tokensToRedeem }, */
-  /*     transactionOptions */
-  /*   ) */
+    await redeemTx.wait()
+    console.log("Redeemed tokens")
 
-  /*   await redeemTx.wait() */
+    for (var tokenType of tokenTypes) {
+      const syntheticBalance = await contracts[tokenType].balanceOf(
+        namedAccounts.deployer
+      )
+      expect(syntheticBalance).toEqBN(tokensToKeep.sub(tokensToRedeem))
+    }
 
-  /*   const syntheticBalance = await syntheticTokenContract.balanceOf(namedAccounts.deployer) */
-  /*   expect(syntheticBalance).toEqBN(tokensToKeep.sub(tokensToRedeem)) */
-
-  /*   const newCollateralBalance = await contracts.WETH.balanceOf(namedAccounts.deployer) */
-  /*   const expectedCollateralBalance = oldCollateralBalance.add( */
-  /*     tokensToRedeem.mul(collateralizationRatio) */
-  /*   ) */
-  /*   expect(newCollateralBalance).toEqBN(expectedCollateralBalance) */
-  /* }) */
+    const newCollateralBalance = await contracts.WETH.balanceOf(
+      namedAccounts.deployer
+    )
+    const expectedCollateralBalance = oldCollateralBalance.add(tokensToRedeem)
+    expect(newCollateralBalance).toEqBN(expectedCollateralBalance)
+  })
 })
