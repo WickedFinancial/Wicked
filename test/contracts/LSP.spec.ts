@@ -7,9 +7,9 @@ import { waffleJest } from "@ethereum-waffle/jest"
 import { Address } from "hardhat-deploy/dist/types"
 import { BigNumber, Contract } from "ethers"
 import WETHAbi from "../../abis/WETH.json"
-/* import LSPABI from "../../abis/LSP.json" */
+import LSPABI from "../../abis/LSP.json"
 import LSPCreatorABI from "../../abis/LSPCreator.json"
-/* import ERC20ABI from "../../abis/ERC20.json" */
+import ERC20ABI from "../../abis/ERC20.json"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
@@ -27,9 +27,9 @@ describe("LSP", function () {
   const gasprice = 50
   const prepaidProposerReward = ethers.utils.parseUnits("0.01")
   const collateralAmount = ethers.utils.parseUnits("20")
-  const numTokens = ethers.utils.parseUnits("10")
+  const tokensToCreate = ethers.utils.parseUnits("10")
   const tokensToTransfer = ethers.utils.parseUnits("3")
-  const tokensToKeep = numTokens.sub(tokensToTransfer)
+  const tokensToKeep = tokensToCreate.sub(tokensToTransfer)
   const tokensToRedeem = ethers.utils.parseUnits("1")
 
   beforeAll(async () => {
@@ -121,65 +121,66 @@ describe("LSP", function () {
     tx.wait()
 
     await createdLongShortPairPromise
-
-    /* const approveTx = await contracts.WETH.approve( */
-    /*   addresses.LSP, */
-    /*   collateralAmount, */
-    /*   transactionOptions */
-    /* ) */
-
-    /* const approvePromise = new Promise<void>((resolve) => { */
-    /*   contracts.WETH.once( */
-    /*     contracts.WETH.filters.Approval(null, addresses.LSP), */
-    /*     (_1, _2, allowance) => { */
-    /*       expect(allowance).toEqBN(ethers.utils.parseUnits("20")) */
-    /*       resolve() */
-    /*     } */
-    /*   ) */
-    /* }) */
-    /* await approveTx.wait() */
-    /* await approvePromise */
   })
 
-  /* it("Should be able to create a new position providing the required capital", async function () { */
-  /*   const oldBalance = await contracts.WETH.balanceOf(namedAccounts.deployer) */
+  it("Should be able to create a new position providing the required capital", async function () {
+    const transactionOptions = {
+      gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
+      from: namedAccounts.deployer,
+    }
 
-  /*   contracts.LSP = await ethers.getContractAt(LSPABI, addresses.LSP) */
+    // Approve collateral amount to use for minting LSP tokens
+    const approveTx = await contracts.WETH.approve(
+      addresses.LSP,
+      collateralAmount,
+      transactionOptions
+    )
 
-  /*   // Transaction parameters */
-  /*   const transactionOptions = { */
-  /*     gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI */
-  /*     from: namedAccounts.deployer, */
-  /*   } */
+    const approvePromise = new Promise<void>((resolve) => {
+      contracts.WETH.once(
+        contracts.WETH.filters.Approval(null, addresses.LSP),
+        (_1, _2, allowance) => {
+          expect(allowance).toEqBN(ethers.utils.parseUnits("20"))
+          resolve()
+        }
+      )
+    })
+    await approveTx.wait()
+    await approvePromise
 
-  /*   // Sends transaction */
-  /*   const createTx = await contracts.LSP.create( */
-  /*     { rawValue: collateralAmount }, */
-  /*     { rawValue: numTokens }, */
-  /*     transactionOptions */
-  /*   ) */
+    const oldBalance = await contracts.WETH.balanceOf(namedAccounts.deployer)
 
-  /*   const createdPositionPromise = new Promise<void>((resolve) => { */
-  /*     contracts.LSP.once( */
-  /*       contracts.LSP.filters.PositionCreated(), */
-  /*       (sponsor: Address, collateral: BigNumber, tokens: BigNumber) => { */
-  /*         expect(sponsor).toEqual(namedAccounts.deployer) */
-  /*         expect(collateral).toEqBN(collateralAmount) */
-  /*         expect(tokens).toEqBN(numTokens) */
-  /*         resolve() */
-  /*       } */
-  /*     ) */
-  /*   }) */
+    contracts.LSP = await ethers.getContractAt(LSPABI, addresses.LSP)
 
-  /*   await createTx.wait() */
-  /*   await createdPositionPromise */
+    // Sends transaction
+    const createTx = await contracts.LSP.create(
+      tokensToCreate,
+      transactionOptions
+    )
 
-  /*   const sponsorCollateral = await contracts.LSP.getCollateral(namedAccounts.deployer) */
-  /*   expect(sponsorCollateral[0]).toEqBN(collateralAmount) */
+    const createdPositionPromise = new Promise<void>((resolve) => {
+      contracts.LSP.once(
+        contracts.LSP.filters.TokensCreated(),
+        (sponsor: Address, collateral: BigNumber, tokens: BigNumber) => {
+          expect(sponsor).toEqual(namedAccounts.deployer)
+          expect(collateral).toEqBN(tokensToCreate)
+          expect(tokens).toEqBN(tokensToCreate)
+          resolve()
+        }
+      )
+    })
 
-  /*   const newBalance = await contracts.WETH.balanceOf(namedAccounts.deployer) */
-  /*   expect(oldBalance.sub(newBalance)).toEqBN(collateralAmount) */
-  /* }) */
+    await createTx.wait()
+    await createdPositionPromise
+
+    const positionTokens = await contracts.LSP.getPositionTokens(
+      namedAccounts.deployer
+    )
+    expect(positionTokens[0]).toEqBN(tokensToCreate)
+
+    const newBalance = await contracts.WETH.balanceOf(namedAccounts.deployer)
+    expect(oldBalance.sub(newBalance)).toEqBN(tokensToCreate)
+  })
 
   /* it("Sponsor receives correct number of synthetic tokens", async function () { */
 
