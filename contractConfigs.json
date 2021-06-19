@@ -10,5 +10,17 @@
       "customAncillaryData": "",
       "prepaidProposerReward": "0.01",
       "collateralPriceInEth": 1
+    },
+    {
+      "expirationTime": "2021-08-01T16:00:00.000Z",
+      "collateralPerPair": "1",
+      "priceIdentifier": "USDETH",
+      "syntheticName": "USDETH-Linear-210801",
+      "syntheticSymbol": "USDETHLin2181",
+      "collateralToken": "WETH",
+      "financialProductLibrary": "LinearLongShortPairFinancialProductLibrary",
+      "customAncillaryData": "",
+      "prepaidProposerReward": "0.01",
+      "collateralPriceInEth": 1
     }
 ]
