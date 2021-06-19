@@ -1,0 +1,5 @@
+[
+  "function computeExpiryTokensForCollateral(int256 expiryPrice) view returns (uint256)",
+  "function longShortPairParameters(address) view returns (int256 upperBound, int256 lowerBound)",
+  "function setLongShortPairParameters(address LongShortPair, int256 upperBound, int256 lowerBound)"
+]

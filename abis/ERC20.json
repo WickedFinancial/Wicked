@@ -4,5 +4,7 @@
   "function symbol() view returns (string)",
   "function transfer(address to, uint256 amount) returns (boolean)",
   "function approve(address spender, uint256 amount) returns (boolean)",
-  "event Transfer(address indexed from, address indexed to, uint256 amount)"
+  "event Transfer(address indexed from, address indexed to, uint256 amount)",
+  "event Approval(address indexed src, address indexed guy, uint256 wad)"
 ]
+
