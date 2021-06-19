@@ -8,14 +8,14 @@ import { task } from "hardhat/config"
 task(
   "convert",
   "Convert all json abis to human readable format",
-  async (_, hre) => {
+  async (_, { ethers }) => {
     const path = "./abis/"
     const files = await readdir(path)
     for (const file of files) {
       const jsonBuffer = await readFile(path.concat(file))
       const jsonAbi = JSON.parse(jsonBuffer.toString())
-      const iface = new hre.ethers.utils.Interface(jsonAbi)
-      const readableAbi = iface.format(hre.ethers.utils.FormatTypes.full)
+      const iface = new ethers.utils.Interface(jsonAbi)
+      const readableAbi = iface.format(ethers.utils.FormatTypes.full)
       console.log("Readable Abi: ", readableAbi)
       await writeFile(path.concat(file), JSON.stringify(readableAbi, null, 2))
     }
