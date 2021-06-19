@@ -248,38 +248,29 @@ describe("LSP", function () {
       namedAccounts.deployer
     )
 
-    const tokenTypes = ["longToken", "shortToken"]
+    // Check that sponsor still has enough L / S Tokens
+    const syntheticBalances = await contracts.LSP.getPositionTokens(
+      namedAccounts.deployer
+    )
+    expect(syntheticBalances[0]).toBeGteBN(tokensToRedeem)
+    expect(syntheticBalances[1]).toBeGteBN(tokensToRedeem)
 
-    for (var tokenType of tokenTypes) {
-      const approveTx = await contracts[tokenType].approve(
-        addresses.LSP,
-        tokensToRedeem,
-        transactionOptions
-      )
+    //Check contract state
+    const contractState = await contracts.LSP.contractState()
+    const openState = 0;
+    expect(contractState).toEqual(openState)
 
-      const approvePromise = new Promise<void>((resolve) => {
-        contracts[tokenType].once(
-          contracts[tokenType].filters.Approval(null, addresses.LSP),
-          (_1, _2, allowance) => {
-            expect(allowance).toEqBN(tokensToRedeem)
-            resolve()
-          }
-        )
-      })
-
-      await approveTx.wait()
-      await approvePromise
-      console.log(`Approved ${tokenType}`)
-    }
-
+    // TODO: Fails for unknown reason
+    console.log("Redeeming: ...")
     const redeemTx = await contracts.LSP.redeem(
       tokensToRedeem,
       transactionOptions
     )
 
     await redeemTx.wait()
-    console.log("Redeemed tokens")
+    console.log("Redeeemed")
 
+    const tokenTypes = ["longToken", "shortToken"]
     for (var tokenType of tokenTypes) {
       const syntheticBalance = await contracts[tokenType].balanceOf(
         namedAccounts.deployer
