@@ -182,18 +182,33 @@ describe("LSP", function () {
     expect(oldBalance.sub(newBalance)).toEqBN(tokensToCreate)
   })
 
-  /* it("Sponsor receives correct number of synthetic tokens", async function () { */
+  it("Sponsor receives correct number of long tokens", async function () {
+    addresses.longToken = await contracts.LSP.longToken()
 
-  /*   addresses.syntheticToken = await contracts.LSP.tokenCurrency() */
+    contracts.longToken = await ethers.getContractAt(
+      ERC20ABI,
+      addresses.longToken
+    )
 
-  /*   const syntheticTokenContract = await ethers.getContractAt( */
-  /*     ERC20ABI, */
-  /*     addresses.syntheticToken */
-  /*   ) */
+    const syntheticBalance = await contracts.longToken.balanceOf(
+      namedAccounts.deployer
+    )
+    expect(syntheticBalance).toEqBN(tokensToCreate)
+  })
 
-  /*   const syntheticBalance = await syntheticTokenContract.balanceOf(namedAccounts.deployer) */
-  /*   expect(syntheticBalance).toEqBN(numTokens) */
-  /* }) */
+  it("Sponsor receives correct number of short tokens", async function () {
+    addresses.shortToken = await contracts.LSP.shortToken()
+
+    contracts.shortToken = await ethers.getContractAt(
+      ERC20ABI,
+      addresses.shortToken
+    )
+
+    const syntheticBalance = await contracts.shortToken.balanceOf(
+      namedAccounts.deployer
+    )
+    expect(syntheticBalance).toEqBN(tokensToCreate)
+  })
 
   /* it("Sponsor can transfer token", async function () { */
 
