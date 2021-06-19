@@ -4,6 +4,9 @@ import "hardhat-deploy"
 import { readdir, readFile, writeFile } from "fs/promises"
 import { HardhatUserConfig } from "hardhat/types"
 import { task } from "hardhat/config"
+import { Address } from "hardhat-deploy/dist/types"
+import { Contract } from "ethers"
+import { LSPConfiguration } from "types"
 
 task(
   "convert",
@@ -18,6 +21,77 @@ task(
       const readableAbi = iface.format(hre.ethers.utils.FormatTypes.full)
       console.log("Readable Abi: ", readableAbi)
       await writeFile(path.concat(file), JSON.stringify(readableAbi, null, 2))
+    }
+  }
+)
+
+task(
+  "launch",
+  "Launch all configured LSP contracts",
+  async (_, { ethers, getNamedAccounts }) => {
+    const contractConfigs: Array<LSPConfiguration> = require("./contractConfigs.json")
+    const addresses: Record<string, Address> = require("./addresses.json")
+    const abis = require("./abis")
+
+    const LSPCreator = await ethers.getContractAt(
+      abis.LSPCreator,
+      addresses.LSPCreator
+    )
+    const namedAccounts = await getNamedAccounts()
+    const gasprice = 50
+    const transactionOptions = {
+      gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
+      from: namedAccounts.deployer,
+    }
+
+    let contracts: Record<string, Contract> = { LSPCreator }
+
+    for (const contractConfiguration of contractConfigs) {
+      console.log(contractConfiguration)
+
+      const expirationTimestamp = Math.floor(
+        new Date(contractConfiguration.expirationTime).getTime() / 1000
+      ).toString()
+      const priceIdentifier = ethers.utils.formatBytes32String(
+        contractConfiguration.priceIdentifier
+      )
+      const syntheticName = contractConfiguration.syntheticName
+      const syntheticSymbol = contractConfiguration.syntheticSymbol
+      const collateralTokenAddress =
+        addresses[contractConfiguration.collateralToken]
+      const financialProductLibrary =
+        addresses[contractConfiguration.financialProductLibrary]
+      const customAncillaryData = ethers.utils.formatBytes32String(
+        contractConfiguration.customAncillaryData
+      )
+      const prepaidProposerReward = ethers.utils.parseUnits(
+        contractConfiguration.prepaidProposerReward
+      )
+
+      if (!(contractConfiguration.collateralToken in contracts)) {
+        contracts[contractConfiguration.collateralToken] =
+          await ethers.getContractAt(
+            abis[contractConfiguration.collateralToken],
+            collateralTokenAddress
+          )
+      }
+      const collateralContract =
+        contracts[contractConfiguration.collateralToken]
+
+      const depositTx = await collateralContract.deposit({
+        value: prepaidProposerReward.mul(contractConfiguration.collateralPriceInEth),
+        ...transactionOptions,
+      })
+      await depositTx.wait()
+      console.log(`Deposited ${prepaidProposerReward} in ${contractConfiguration.collateralToken}`)
+
+      const approveTx = await contracts.WETH.approve(
+        addresses.LSPCreator,
+        prepaidProposerReward,
+        transactionOptions
+      )
+      await approveTx.wait()
+      console.log(`Deposited ${prepaidProposerReward} in ${contractConfiguration.collateralToken}`)
     }
   }
 )
