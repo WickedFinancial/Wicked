@@ -9,4 +9,5 @@ export type LSPConfiguration = {
   customAncillaryData: string
   prepaidProposerReward: string
   collateralPriceInEth: number
+  address?: string
 }

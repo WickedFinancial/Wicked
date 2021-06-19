@@ -47,52 +47,99 @@ task(
     let contracts: Record<string, Contract> = { LSPCreator }
 
     for (const contractConfiguration of contractConfigs) {
-      console.log(contractConfiguration)
+      try {
+        console.log(contractConfiguration)
 
-      const expirationTimestamp = Math.floor(
-        new Date(contractConfiguration.expirationTime).getTime() / 1000
-      ).toString()
-      const priceIdentifier = ethers.utils.formatBytes32String(
-        contractConfiguration.priceIdentifier
-      )
-      const syntheticName = contractConfiguration.syntheticName
-      const syntheticSymbol = contractConfiguration.syntheticSymbol
-      const collateralTokenAddress =
-        addresses[contractConfiguration.collateralToken]
-      const financialProductLibrary =
-        addresses[contractConfiguration.financialProductLibrary]
-      const customAncillaryData = ethers.utils.formatBytes32String(
-        contractConfiguration.customAncillaryData
-      )
-      const prepaidProposerReward = ethers.utils.parseUnits(
-        contractConfiguration.prepaidProposerReward
-      )
+        // Parse Contract configuration values
+        const expirationTimestamp = Math.floor(
+          new Date(contractConfiguration.expirationTime).getTime() / 1000
+        ).toString()
+        const priceIdentifier = ethers.utils.formatBytes32String(
+          contractConfiguration.priceIdentifier
+        )
+        const collateralPerPair = ethers.utils.parseUnits(
+          contractConfiguration.collateralPerPair
+        )
+        const syntheticName = contractConfiguration.syntheticName
+        const syntheticSymbol = contractConfiguration.syntheticSymbol
+        const collateralTokenAddress =
+          addresses[contractConfiguration.collateralToken]
+        const financialProductLibrary =
+          addresses[contractConfiguration.financialProductLibrary]
+        const customAncillaryData = ethers.utils.formatBytes32String(
+          contractConfiguration.customAncillaryData
+        )
+        const prepaidProposerReward = ethers.utils.parseUnits(
+          contractConfiguration.prepaidProposerReward
+        )
 
-      if (!(contractConfiguration.collateralToken in contracts)) {
-        contracts[contractConfiguration.collateralToken] =
-          await ethers.getContractAt(
-            abis[contractConfiguration.collateralToken],
-            collateralTokenAddress
+        // Get Collateral Contract instance if not present already
+        if (!(contractConfiguration.collateralToken in contracts)) {
+          contracts[contractConfiguration.collateralToken] =
+            await ethers.getContractAt(
+              abis[contractConfiguration.collateralToken],
+              collateralTokenAddress
+            )
+        }
+
+        // Create and Approve collateral for the proposer reward
+        const collateralContract =
+          contracts[contractConfiguration.collateralToken]
+        const depositTx = await collateralContract.deposit({
+          value: prepaidProposerReward.mul(
+            contractConfiguration.collateralPriceInEth
+          ),
+          ...transactionOptions,
+        })
+        await depositTx.wait()
+        console.log(
+          `Deposited ${prepaidProposerReward} in ${contractConfiguration.collateralToken}`
+        )
+
+        const approveTx = await collateralContract.approve(
+          addresses.LSPCreator,
+          prepaidProposerReward,
+          transactionOptions
+        )
+        await approveTx.wait()
+        console.log(
+          `Deposited ${prepaidProposerReward} in ${contractConfiguration.collateralToken}`
+        )
+
+        // Launch LSP
+        const launchTX = await LSPCreator.createLongShortPair(
+          expirationTimestamp,
+          collateralPerPair,
+          priceIdentifier,
+          syntheticName,
+          syntheticSymbol,
+          collateralTokenAddress,
+          financialProductLibrary,
+          customAncillaryData,
+          prepaidProposerReward,
+          transactionOptions
+        )
+
+        const contractLaunched = new Promise<void>((resolve) => {
+          LSPCreator.once(
+            LSPCreator.filters.CreatedLongShortPair(),
+            (address: Address, _) => {
+              contractConfiguration.address = address
+              resolve()
+            }
           )
+        })
+        launchTX.wait()
+        await contractLaunched
+        console.log(
+          `Deployed contract ${syntheticName} to address ${contractConfiguration.address}`
+        )
+      } catch (e) {
+        console.log("FAILED to deploy contract", e)
       }
-      const collateralContract =
-        contracts[contractConfiguration.collateralToken]
-
-      const depositTx = await collateralContract.deposit({
-        value: prepaidProposerReward.mul(contractConfiguration.collateralPriceInEth),
-        ...transactionOptions,
-      })
-      await depositTx.wait()
-      console.log(`Deposited ${prepaidProposerReward} in ${contractConfiguration.collateralToken}`)
-
-      const approveTx = await contracts.WETH.approve(
-        addresses.LSPCreator,
-        prepaidProposerReward,
-        transactionOptions
-      )
-      await approveTx.wait()
-      console.log(`Deposited ${prepaidProposerReward} in ${contractConfiguration.collateralToken}`)
     }
+    const outputFile = "./deployedContractConfigs.json"
+    await writeFile(outputFile, JSON.stringify(contractConfigs, null, 2))
   }
 )
 
