@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Web3Btn should match a snapshot 1`] = `
+<button
+  class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default"
+  role="button"
+  type="button"
+>
+  <span
+    class="v-btn__content"
+  >
+    <i
+      aria-hidden="true"
+      class="v-icon notranslate material-icons theme--light"
+    >
+      mdiEthereum
+    </i>
+    
+  Connect
+
+  </span>
+</button>
+`;
