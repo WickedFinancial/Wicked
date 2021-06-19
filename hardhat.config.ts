@@ -1,12 +1,24 @@
 import "@nomiclabs/hardhat-ethers"
 import "hardhat-jest-plugin"
 import "hardhat-deploy"
+import fs from "fs"
 import { readdir, readFile, writeFile } from "fs/promises"
 import { HardhatUserConfig } from "hardhat/types"
 import { task } from "hardhat/config"
 import { Address } from "hardhat-deploy/dist/types"
 import { Contract } from "ethers"
 import { LSPConfiguration } from "types"
+
+function mnemonic() {
+  try {
+    return fs.readFileSync("./mnemonic.txt").toString().trim()
+  } catch (e) {
+    console.log(
+      "WARNING: No mnemonic file created for a deploy account. Try `yarn run generate` and then `yarn run account`."
+    )
+  }
+  return ""
+}
 
 task(
   "convert",
@@ -103,11 +115,12 @@ task(
         )
         await approveTx.wait()
         console.log(
-          `Deposited ${prepaidProposerReward} in ${contractConfiguration.collateralToken}`
+          `Approved ${prepaidProposerReward} in ${contractConfiguration.collateralToken}`
         )
 
         // Launch LSP
-        const launchTX = await LSPCreator.createLongShortPair(
+        console.log(`Simulating deploying ${syntheticName} to retrieve address`)
+        const lspAddress = await LSPCreator.callStatic.createLongShortPair(
           expirationTimestamp,
           collateralPerPair,
           priceIdentifier,
@@ -120,22 +133,31 @@ task(
           transactionOptions
         )
 
-        const contractLaunched = new Promise<void>((resolve) => {
-          LSPCreator.once(
-            LSPCreator.filters.CreatedLongShortPair(),
-            (address: Address, _) => {
-              contractConfiguration.address = address
-              resolve()
-            }
-          )
-        })
-        launchTX.wait()
-        await contractLaunched
+        console.log(`Deploying  ${syntheticName} to address ${lspAddress}`)
+
+        const launchTX = await LSPCreator.createLongShortPair(
+          expirationTimestamp,
+          collateralPerPair,
+          priceIdentifier,
+          syntheticName,
+          syntheticSymbol,
+          collateralTokenAddress,
+          financialProductLibrary,
+          customAncillaryData,
+          prepaidProposerReward,
+          transactionOptions
+        )
+        contractConfiguration.address = lspAddress
+
         console.log(
           `Deployed contract ${syntheticName} to address ${contractConfiguration.address}`
         )
       } catch (e) {
-        console.log("FAILED to deploy contract", e)
+        contractConfiguration.address = "FAILED"
+        console.log(
+          `FAILED to deploy contract ${contractConfiguration.syntheticName}`,
+          e
+        )
       }
     }
     const outputFile = "./deployedContractConfigs.json"
@@ -153,6 +175,12 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
+      },
+    },
+    kovan: {
+      url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e", //<---- YOUR INFURA ID! (or it won't work)
+      accounts: {
+        mnemonic: mnemonic(),
       },
     },
   },
