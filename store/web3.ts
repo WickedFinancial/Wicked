@@ -8,5 +8,4 @@ export default class web3 extends VuexModule {
   setConnectionStatus(status: boolean) {
     this.isConnected = status
   }
-
 }
