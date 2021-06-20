@@ -72,8 +72,6 @@ const priceFeedLinks: Record<string, string> = {
 export default class contract extends Vue {
   @contracts.State
   contractConfigs!: Array<LSPConfiguration>
-  @contracts.Getter
-  syntheticNames!: Array<string>
 
   get contractName(): string {
     return this.$route.params.contract
@@ -89,11 +87,15 @@ export default class contract extends Vue {
     if (this.contractDetails) {
       return this.contractDetails.financialProductLibraryParameters.map(
         (value, index) => {
-          return {
-            name: libraryParameters[
-              this.contractDetails.financialProductLibrary
-            ][index],
-            value,
+          if (this.contractDetails) {
+            return {
+              name: libraryParameters[
+                this.contractDetails.financialProductLibrary
+              ][index],
+              value,
+            }
+          } else {
+            return {}
           }
         }
       )

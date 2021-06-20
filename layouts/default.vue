@@ -27,6 +27,7 @@
       <v-toolbar-title v-text="title" />
       <avow-logo id="Logo" />
       <v-spacer />
+      <web3-btn></web3-btn>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -36,37 +37,32 @@
   </v-app>
 </template>
 
-<script>
-import { mapGetters } from "Vuex"
-export default {
-  data() {
-    return {
-      clipped: true,
-      drawer: true,
-      right: true,
-      rightDrawer: false,
-      title: "Avow",
-    }
-  },
-  computed: {
-    ...mapGetters("contracts", ["syntheticNames"]),
-    items() {
-      let menuItems = [
-        {
-          icon: "mdi-apps",
-          title: "Dashboard",
-          to: "/",
-        },
-      ]
-      const contractItems = this.syntheticNames.map((syntheticName) => {
-        return {
-          icon: "mdi-file-document-edit-outline",
-          title: syntheticName,
-          to: `/contract/${syntheticName}`,
-        }
-      })
-      return menuItems.concat(contractItems)
-    },
-  },
+<script lang="ts">
+import { Vue, Component, namespace } from "nuxt-property-decorator"
+import Web3Btn from "~/components/Web3Btn.vue"
+const contracts = namespace("contracts")
+
+@Component({ components: { Web3Btn } })
+export default class DefaultLayout extends Vue {
+  clipped = true
+  drawer = true
+  menuItems = [{ icon: "mdi-apps", title: "Dashboard", to: "/" }]
+  right = true
+  rightDrawer = false
+  title = "Avow"
+
+  @contracts.Getter
+  syntheticNames!: Array<string>
+
+  get items(): Array<object> {
+    const contractItems = this.syntheticNames.map((syntheticName) => {
+      return {
+        icon: "mdi-file-document-edit-outline",
+        title: syntheticName,
+        to: `/contract/${syntheticName}`,
+      }
+    })
+    return this.menuItems.concat(contractItems)
+  }
 }
 </script>
