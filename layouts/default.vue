@@ -62,7 +62,7 @@ export default {
         return {
           icon: "mdi-file-document-edit-outline",
           title: syntheticName,
-          to: "/",
+          to: `/contract/${syntheticName}`,
         }
       })
       return menuItems.concat(contractItems)
