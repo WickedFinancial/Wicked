@@ -7,9 +7,9 @@ import web3 from "~/store/web3"
 describe("Web3Btn", () => {
   let btn: HTMLElement
   beforeEach(() => {
-    btn = render(Web3BtnComponent, { store: { modules: { web3 } } }).getByRole(
-      "button"
-    )
+    btn = render(Web3BtnComponent, {
+      store: { modules: { web3 } },
+    }).getByRole("button")
   })
   it("should be on the screen and accessible by role button", () => {
     expect(btn).toBeInTheDocument()

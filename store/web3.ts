@@ -16,7 +16,7 @@ const providerOptions = {
 }
 
 let web3Modal: Web3modal
-let currentProvider: ethers.providers.Web3Provider
+let currentProvider: ethers.providers.Web3Provider | undefined
 
 function initializeModal() {
   // window must be available so we delay instantiating till later
@@ -60,7 +60,7 @@ export default class web3 extends VuexModule {
 
   @Mutation
   clearProvider() {
-    currentProvider = undefined as any
+    currentProvider = undefined
     this.providerSet = false
     this.isConnected = false
   }
@@ -68,7 +68,7 @@ export default class web3 extends VuexModule {
   @Action({ rawError: true })
   async connectWeb3() {
     const webModal = initializeModal()
-    let provider: any
+    let provider: typeof webModal.connect
     try {
       provider = await webModal.connect()
       this.context.commit("setEthersProvider", provider)
