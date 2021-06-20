@@ -7,6 +7,7 @@
       "syntheticSymbol": "USDETHLin2171",
       "collateralToken": "WETH",
       "financialProductLibrary": "LinearLongShortPairFinancialProductLibrary",
+      "financialProductLibraryParameters": ["4000", "1000"],
       "customAncillaryData": "",
       "prepaidProposerReward": "0.01",
       "collateralPriceInEth": 1
@@ -19,6 +20,7 @@
       "syntheticSymbol": "USDETHLin2181",
       "collateralToken": "WETH",
       "financialProductLibrary": "LinearLongShortPairFinancialProductLibrary",
+      "financialProductLibraryParameters": ["3000", "2000"],
       "customAncillaryData": "",
       "prepaidProposerReward": "0.01",
       "collateralPriceInEth": 1

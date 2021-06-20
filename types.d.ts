@@ -6,6 +6,7 @@ export type LSPConfiguration = {
   syntheticSymbol: string
   collateralToken: string
   financialProductLibrary: string
+  financialProductLibraryParameters: Array<string>
   customAncillaryData: string
   prepaidProposerReward: string
   collateralPriceInEth: number

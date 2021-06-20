@@ -13,9 +13,7 @@ function mnemonic() {
   try {
     return fs.readFileSync("./mnemonic.txt").toString().trim()
   } catch (e) {
-    console.log(
-      "WARNING: No mnemonic file"
-    )
+    console.log("WARNING: No mnemonic file")
   }
   return ""
 }
@@ -76,7 +74,7 @@ task(
         const syntheticSymbol = contractConfiguration.syntheticSymbol
         const collateralTokenAddress =
           addresses[contractConfiguration.collateralToken]
-        const financialProductLibrary =
+        const financialProductLibraryAddress =
           addresses[contractConfiguration.financialProductLibrary]
         const customAncillaryData = ethers.utils.formatBytes32String(
           contractConfiguration.customAncillaryData
@@ -127,7 +125,7 @@ task(
           syntheticName,
           syntheticSymbol,
           collateralTokenAddress,
-          financialProductLibrary,
+          financialProductLibraryAddress,
           customAncillaryData,
           prepaidProposerReward,
           transactionOptions
@@ -135,14 +133,14 @@ task(
 
         console.log(`Deploying  ${syntheticName} to address ${lspAddress}`)
 
-        const launchTX = await LSPCreator.createLongShortPair(
+        await LSPCreator.createLongShortPair(
           expirationTimestamp,
           collateralPerPair,
           priceIdentifier,
           syntheticName,
           syntheticSymbol,
           collateralTokenAddress,
-          financialProductLibrary,
+          financialProductLibraryAddress,
           customAncillaryData,
           prepaidProposerReward,
           transactionOptions
@@ -152,8 +150,31 @@ task(
         console.log(
           `Deployed contract ${syntheticName} to address ${contractConfiguration.address}`
         )
+
+        // Configure Financial ProductLibrary
+        // Get Financial Product Library instance if not present already
+        if (!(contractConfiguration.financialProductLibrary in contracts)) {
+          contracts[contractConfiguration.financialProductLibrary] =
+            await ethers.getContractAt(
+              abis[contractConfiguration.financialProductLibrary],
+              financialProductLibraryAddress
+            )
+        }
+
+        // Set Parameters
+        const financialProductLibraryContract =
+          contracts[contractConfiguration.financialProductLibrary]
+
+        await financialProductLibraryContract.setLongShortPairParameters(
+          lspAddress,
+          ...contractConfiguration.financialProductLibraryParameters,
+          transactionOptions
+        )
+        console.log(
+          `Set the parameters to ${contractConfiguration.financialProductLibraryParameters} for ${contractConfiguration.financialProductLibrary} of contract ${syntheticName}`
+        )
+
       } catch (e) {
-        contractConfiguration.address = "FAILED"
         console.log(
           `FAILED to deploy contract ${contractConfiguration.syntheticName}`,
           e
