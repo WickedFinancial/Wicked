@@ -7,10 +7,15 @@
     "syntheticSymbol": "USDETHLin2171",
     "collateralToken": "WETH",
     "financialProductLibrary": "LinearLongShortPairFinancialProductLibrary",
+    "financialProductLibraryParameters": [
+      "4000",
+      "1000"
+    ],
     "customAncillaryData": "",
     "prepaidProposerReward": "0.01",
     "collateralPriceInEth": 1,
-    "address": "0x21786Df33d3815b276faa49a14f0Af2E564c4333"
+    "address": "0xc20C4CaeAAb00cB88C78A93E7Fc14E3fC31E6cad",
+    "success": true
   },
   {
     "expirationTime": "2021-08-01T16:00:00.000Z",
@@ -20,9 +25,14 @@
     "syntheticSymbol": "USDETHLin2181",
     "collateralToken": "WETH",
     "financialProductLibrary": "LinearLongShortPairFinancialProductLibrary",
+    "financialProductLibraryParameters": [
+      "3000",
+      "2000"
+    ],
     "customAncillaryData": "",
     "prepaidProposerReward": "0.01",
     "collateralPriceInEth": 1,
-    "address": "0xf7b6a253b54D25b3029fbEaCD51927CA0C27CfA2"
+    "address": "0x86DE29169AE712b61F2Dc41A0209BAD8Fd018047",
+    "success": true
   }
 ]
