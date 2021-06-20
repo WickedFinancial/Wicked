@@ -11,4 +11,6 @@ export type LSPConfiguration = {
   prepaidProposerReward: string
   collateralPriceInEth: number
   address?: string
+  success?: boolean
+  error?: string
 }

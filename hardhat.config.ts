@@ -174,11 +174,15 @@ task(
           `Set the parameters to ${contractConfiguration.financialProductLibraryParameters} for ${contractConfiguration.financialProductLibrary} of contract ${syntheticName}`
         )
 
+
+        contractConfiguration.success = true;
       } catch (e) {
         console.log(
           `FAILED to deploy contract ${contractConfiguration.syntheticName}`,
           e
         )
+        contractConfiguration.success = false;
+        contractConfiguration.error = e.toString();
       }
     }
     const outputFile = "./deployedContractConfigs.json"
