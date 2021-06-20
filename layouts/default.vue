@@ -1,11 +1,6 @@
 <template>
   <v-app dark>
-    <v-navigation-drawer
-      v-model="drawer"
-      :clipped="clipped"
-      fixed
-      app
-    >
+    <v-navigation-drawer v-model="drawer" :clipped="clipped" fixed app>
       <v-list>
         <v-list-item
           v-for="(item, i) in items"
@@ -42,27 +37,36 @@
 </template>
 
 <script>
+import { mapGetters } from "Vuex"
 export default {
   data() {
     return {
       clipped: true,
       drawer: true,
-      items: [
+      right: true,
+      rightDrawer: false,
+      title: "Avow",
+    }
+  },
+  computed: {
+    ...mapGetters("contracts", ["syntheticNames"]),
+    items() {
+      let menuItems = [
         {
           icon: "mdi-apps",
           title: "Dashboard",
           to: "/",
         },
-        // {
-        //   icon: "mdi-chart-bubble",
-        //   title: "Mint",
-        //   to: "/mint",
-        // },
-      ],
-      right: true,
-      rightDrawer: false,
-      title: "Avow",
-    }
+      ]
+      const contractItems = this.syntheticNames.map((syntheticName) => {
+        return {
+          icon: "mdi-file-document-edit-outline",
+          title: syntheticName,
+          to: "/",
+        }
+      })
+      return menuItems.concat(contractItems)
+    },
   },
 }
 </script>
