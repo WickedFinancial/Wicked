@@ -11,10 +11,8 @@ exports[`Web3Btn should match a snapshot 1`] = `
   >
     <i
       aria-hidden="true"
-      class="v-icon notranslate material-icons theme--light"
-    >
-      mdiEthereum
-    </i>
+      class="v-icon notranslate mdi mdi-plus theme--light"
+    />
     
   Connect
 
