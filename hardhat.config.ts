@@ -133,7 +133,7 @@ task(
 
         console.log(`Deploying  ${syntheticName} to address ${lspAddress}`)
 
-        await LSPCreator.createLongShortPair(
+        const launchTx = await LSPCreator.createLongShortPair(
           expirationTimestamp,
           collateralPerPair,
           priceIdentifier,
@@ -148,7 +148,7 @@ task(
         contractConfiguration.address = lspAddress
 
         console.log(
-          `Deployed contract ${syntheticName} to address ${contractConfiguration.address}`
+          `Deployed contract ${syntheticName} to address ${contractConfiguration.address} in transaction: ${launchTx.hash}`
         )
 
         // Configure Financial ProductLibrary
