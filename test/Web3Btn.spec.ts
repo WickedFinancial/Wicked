@@ -2,11 +2,14 @@ import "@testing-library/jest-dom"
 import { screen, fireEvent } from "@testing-library/vue"
 import Web3BtnComponent from "~/components/Web3Btn.vue"
 import { renderWithVuetify as render } from "~/test/utils"
+import web3 from "~/store/web3"
 
 describe("Web3Btn", () => {
   let btn: HTMLElement
   beforeEach(() => {
-    btn = render(Web3BtnComponent).getByRole("button")
+    btn = render(Web3BtnComponent, { store: { modules: { web3 } } }).getByRole(
+      "button"
+    )
   })
   it("should be on the screen and accessible by role button", () => {
     expect(btn).toBeInTheDocument()

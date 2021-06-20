@@ -1,27 +1,28 @@
 <template>
   <v-btn role="button" @click.p="toggleConnectionStatus">
     <v-icon>mdiEthereum</v-icon>
-    {{ connectionStatus }}
+    {{ btnAction }}
   </v-btn>
 </template>
 <script lang="ts">
-import { Vue, Component } from "vue-property-decorator"
+import { Vue, Component, namespace } from "nuxt-property-decorator"
+
+const web3 = namespace("web3")
 
 @Component
 export default class Web3Btn extends Vue {
-  isConnected = false
+  @web3.State
+  isConnected!: boolean
 
-  get connectionStatus() {
+  @web3.Mutation
+  setConnectionStatus!: (status: boolean) => void
+
+  get btnAction() {
     return this.isConnected ? "Disconnect" : "Connect"
   }
 
-  set connectionStatus(isConnected: boolean) {
-    this.isConnected = isConnected
-  }
-
   toggleConnectionStatus() {
-    this.connectionStatus = !this.isConnected
+    this.setConnectionStatus(!this.isConnected)
   }
 }
 </script>
-<style scoped></style>
