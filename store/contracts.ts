@@ -1,5 +1,5 @@
 import { Module, VuexModule } from "vuex-module-decorators"
-import { LSPConfiguration } from "../types"
+import { LSPConfiguration } from "~/hardhat.config"
 
 @Module({ stateFactory: true, name: "contracts", namespaced: true })
 export default class contracts extends VuexModule {

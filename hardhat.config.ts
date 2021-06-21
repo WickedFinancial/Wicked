@@ -8,7 +8,7 @@ import { task, types } from "hardhat/config"
 import { Address } from "hardhat-deploy/dist/types"
 import { Contract } from "ethers"
 
-type LSPConfiguration = {
+export type LSPConfiguration = {
   expirationTime: string
   collateralPerPair: string
   priceIdentifier: string
@@ -104,12 +104,11 @@ task("launch", "Launch all configured LSP contracts")
 
         // Get Collateral Contract instance if not present already
         if (!(contractConfiguration.collateralToken in contracts)) {
-          contracts[
-            contractConfiguration.collateralToken
-          ] = await ethers.getContractAt(
-            abis[contractConfiguration.collateralToken],
-            collateralTokenAddress
-          )
+          contracts[contractConfiguration.collateralToken] =
+            await ethers.getContractAt(
+              abis[contractConfiguration.collateralToken],
+              collateralTokenAddress
+            )
         }
 
         // Create and Approve collateral for the proposer reward
@@ -174,12 +173,11 @@ task("launch", "Launch all configured LSP contracts")
         // Configure Financial ProductLibrary
         // Get Financial Product Library instance if not present already
         if (!(contractConfiguration.financialProductLibrary in contracts)) {
-          contracts[
-            contractConfiguration.financialProductLibrary
-          ] = await ethers.getContractAt(
-            abis[contractConfiguration.financialProductLibrary],
-            financialProductLibraryAddress
-          )
+          contracts[contractConfiguration.financialProductLibrary] =
+            await ethers.getContractAt(
+              abis[contractConfiguration.financialProductLibrary],
+              financialProductLibraryAddress
+            )
         }
 
         // Set Parameters
