@@ -7,11 +7,11 @@ import {
 import WalletConnectProvider from "@walletconnect/web3-provider"
 import Web3modal from "web3modal"
 import { ethers } from "ethers"
+import { testingStore } from "~/utils/store-accessor"
 
 const providerOptions = {
   walletconnect: {
     package: WalletConnectProvider,
-    options: { infuraId: "3ce35c3d389a4461bffd073fbf27d23e" },
   },
 }
 
@@ -33,7 +33,12 @@ export const getCurrentProvider = () => {
   return currentProvider
 }
 
-@Module({ stateFactory: true, name: "web3", namespaced: true })
+@Module({
+  stateFactory: true,
+  name: "web3",
+  namespaced: true,
+  store: testingStore(),
+})
 export default class web3 extends VuexModule {
   isConnected = false
   modalInitialized = false
