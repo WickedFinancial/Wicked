@@ -16,13 +16,13 @@ jest.setTimeout(40000)
 expect.extend(waffleJest)
 
 describe("LSP", function () {
-  let addresses: Record<string, Address> = {
+  const addresses: Record<string, Address> = {
     WETH: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
     LSPCreator: "0x81b0A8206C559a0747D86B4489D0055db4720E84",
     LinearLongShortPairFinancialProductLibrary:
       "0x46b541E0fE2E817340A1A88740607329fF5ED279",
   }
-  let contracts: Record<string, Contract> = {}
+  const contracts: Record<string, Contract> = {}
   let namedAccounts: Record<string, Address>
 
   const gasprice = 50
@@ -127,11 +127,10 @@ describe("LSP", function () {
   it("Should be able configure Linear LSP Library", async function () {
     const lowerBound = "2000"
     const upperBound = "3000"
-    contracts.LinearLongShortPairFinancialProductLibrary =
-      await ethers.getContractAt(
-        LinearLongShortPairABI,
-        addresses.LinearLongShortPairFinancialProductLibrary
-      )
+    contracts.LinearLongShortPairFinancialProductLibrary = await ethers.getContractAt(
+      LinearLongShortPairABI,
+      addresses.LinearLongShortPairFinancialProductLibrary
+    )
 
     await contracts.LinearLongShortPairFinancialProductLibrary.setLongShortPairParameters(
       addresses.LSP,
@@ -139,10 +138,11 @@ describe("LSP", function () {
       lowerBound
     )
 
-    const parameters = await contracts.LinearLongShortPairFinancialProductLibrary.longShortPairParameters(addresses.LSP)
+    const parameters = await contracts.LinearLongShortPairFinancialProductLibrary.longShortPairParameters(
+      addresses.LSP
+    )
     expect(parameters[0].toString()).toEqual(upperBound)
     expect(parameters[1].toString()).toEqual(lowerBound)
-
   })
 
   it("Should be able to create a new position providing the required capital", async function () {

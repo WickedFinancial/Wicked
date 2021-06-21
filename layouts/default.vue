@@ -39,11 +39,12 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, namespace } from "nuxt-property-decorator"
 import { Vue, Component, namespace, Watch } from "nuxt-property-decorator"
+
 import Web3Btn from "~/components/Web3Btn.vue"
-const contracts = namespace("contracts")
 import { getCurrentProvider } from "~/store/web3"
+
+const contracts = namespace("contracts")
 
 const web3 = namespace("web3")
 
@@ -58,6 +59,7 @@ export default class DefaultLayout extends Vue {
   right = true
   rightDrawer = false
   title = "Avow"
+  selectedAccount: string = ""
 
   @contracts.Getter
   syntheticNames!: Array<string>
@@ -72,13 +74,13 @@ export default class DefaultLayout extends Vue {
     })
     return this.menuItems.concat(contractItems)
   }
-  selectedAccount!: string = ""
 
   @Watch("isConnected")
   onConnectStatus(status: boolean, oldStatus: boolean) {
     if (status && !oldStatus) {
-      const provider = getCurrentProvider()
-      this.selectedAccount = provider?.provider.selectedAddress
+      const modalProvider = getCurrentProvider()
+      const provider = modalProvider?.provider as any // Todo Make an interface with the different providers?
+      this.selectedAccount = provider.selectedAddress
     } else if (!status && oldStatus) {
       this.selectedAccount = ""
     }
