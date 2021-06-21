@@ -4,6 +4,9 @@
       :contractDetails="contractDetails"
       :contractName="contractName"
     />
+    <contract-tokens
+      :contractDetails="contractDetails"
+    />
   </v-container>
 </template>
 
