@@ -8,7 +8,7 @@
         <v-card-title>
           <span class="headline">Mint Tokens</span>
         </v-card-title>
-        <form @submit.prevent="submit">
+        <form @submit.prevent="mint">
           <v-card-text>
             <v-container>
               <v-row>
@@ -25,7 +25,7 @@
                 ><v-col cols="12">
                   <v-list-item>
                     <v-list-item-title>
-                      Necessary Collateral
+                      Required Collateral
                     </v-list-item-title>
                     <v-list-item-subtitle>{{
                       this.collateralAmount
@@ -37,15 +37,35 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="close"> Close </v-btn>
-            <v-progress-circular
-              indeterminate
-              color="primary"
-              v-if="loading"
-            ></v-progress-circular>
-            <v-btn v-else color="blue darken-1" text type="submit">
-              Mint
-            </v-btn>
+            <v-btn color="blue darken-1" text @click="close"> Cancel </v-btn>
+
+            <div v-if="approved">
+              <v-progress-circular
+                indeterminate
+                color="primary"
+                v-if="loading"
+              ></v-progress-circular>
+              <v-btn v-else color="blue darken-1" text type="submit">
+                Mint
+              </v-btn>
+            </div>
+
+            <div v-else>
+              <v-progress-circular
+                indeterminate
+                color="primary"
+                v-if="loading"
+              ></v-progress-circular>
+              <v-btn
+                v-else
+                color="blue darken-1"
+                text
+                type="button"
+                @click.prevent="approve"
+              >
+                Approve
+              </v-btn>
+            </div>
           </v-card-actions>
         </form>
       </v-card>
@@ -61,6 +81,7 @@ import { LSPConfiguration } from "@/types"
 export default class mintTokens extends Vue {
   dialog = false
   loading = false
+  approved = false
   syntheticTokens = 0
 
   @Prop()
@@ -71,15 +92,28 @@ export default class mintTokens extends Vue {
       this.syntheticTokens * parseFloat(this.contractDetails.collateralPerPair)
     )
   }
-  async submit() {
+
+  async approve() {
     try {
       this.loading = true
-      console.info("Minting amount of tokens: ", this.syntheticTokens)
-      this.dialog = false
+      console.info("Approving amount of tokens: ", this.collateralAmount)
+      this.approved = true
     } finally {
       this.loading = false
     }
   }
+
+  async mint() {
+    try {
+      this.loading = true
+      console.info("Minting amount of tokens: ", this.syntheticTokens)
+      this.dialog = false
+      this.approved = false
+    } finally {
+      this.loading = false
+    }
+  }
+
   close() {
     this.dialog = false
   }
