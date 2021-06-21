@@ -92,3 +92,6 @@ sw.*
 # hardhat
 artifacts
 cache
+
+# Secret mnemonic
+mnemonic.txt

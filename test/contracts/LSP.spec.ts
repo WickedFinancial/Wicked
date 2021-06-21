@@ -10,6 +10,7 @@ import WETHAbi from "../../abis/WETH.json"
 import LSPABI from "../../abis/LSP.json"
 import LSPCreatorABI from "../../abis/LSPCreator.json"
 import ERC20ABI from "../../abis/ERC20.json"
+import LinearLongShortPairABI from "../../abis/LinearLongShortPairFinancialProductLibrary.json"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
@@ -121,6 +122,27 @@ describe("LSP", function () {
     tx.wait()
 
     await createdLongShortPairPromise
+  })
+
+  it("Should be able configure Linear LSP Library", async function () {
+    const lowerBound = "2000"
+    const upperBound = "3000"
+    contracts.LinearLongShortPairFinancialProductLibrary =
+      await ethers.getContractAt(
+        LinearLongShortPairABI,
+        addresses.LinearLongShortPairFinancialProductLibrary
+      )
+
+    await contracts.LinearLongShortPairFinancialProductLibrary.setLongShortPairParameters(
+      addresses.LSP,
+      upperBound,
+      lowerBound
+    )
+
+    const parameters = await contracts.LinearLongShortPairFinancialProductLibrary.longShortPairParameters(addresses.LSP)
+    expect(parameters[0].toString()).toEqual(upperBound)
+    expect(parameters[1].toString()).toEqual(lowerBound)
+
   })
 
   it("Should be able to create a new position providing the required capital", async function () {
