@@ -2,22 +2,20 @@
   <v-container>
     <v-card class="mx-auto my-12" max-width="500">
       <v-card-title
-        ><a :href="etherscanLinkContract">{{
-          this.contractName
-        }}</a></v-card-title
+        ><a :href="etherscanLinkContract">{{ contractName }}</a></v-card-title
       >
-      <v-card-subtitle>{{ this.contractType }}</v-card-subtitle>
+      <v-card-subtitle>{{ contractType }}</v-card-subtitle>
       <v-card-text>
         <v-list-item>
           <v-list-item-title> Expiration Time </v-list-item-title>
-          <v-list-item-subtitle>{{ this.expirationTime }}</v-list-item-subtitle>
+          <v-list-item-subtitle>{{ expirationTime }}</v-list-item-subtitle>
         </v-list-item>
 
         <v-list-item>
           <v-list-item-title> Collateral </v-list-item-title>
           <v-list-item-subtitle
             ><a :href="etherscanLinkCollateral">{{
-              this.contractDetails.collateralToken
+              contractDetails.collateralToken
             }}</a></v-list-item-subtitle
           >
         </v-list-item>
@@ -25,7 +23,7 @@
         <v-list-item>
           <v-list-item-title> Collateral Per Pair</v-list-item-title>
           <v-list-item-subtitle>{{
-            this.contractDetails.collateralPerPair
+            contractDetails.collateralPerPair
           }}</v-list-item-subtitle>
         </v-list-item>
 
@@ -33,7 +31,7 @@
           <v-list-item-title> Price Feed </v-list-item-title>
           <v-list-item-subtitle
             ><a :href="priceFeedLink">{{
-              this.contractDetails.priceIdentifier
+              contractDetails.priceIdentifier
             }}</a></v-list-item-subtitle
           >
         </v-list-item>
@@ -89,9 +87,10 @@ export default class contract extends Vue {
         (value, index) => {
           if (this.contractDetails) {
             return {
-              name: libraryParameters[
-                this.contractDetails.financialProductLibrary
-              ][index],
+              name:
+                libraryParameters[this.contractDetails.financialProductLibrary][
+                  index
+                ],
               value,
             }
           } else {
