@@ -1,8 +1,8 @@
 import {
-  VuexAction as Action,
-  VuexMutation as Mutation,
-  VuexModule,
   Module,
+  VuexAction as Action,
+  VuexModule,
+  VuexMutation as Mutation,
 } from "nuxt-property-decorator"
 import WalletConnectProvider from "@walletconnect/web3-provider"
 import Web3modal from "web3modal"
@@ -12,7 +12,9 @@ import { testingStore } from "~/utils/store-accessor"
 const providerOptions = {
   walletconnect: {
     package: WalletConnectProvider,
-    infuraId: "3ce35c3d389a4461bffd073fbf27d23e",
+    options: {
+      infuraId: "3ce35c3d389a4461bffd073fbf27d23e",
+    },
   },
 }
 
