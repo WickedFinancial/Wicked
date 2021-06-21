@@ -12,6 +12,7 @@ import { testingStore } from "~/utils/store-accessor"
 const providerOptions = {
   walletconnect: {
     package: WalletConnectProvider,
+    infuraId: "3ce35c3d389a4461bffd073fbf27d23e",
   },
 }
 

@@ -8,7 +8,6 @@
 </template>
 <script lang="ts">
 import { Vue, Component, namespace } from "nuxt-property-decorator"
-import { getCurrentProvider } from "~/store/web3"
 
 const web3 = namespace("web3")
 
@@ -29,14 +28,9 @@ export default class Web3Btn extends Vue {
 
   async connect() {
     await this.connectWeb3()
-    const provider = getCurrentProvider()
-    if (provider) {
-      console.log(provider)
-    }
   }
 
   clear() {
-    console.log("Disconnecting")
     this.clearProvider()
   }
 

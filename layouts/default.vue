@@ -27,6 +27,7 @@
       <v-toolbar-title v-text="title" />
       <avow-logo id="Logo" />
       <v-spacer />
+      {{ selectedAccount }}
       <web3-btn></web3-btn>
     </v-app-bar>
     <v-main>
@@ -38,16 +39,33 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from "nuxt-property-decorator"
+import { Vue, Component, namespace, Watch } from "nuxt-property-decorator"
 import Web3Btn from "~/components/Web3Btn.vue"
+import { getCurrentProvider } from "~/store/web3"
+
+const web3 = namespace("web3")
 
 @Component({ components: { Web3Btn } })
 export default class DefaultLayout extends Vue {
+  @web3.State
+  isConnected!: boolean
+
   clipped = true
   drawer = true
   items = [{ icon: "mdi-apps", title: "Dashboard", to: "/" }]
   right = true
   rightDrawer = false
   title = "Avow"
+  selectedAccount!: string = ""
+
+  @Watch("isConnected")
+  onConnectStatus(status: boolean, oldStatus: boolean) {
+    if (status && !oldStatus) {
+      const provider = getCurrentProvider()
+      this.selectedAccount = provider?.provider.selectedAddress
+    } else if (!status && oldStatus) {
+      this.selectedAccount = ""
+    }
+  }
 }
 </script>
