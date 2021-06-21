@@ -7,7 +7,23 @@ import { HardhatUserConfig } from "hardhat/types"
 import { task, types } from "hardhat/config"
 import { Address } from "hardhat-deploy/dist/types"
 import { Contract } from "ethers"
-import { LSPConfiguration } from "types"
+
+type LSPConfiguration = {
+  expirationTime: string
+  collateralPerPair: string
+  priceIdentifier: string
+  syntheticName: string
+  syntheticSymbol: string
+  collateralToken: string
+  financialProductLibrary: string
+  financialProductLibraryParameters: Array<string>
+  customAncillaryData: string
+  prepaidProposerReward: string
+  collateralPriceInEth: number
+  address?: string
+  success?: boolean
+  error?: string
+}
 
 function mnemonic() {
   try {
