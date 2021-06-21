@@ -1,11 +1,6 @@
 <template>
   <v-app dark>
-    <v-navigation-drawer
-      v-model="drawer"
-      :clipped="clipped"
-      fixed
-      app
-    >
+    <v-navigation-drawer v-model="drawer" :clipped="clipped" fixed app>
       <v-list>
         <v-list-item
           v-for="(item, i) in items"
@@ -32,6 +27,7 @@
       <v-toolbar-title v-text="title" />
       <avow-logo id="Logo" />
       <v-spacer />
+      <web3-btn></web3-btn>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -41,28 +37,32 @@
   </v-app>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      clipped: true,
-      drawer: true,
-      items: [
-        {
-          icon: "mdi-apps",
-          title: "Dashboard",
-          to: "/",
-        },
-        // {
-        //   icon: "mdi-chart-bubble",
-        //   title: "Mint",
-        //   to: "/mint",
-        // },
-      ],
-      right: true,
-      rightDrawer: false,
-      title: "Avow",
-    }
-  },
+<script lang="ts">
+import { Vue, Component, namespace } from "nuxt-property-decorator"
+import Web3Btn from "~/components/Web3Btn.vue"
+const contracts = namespace("contracts")
+
+@Component({ components: { Web3Btn } })
+export default class DefaultLayout extends Vue {
+  clipped = true
+  drawer = true
+  menuItems = [{ icon: "mdi-apps", title: "Dashboard", to: "/" }]
+  right = true
+  rightDrawer = false
+  title = "Avow"
+
+  @contracts.Getter
+  syntheticNames!: Array<string>
+
+  get items(): Array<object> {
+    const contractItems = this.syntheticNames.map((syntheticName) => {
+      return {
+        icon: "mdi-file-document-edit-outline",
+        title: syntheticName,
+        to: `/contract/${syntheticName}`,
+      }
+    })
+    return this.menuItems.concat(contractItems)
+  }
 }
 </script>
