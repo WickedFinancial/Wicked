@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, namespace, Watch } from "nuxt-property-decorator"
+import { Component, namespace, Vue, Watch } from "nuxt-property-decorator"
 
 import Web3Btn from "~/components/Web3Btn.vue"
 import { getCurrentProvider } from "~/store/web3"
