@@ -4,7 +4,7 @@ import "hardhat-deploy"
 import fs from "fs"
 import { readdir, readFile, writeFile } from "fs/promises"
 import { HardhatUserConfig } from "hardhat/types"
-import { task } from "hardhat/config"
+import { task, types } from "hardhat/config"
 import { Address } from "hardhat-deploy/dist/types"
 import { Contract } from "ethers"
 import { LSPConfiguration } from "types"
@@ -35,10 +35,14 @@ task(
   }
 )
 
-task(
-  "launch",
-  "Launch all configured LSP contracts",
-  async (_, { ethers, getNamedAccounts }) => {
+task("launch", "Launch all configured LSP contracts")
+  .addOptionalParam(
+    "gasprice",
+    "Gas Price to use in transactions",
+    50 * 100000000,
+    types.int
+  )
+  .setAction(async ({ gasprice }, { ethers, getNamedAccounts }) => {
     const contractConfigs: Array<LSPConfiguration> = require("./contractConfigs.json")
     const addresses: Record<string, Address> = require("./addresses.json")
     const abis = require("./abis")
@@ -48,9 +52,8 @@ task(
       addresses.LSPCreator
     )
     const namedAccounts = await getNamedAccounts()
-    const gasprice = 50
     const transactionOptions = {
-      gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
+      gasPrice: gasprice, // gasprice arg * 1 GWEI
       from: namedAccounts.deployer,
     }
 
@@ -174,21 +177,19 @@ task(
           `Set the parameters to ${contractConfiguration.financialProductLibraryParameters} for ${contractConfiguration.financialProductLibrary} of contract ${syntheticName}`
         )
 
-
-        contractConfiguration.success = true;
+        contractConfiguration.success = true
       } catch (e) {
         console.log(
           `FAILED to deploy contract ${contractConfiguration.syntheticName}`,
           e
         )
-        contractConfiguration.success = false;
-        contractConfiguration.error = e.toString();
+        contractConfiguration.success = false
+        contractConfiguration.error = e.toString()
       }
     }
     const outputFile = "./deployedContractConfigs.json"
     await writeFile(outputFile, JSON.stringify(contractConfigs, null, 2))
-  }
-)
+  })
 
 const config: HardhatUserConfig = {
   solidity: "0.7.3",
