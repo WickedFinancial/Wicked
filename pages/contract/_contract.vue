@@ -14,9 +14,10 @@
 import { Vue, Component, namespace } from "nuxt-property-decorator"
 import { LSPConfiguration } from "@/types"
 import ContractSummary from "@/components/ContractSummary.vue"
+import ContractTokens from "@/components/ContractTokens.vue"
 const contracts = namespace("contracts")
 
-@Component({ components: { ContractSummary } })
+@Component({ components: { ContractSummary, ContractTokens } })
 export default class contract extends Vue {
   @contracts.State
   contractConfigs!: Array<LSPConfiguration>

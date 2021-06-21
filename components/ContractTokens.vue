@@ -20,14 +20,14 @@
     </v-card-text>
 
     <v-card-actions>
-      <MintTokens />
+      <MintTokens :contractDetails="contractDetails" />
     </v-card-actions>
   </v-card>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from "nuxt-property-decorator"
-import MintTokens from "@/components/dialoges/MintTokens.vue"
+import MintTokens from "@/components/MintTokens.vue"
 import { LSPConfiguration } from "@/types"
 
 const addresses: Record<string, string> = require("@/addresses.json")

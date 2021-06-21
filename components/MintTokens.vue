@@ -14,13 +14,25 @@
               <v-row>
                 <v-col cols="12">
                   <v-text-field
-                    label="Collateral Tokens to deposit"
-                    v-model="collateralTokens"
+                    label="Synthetic Tokens to create"
+                    v-model="syntheticTokens"
                     type="number"
                     required
                   ></v-text-field>
                 </v-col>
               </v-row>
+              <v-row
+                ><v-col cols="12">
+                  <v-list-item>
+                    <v-list-item-title>
+                      Necessary Collateral
+                    </v-list-item-title>
+                    <v-list-item-subtitle>{{
+                      this.collateralAmount
+                    }}</v-list-item-subtitle>
+                  </v-list-item>
+                </v-col></v-row
+              >
             </v-container>
           </v-card-text>
           <v-card-actions>
@@ -41,30 +53,36 @@
   </v-row>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      dialog: false,
-      loading: false,
-      collateralTokens: 0,
-    }
-  },
+<script lang="ts">
+import { Vue, Component, Prop } from "nuxt-property-decorator"
+import { LSPConfiguration } from "@/types"
 
-  methods: {
-    async submit(event) {
-      try {
-        this.loading = true
-        console.log("Minting amount of tokens: ", this.collateralTokens)
-        this.dialog = false
-      } finally {
-        this.loading = false
-      }
-    },
-    close() {
+@Component
+export default class mintTokens extends Vue {
+  dialog = false
+  loading = false
+  syntheticTokens = 0
+
+  @Prop()
+  contractDetails!: LSPConfiguration
+
+  get collateralAmount(): number {
+    return (
+      this.syntheticTokens * parseFloat(this.contractDetails.collateralPerPair)
+    )
+  }
+  async submit() {
+    try {
+      this.loading = true
+      console.info("Minting amount of tokens: ", this.syntheticTokens)
       this.dialog = false
-    },
-  },
+    } finally {
+      this.loading = false
+    }
+  }
+  close() {
+    this.dialog = false
+  }
 }
 </script>
 <style scoped>
