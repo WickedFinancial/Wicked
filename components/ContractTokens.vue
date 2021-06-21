@@ -18,16 +18,21 @@
         <v-list-item-subtitle>{{ this.shortTokens }}</v-list-item-subtitle>
       </v-list-item>
     </v-card-text>
+
+    <v-card-actions>
+      <MintTokens />
+    </v-card-actions>
   </v-card>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from "nuxt-property-decorator"
+import MintTokens from "@/components/dialoges/MintTokens.vue"
 import { LSPConfiguration } from "@/types"
 
 const addresses: Record<string, string> = require("@/addresses.json")
 
-@Component
+@Component({ components: { MintTokens } })
 export default class contractTokens extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration
