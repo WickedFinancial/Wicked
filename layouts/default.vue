@@ -39,8 +39,10 @@
 </template>
 
 <script lang="ts">
+import { Vue, Component, namespace } from "nuxt-property-decorator"
 import { Vue, Component, namespace, Watch } from "nuxt-property-decorator"
 import Web3Btn from "~/components/Web3Btn.vue"
+const contracts = namespace("contracts")
 import { getCurrentProvider } from "~/store/web3"
 
 const web3 = namespace("web3")
@@ -52,10 +54,24 @@ export default class DefaultLayout extends Vue {
 
   clipped = true
   drawer = true
-  items = [{ icon: "mdi-apps", title: "Dashboard", to: "/" }]
+  menuItems = [{ icon: "mdi-apps", title: "Dashboard", to: "/" }]
   right = true
   rightDrawer = false
   title = "Avow"
+
+  @contracts.Getter
+  syntheticNames!: Array<string>
+
+  get items(): Array<object> {
+    const contractItems = this.syntheticNames.map((syntheticName) => {
+      return {
+        icon: "mdi-file-document-edit-outline",
+        title: syntheticName,
+        to: `/contract/${syntheticName}`,
+      }
+    })
+    return this.menuItems.concat(contractItems)
+  }
   selectedAccount!: string = ""
 
   @Watch("isConnected")

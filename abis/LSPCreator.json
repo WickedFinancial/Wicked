@@ -1,0 +1,11 @@
+[
+  "constructor(address _finder, address _tokenFactory, address _timer)",
+  "event CreatedLongShortPair(address indexed LongShortPair, address indexed deployerAddress)",
+  "function _getSyntheticDecimals(address _collateralToken) view returns (uint8 decimals)",
+  "function createLongShortPair(uint64 expirationTimestamp, uint256 collateralPerPair, bytes32 priceIdentifier, string syntheticName, string syntheticSymbol, address collateralToken, address financialProductLibrary, bytes customAncillaryData, uint256 prepaidProposerReward) returns (address)",
+  "function finder() view returns (address)",
+  "function getCurrentTime() view returns (uint256)",
+  "function setCurrentTime(uint256 time)",
+  "function timerAddress() view returns (address)",
+  "function tokenFactory() view returns (address)"
+]
