@@ -40,12 +40,21 @@ export const getCurrentProvider = () => {
   stateFactory: true,
   name: "web3",
   namespaced: true,
-  store: testingStore(),
 })
 export default class web3 extends VuexModule {
   isConnected = false
   modalInitialized = false
   providerSet = false
+
+  get selectedAccount(): string {
+    if (this.isConnected) {
+      const modalProvider = getCurrentProvider()
+      const provider = modalProvider?.provider as any
+      return provider.selectedAddress
+    } else {
+      return ""
+    }
+  }
 
   @Mutation
   setConnectionStatus(status: boolean) {

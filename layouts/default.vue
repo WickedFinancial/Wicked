@@ -53,13 +53,16 @@ export default class DefaultLayout extends Vue {
   @web3.State
   isConnected!: boolean
 
+  @web3.Getter
+  selectedAccount!: string
+
+
   clipped = true
   drawer = true
   menuItems = [{ icon: "mdi-apps", title: "Dashboard", to: "/" }]
   right = true
   rightDrawer = false
   title = "Avow"
-  selectedAccount: string = ""
 
   @contracts.Getter
   syntheticNames!: Array<string>
@@ -75,15 +78,6 @@ export default class DefaultLayout extends Vue {
     return this.menuItems.concat(contractItems)
   }
 
-  @Watch("isConnected")
-  onConnectStatus(status: boolean, oldStatus: boolean) {
-    if (status && !oldStatus) {
-      const modalProvider = getCurrentProvider()
-      const provider = modalProvider?.provider as any // Todo Make an interface with the different providers?
-      this.selectedAccount = provider.selectedAddress
-    } else if (!status && oldStatus) {
-      this.selectedAccount = ""
-    }
-  }
+
 }
 </script>
