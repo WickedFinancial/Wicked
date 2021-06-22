@@ -28,7 +28,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from "nuxt-property-decorator"
 import MintTokens from "@/components/MintTokens.vue"
-import { LSPConfiguration } from "@/types"
+import { LSPConfiguration } from "@/hardhat.config"
 
 const addresses: Record<string, string> = require("@/addresses.json")
 

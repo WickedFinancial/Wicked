@@ -75,7 +75,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from "nuxt-property-decorator"
-import { LSPConfiguration } from "@/types"
+import { LSPConfiguration } from "@/hardhat.config"
 
 @Component
 export default class mintTokens extends Vue {

@@ -50,7 +50,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from "nuxt-property-decorator"
-import { LSPConfiguration } from "@/types"
+import { LSPConfiguration } from "@/hardhat.config"
 
 const addresses: Record<string, string> = require("@/addresses.json")
 
@@ -83,7 +83,7 @@ export default class contractSummary extends Vue {
   get libraryConfiguration(): Array<object> | undefined {
     if (this.contractDetails) {
       return this.contractDetails.financialProductLibraryParameters.map(
-        (value, index) => {
+        (value: string, index: number) => {
           if (this.contractDetails) {
             return {
               name: libraryParameters[

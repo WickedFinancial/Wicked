@@ -27,6 +27,7 @@
       <v-toolbar-title v-text="title" />
       <avow-logo id="Logo" />
       <v-spacer />
+      {{ selectedAccount }}
       <web3-btn></web3-btn>
     </v-app-bar>
     <v-main>
@@ -38,18 +39,27 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, namespace } from "nuxt-property-decorator"
+import { Component, namespace, Vue, Watch } from "nuxt-property-decorator"
+
 import Web3Btn from "~/components/Web3Btn.vue"
+import { getCurrentProvider } from "~/store/web3"
+
 const contracts = namespace("contracts")
+
+const web3 = namespace("web3")
 
 @Component({ components: { Web3Btn } })
 export default class DefaultLayout extends Vue {
+  @web3.State
+  isConnected!: boolean
+
   clipped = true
   drawer = true
   menuItems = [{ icon: "mdi-apps", title: "Dashboard", to: "/" }]
   right = true
   rightDrawer = false
   title = "Avow"
+  selectedAccount: string = ""
 
   @contracts.Getter
   syntheticNames!: Array<string>
@@ -63,6 +73,17 @@ export default class DefaultLayout extends Vue {
       }
     })
     return this.menuItems.concat(contractItems)
+  }
+
+  @Watch("isConnected")
+  onConnectStatus(status: boolean, oldStatus: boolean) {
+    if (status && !oldStatus) {
+      const modalProvider = getCurrentProvider()
+      const provider = modalProvider?.provider as any // Todo Make an interface with the different providers?
+      this.selectedAccount = provider.selectedAddress
+    } else if (!status && oldStatus) {
+      this.selectedAccount = ""
+    }
   }
 }
 </script>

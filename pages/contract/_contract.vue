@@ -11,8 +11,8 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, namespace } from "nuxt-property-decorator"
-import { LSPConfiguration } from "@/types"
+import { Component, namespace, Vue } from "nuxt-property-decorator"
+import { LSPConfiguration } from "@/hardhat.config"
 import ContractSummary from "@/components/ContractSummary.vue"
 import ContractTokens from "@/components/ContractTokens.vue"
 const contracts = namespace("contracts")
