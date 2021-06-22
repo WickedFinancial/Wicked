@@ -42,7 +42,6 @@
 import { Component, namespace, Vue, Watch } from "nuxt-property-decorator"
 
 import Web3Btn from "~/components/Web3Btn.vue"
-import { getCurrentProvider } from "~/store/web3"
 
 const contracts = namespace("contracts")
 
