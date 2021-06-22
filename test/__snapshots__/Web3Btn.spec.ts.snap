@@ -3,7 +3,5 @@
 exports[`Web3Btn should match snapshot 1`] = `
 "<div><button type=\\"button\\" class=\\"v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default\\" role=\\"button\\"><span class=\\"v-btn__content\\"><i aria-hidden=\\"true\\" class=\\"v-icon notranslate mdi mdi-plus theme--light\\"></i>
     Connect
-  </span></button>
-  <h1></h1>
-</div>"
+  </span></button></div>"
 `;

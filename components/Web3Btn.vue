@@ -4,7 +4,6 @@
       <v-icon>mdi-plus</v-icon>
       {{ btnAction }}
     </v-btn>
-    <h1></h1>
   </div>
 </template>
 <script lang="ts">
