@@ -7,7 +7,6 @@ import {
 import WalletConnectProvider from "@walletconnect/web3-provider"
 import Web3modal from "web3modal"
 import { ethers } from "ethers"
-import { testingStore } from "~/utils/store-accessor"
 
 const providerOptions = {
   walletconnect: {
@@ -43,7 +42,7 @@ export const getCurrentProvider = () => {
 })
 export default class web3 extends VuexModule {
   isConnected = false
-  modalInitialized = false
+  modalInitializing = false
   providerSet = false
 
   get selectedAccount(): string {
@@ -76,6 +75,11 @@ export default class web3 extends VuexModule {
   }
 
   @Mutation
+  setModalInitializing(state: boolean) {
+    this.modalInitializing = state
+  }
+
+  @Mutation
   clearProvider() {
     currentProvider = undefined
     this.providerSet = false
@@ -84,6 +88,7 @@ export default class web3 extends VuexModule {
 
   @Action({ rawError: true })
   async connectWeb3() {
+    this.context.commit("setModalInitializing", true)
     const webModal = initializeModal()
     let provider: typeof webModal.connect
     try {
@@ -93,6 +98,8 @@ export default class web3 extends VuexModule {
     } catch (e: unknown) {
       console.log("Error connecting to Web3")
       this.context.commit("setConnectionStatus", false)
+    } finally {
+      this.context.commit("setModalInitializing", false)
     }
   }
 }

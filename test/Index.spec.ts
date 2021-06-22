@@ -1,19 +1,29 @@
-import "@testing-library/jest-dom"
 import Index from "@/pages/index.vue"
-import { renderWithVuetify as render } from "~/test/utils"
+import Vuetify from "vuetify"
+import { createLocalVue, mount, MountOptions } from "@vue/test-utils"
+import Vue from "vue"
 
 describe("Index Page", () => {
-  let screen: ReturnType<typeof render>
-
+  const localVue = createLocalVue()
+  let vuetify: any
   beforeEach(() => {
-    screen = render(Index)
+    vuetify = new Vuetify()
   })
 
-  it("should be justified to the center", () => {
-    expect(screen.getByTestId("index-page")).toHaveClass("justify-center")
-  })
+  const mountFunction = (options: MountOptions<Vue>) => {
+    return mount(Index, {
+      localVue,
+      vuetify,
+      ...options,
+    })
+  }
 
-  it("should be aligned to the center", () => {
-    expect(screen.getByTestId("index-page")).toHaveClass("align-center")
+  it("should mount properly", () => {
+    const wrapper = mountFunction({})
+    expect(wrapper.exists()).toBe(true)
+  })
+  it("should match snapshot", () => {
+    const wrapper = mountFunction({})
+    expect(wrapper.html()).toMatchSnapshot()
   })
 })

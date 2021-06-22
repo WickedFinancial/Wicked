@@ -6,10 +6,10 @@ import { ethers, getNamedAccounts } from "hardhat"
 import { waffleJest } from "@ethereum-waffle/jest"
 import { Address } from "hardhat-deploy/dist/types"
 import { BigNumber, Contract } from "ethers"
-import WETHAbi from "../../abis/WETH.json"
-import EMPABI from "../../abis/EMP.json"
-import EMPCreatorABI from "../../abis/EMPCreator.json"
-import ERC20ABI from "../../abis/ERC20.json"
+import WETHAbi from "~/abis/WETH.json"
+import EMPABI from "~/abis/EMP.json"
+import EMPCreatorABI from "~/abis/EMPCreator.json"
+import ERC20ABI from "~/abis/ERC20.json"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
@@ -54,7 +54,8 @@ describe("EMP", function () {
     const expirationPeriod = 300
     const expirationTime = currTime + expirationPeriod
 
-    const priceFeedIdentifier = "USDETH"
+    const priceFeedIdentifier =
+      "0x5553444554480000000000000000000000000000000000000000000000000000" // "USDETH"
     const expirationTimestamp = expirationTime.toString()
     const syntheticName = "Yield Dollar [WETH Jan 2022]"
     const syntheticSymbol = "YD-ETH-JAN22"
@@ -67,8 +68,7 @@ describe("EMP", function () {
       collateralAddress: addresses.WETH, // Collateral token address.
       syntheticName, // Long name.
       syntheticSymbol, // Short name.
-      priceFeedIdentifier:
-        "0x5553444554480000000000000000000000000000000000000000000000000000",
+      priceFeedIdentifier,
       collateralRequirement: { rawValue: ethers.utils.parseUnits("1.25") }, // 125% collateral req.
       disputeBondPercentage: { rawValue: ethers.utils.parseUnits("0.1") }, // 10% dispute bond.
       sponsorDisputeRewardPercentage: {

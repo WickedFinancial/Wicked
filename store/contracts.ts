@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators"
-import { LSPConfiguration } from "~/hardhat.config"
+import { LSPConfiguration } from "~/types"
 import { getCurrentProvider } from "./web3"
 import { ethers } from "ethers"
 import LSPAbi from "@/abis/LSP.json"
@@ -22,7 +22,7 @@ let syntheticTokenContracts: Record<string, SyntheticTokenContractMapping> = {}
 
 @Module
 export default class contracts extends VuexModule {
-  contractConfigs: Array<LSPConfiguration> = require("../deployedContractConfigs.json")
+  contractConfigs: Array<LSPConfiguration> = require("~/deployedContractConfigs.json")
   syntheticTokenBalances: Record<string, SyntheticTokenBalances> = {}
   collateralTokenBalances: Record<string, number> = {}
 

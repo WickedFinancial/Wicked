@@ -28,4 +28,5 @@ module.exports = {
     "<rootDir>/plugins/**/*.ts",
     "<rootDir>/store/**/*.ts",
   ],
+  setupFiles: ["<rootDir>/test/setup.ts"],
 }
