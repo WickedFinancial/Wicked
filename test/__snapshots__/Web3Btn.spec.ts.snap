@@ -1,21 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Web3Btn should match a snapshot 1`] = `
-<button
-  class="v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default"
-  role="button"
-  type="button"
->
-  <span
-    class="v-btn__content"
-  >
-    <i
-      aria-hidden="true"
-      class="v-icon notranslate mdi mdi-plus theme--light"
-    />
-    
+exports[`Web3Btn should match snapshot 1`] = `
+"<div><button type=\\"button\\" class=\\"v-btn v-btn--is-elevated v-btn--has-bg theme--light v-size--default\\" role=\\"button\\"><span class=\\"v-btn__content\\"><i aria-hidden=\\"true\\" class=\\"v-icon notranslate mdi mdi-plus theme--light\\"></i>
     Connect
-  
-  </span>
-</button>
+  </span></button></div>"
 `;

@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Index Page should match snapshot 1`] = `
+"<div class=\\"container\\">
+  <div data-testid=\\"index-page\\" class=\\"row align-center justify-center\\">
+    <div class=\\"col-sm-8 col-md-6 col-12\\"></div>
+  </div>
+</div>"
+`;
