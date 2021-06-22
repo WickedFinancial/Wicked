@@ -5,86 +5,44 @@ import { ethers } from "ethers"
 import LSPAbi from "@/abis/LSP.json"
 const abis: Record<string, Array<string>> = require("@/abis")
 const addresses: Record<string, string> = require("@/addresses.json")
-console.log(abis)
 
 type SyntheticTokenContractMapping = {
   shortContract: ethers.Contract
   longContract: ethers.Contract
 }
 
+type TokenBalances = {
+  collateralBalance: number
+  shortBalance: number
+  longBalance: number
+}
+
+let lspContracts: Record<string, ethers.Contract> = {}
+let collateralContracts: Record<string, ethers.Contract> = {}
+let syntheticTokenContracts: Record<string, SyntheticTokenContractMapping> = {}
+
 @Module
 export default class contracts extends VuexModule {
   contractConfigs: Array<LSPConfiguration> = require("../deployedContractConfigs.json")
-  lspContracts: Record<string, ethers.Contract> = {}
-  collateralContracts: Record<string, ethers.Contract> = {}
-  syntheticTokenContracts: Record<string, SyntheticTokenContractMapping> = {}
+  tokenBalances: Record<string, TokenBalances> = {}
 
   get syntheticNames() {
     return this.contractConfigs.map((config) => config.syntheticName)
   }
 
-  get getLspContracts(): Record<string, ethers.Contract> {
-    return this.lspContracts
+  get getTokenbalances(): Record<string, TokenBalances> {
+    return this.tokenBalances
   }
 
-  get getCollateralContracts(): Record<string, ethers.Contract> {
-    return this.collateralContracts
-  }
-
-  get getSyntheticTokenContracts(): Record<
-    string,
-    SyntheticTokenContractMapping
-  > {
-    return this.syntheticTokenContracts
-  }
-
-  @Mutation
-  setLspContract(payload: {
-    syntheticName: string
-    lspContract: ethers.Contract
-  }) {
-    console.log("Set LSP Payload", payload)
-    const { syntheticName, lspContract } = payload
-    console.log(`Setting Lsp Contract ${syntheticName} to: `, lspContract)
-    this.lspContracts[syntheticName] = lspContract
-  }
-
-  @Mutation
-  setCollateralContract(payload: {
-    collateralName: string
-    collateralContract: ethers.Contract
-  }) {
-    const { collateralName, collateralContract } = payload
-    console.log(
-      `Setting Collateral Contract ${collateralName} to: `,
-      collateralContract
-    )
-    this.collateralContracts[collateralName] = collateralContract
-  }
-
-  @Mutation
-  setSyntheticTokenContracts(payload: {
-    syntheticName: string
-    longContract: ethers.Contract
-    shortContract: ethers.Contract
-  }) {
-    const { syntheticName, longContract, shortContract } = payload
-    console.log(
-      `Setting shortContract Contract ${syntheticName} to: `,
-      shortContract
-    )
-    console.log(
-      `Setting longContract Contract ${syntheticName} to: `,
-      longContract
-    )
-    this.syntheticTokenContracts[syntheticName] = {
-      longContract,
-      shortContract,
-    }
-  }
+  /* @Action({ rawError: true}) */
+  /* async loadBalances() { */
+  /*     for (var config of this.contractConfigs) { */
+  /*     } */
+  /* } */
 
   @Action({ rawError: true })
   async initializeContracts() {
+    console.log("Connecting to contracts")
     const provider: ethers.providers.Web3Provider | undefined =
       getCurrentProvider()
     if (provider === undefined) {
@@ -102,10 +60,7 @@ export default class contracts extends VuexModule {
             // Will throw an error if contract is not deployed on current network
             await lspContract.deployed()
             const syntheticName = config.syntheticName
-            this.context.commit("setLspContract", {
-              syntheticName,
-              lspContract,
-            })
+            lspContracts[syntheticName] = lspContract
 
             // Instantiate Collateral Contract
             const collateralName = config.collateralToken
@@ -120,12 +75,10 @@ export default class contracts extends VuexModule {
               collateralAbi,
               provider
             )
+
             // Will throw an error if contract is not deployed on current network
             await collateralContract.deployed()
-            this.context.commit("setCollateralContract", {
-              collateralName,
-              collateralContract,
-            })
+            collateralContracts[collateralName] = collateralContract
 
             // Instantiate Long / Short Token Contracts
             const erc20Abi = abis.ERC20
@@ -143,11 +96,10 @@ export default class contracts extends VuexModule {
               provider
             )
 
-            this.context.commit("setSyntheticTokenContracts", {
-              syntheticName,
+            syntheticTokenContracts[syntheticName] = {
               longContract,
               shortContract,
-            })
+            }
 
             console.log(`Connected to contract ${syntheticName} succesfully`)
           } catch (e) {
