@@ -35,7 +35,7 @@ describe("Web3Btn", () => {
     expect(wrapper.html()).toMatchSnapshot()
   })
 
-  it("should try to initialize the ", async () => {
+  it("should try to initialize the modal", async () => {
     // Todo mock connection to web3
     const wrapper = mountFunction({})
     const btn = wrapper.find('[role="button"]')
