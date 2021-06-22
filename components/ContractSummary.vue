@@ -75,53 +75,42 @@ export default class contractSummary extends Vue {
   contractName!: string
 
   get expirationTime(): string | undefined {
-    if (this.contractDetails) {
-      return new Date(this.contractDetails.expirationTime).toLocaleString()
-    }
+    return new Date(this.contractDetails.expirationTime).toLocaleString()
   }
 
   get libraryConfiguration(): Array<object> | undefined {
-    if (this.contractDetails) {
-      return this.contractDetails.financialProductLibraryParameters.map(
-        (value: string, index: number) => {
-          if (this.contractDetails) {
-            return {
-              name: libraryParameters[
-                this.contractDetails.financialProductLibrary
-              ][index],
-              value,
-            }
-          } else {
-            return {}
+    return this.contractDetails.financialProductLibraryParameters.map(
+      (value: string, index: number) => {
+        if (this.contractDetails) {
+          return {
+            name: libraryParameters[
+              this.contractDetails.financialProductLibrary
+            ][index],
+            value,
           }
+        } else {
+          return {}
         }
-      )
-    }
+      }
+    )
   }
 
   get etherscanLinkContract(): string | undefined {
-    if (this.contractDetails) {
-      return `https://kovan.etherscan.io/address/${this.contractDetails.address}`
-    }
+    return `https://kovan.etherscan.io/address/${this.contractDetails.address}`
   }
 
   get etherscanLinkCollateral(): string | undefined {
-    if (this.contractDetails) {
-      return `https://kovan.etherscan.io/address/${
-        addresses[this.contractDetails.collateralToken]
-      }`
-    }
+    return `https://kovan.etherscan.io/address/${
+      addresses[this.contractDetails.collateralToken]
+    }`
   }
 
   get priceFeedLink(): string | undefined {
-    if (this.contractDetails) {
-      return priceFeedLinks[this.contractDetails.priceIdentifier]
-    }
+    return priceFeedLinks[this.contractDetails.priceIdentifier]
   }
 
   get contractType(): string | undefined {
-    if (this.contractDetails)
-      return readableLibraryNames[this.contractDetails.financialProductLibrary]
+    return readableLibraryNames[this.contractDetails.financialProductLibrary]
   }
 }
 </script>
