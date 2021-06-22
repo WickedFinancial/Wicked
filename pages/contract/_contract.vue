@@ -49,11 +49,13 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable getter-return */
 import { Component, namespace, Vue } from "nuxt-property-decorator"
 import { LSPConfiguration } from "~/hardhat.config"
 
-const addresses: Record<string, string> = require("@/addresses.json")
 const contracts = namespace("contracts")
+
+const addresses: Record<string, string> = require("@/addresses.json")
 
 const readableLibraryNames: Record<string, string> = {
   LinearLongShortPairFinancialProductLibrary: "Linear Payout Contract",
@@ -68,7 +70,7 @@ const priceFeedLinks: Record<string, string> = {
 }
 
 @Component
-export default class contract extends Vue {
+export default class Contract extends Vue {
   @contracts.State
   contractConfigs!: Array<LSPConfiguration>
 
@@ -76,7 +78,7 @@ export default class contract extends Vue {
     return this.$route.params.contract
   }
 
-  get expirationTime(): string | undefined {
+  get expirationTime(): string | void {
     if (this.contractDetails) {
       return new Date(this.contractDetails.expirationTime).toLocaleString()
     }

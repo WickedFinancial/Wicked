@@ -4,7 +4,6 @@ import { Store } from "vuex"
 import { getModule } from "nuxt-property-decorator"
 import Vue from "vue"
 import Web3Btn from "~/components/Web3Btn.vue"
-import { createStore } from "~/test/setup"
 import web3 from "~/store/web3"
 
 describe("Web3Btn", () => {
@@ -14,7 +13,7 @@ describe("Web3Btn", () => {
 
   beforeEach(() => {
     vuetify = new Vuetify()
-    store = createStore({ modules: { web3 } })
+    store = new Store({ modules: { web3 } })
   })
   const mountFunction = (options: MountOptions<Vue>) => {
     return mount(Web3Btn, {
