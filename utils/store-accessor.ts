@@ -1,5 +1,5 @@
-import Vuex, { Store } from "vuex"
-import { Vue, getModule } from "nuxt-property-decorator"
+import { Store } from "vuex"
+import { getModule } from "nuxt-property-decorator"
 import web3 from "~/store/web3"
 
 // eslint-disable-next-line import/no-mutable-exports
@@ -11,17 +11,3 @@ function initialiseStores(store: Store<any>): void {
 }
 
 export { initialiseStores, web3Store }
-
-let testStore: Store<any>
-if (process.env.NODE_ENV === "test") {
-  Vue.use(Vuex)
-  testStore = new Vuex.Store({})
-}
-
-export function testingStore() {
-  if (process.env.NODE_ENV === "test") {
-    return testStore
-  } else {
-    return undefined
-  }
-}

@@ -4,10 +4,11 @@
       <v-icon>mdi-plus</v-icon>
       {{ btnAction }}
     </v-btn>
+    <h1></h1>
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, namespace } from "nuxt-property-decorator"
+import { Component, namespace, Vue } from "nuxt-property-decorator"
 
 const web3 = namespace("web3")
 

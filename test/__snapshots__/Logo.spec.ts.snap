@@ -1,24 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Logo should match a snapshot 1`] = `
-<div
-  aria-label="Site Logo"
-  class="v-image v-responsive theme--light"
-  id="Logo"
-  role="img"
-  style="max-width: 35px;"
->
-  <transition-stub
-    mode="in-out"
-    name="fade-transition"
-  >
-    <div
-      class="v-image__image v-image__image--preload v-image__image--cover"
-      style="background-position: left center;"
-    />
+exports[`Logo should match snapshot 1`] = `
+"<div aria-label=\\"Site Logo\\" role=\\"img\\" class=\\"v-image v-responsive theme--light\\" style=\\"max-width: 35px;\\" id=\\"Logo\\">
+  <transition-stub name=\\"fade-transition\\" mode=\\"in-out\\">
+    <div class=\\"v-image__image v-image__image--preload v-image__image--cover\\" style=\\"background-position: left center;\\"></div>
   </transition-stub>
-  <div
-    class="v-responsive__content"
-  />
-</div>
+  <div class=\\"v-responsive__content\\"></div>
+</div>"
 `;

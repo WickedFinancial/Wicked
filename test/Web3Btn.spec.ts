@@ -1,24 +1,46 @@
-import "@testing-library/jest-dom"
-import { fireEvent } from "@testing-library/vue"
-import Web3BtnComponent from "~/components/Web3Btn.vue"
-import { renderWithVuetify as render } from "~/test/utils"
+import Vuetify from "vuetify"
+import { createLocalVue, mount, MountOptions } from "@vue/test-utils"
+import { Store } from "vuex"
+import { getModule } from "nuxt-property-decorator"
+import Vue from "vue"
+import Web3Btn from "~/components/Web3Btn.vue"
+import { createStore } from "~/test/setup"
 import web3 from "~/store/web3"
 
 describe("Web3Btn", () => {
-  let btn: HTMLElement
+  const localVue = createLocalVue()
+  let vuetify: any
+  let store: Store<any>
+
   beforeEach(() => {
-    btn = render(Web3BtnComponent, {
-      store: { modules: { web3 } },
-    }).getByRole("button")
+    vuetify = new Vuetify()
+    store = createStore({ modules: { web3 } })
   })
-  it("should be on the screen and accessible by role button", () => {
-    expect(btn).toBeInTheDocument()
+  const mountFunction = (options: MountOptions<Vue>) => {
+    return mount(Web3Btn, {
+      localVue,
+      vuetify,
+      store,
+      ...options,
+    })
+  }
+
+  it("should mount properly", () => {
+    const wrapper = mountFunction({})
+    expect(wrapper.exists()).toBe(true)
   })
-  it("should match a snapshot", () => {
-    expect(btn).toMatchSnapshot()
+
+  it("should match snapshot", () => {
+    const wrapper = mountFunction({})
+    expect(wrapper.html()).toMatchSnapshot()
   })
-  it("should be disconnected by default", async () => {
-    expect(btn).toHaveTextContent("Connect")
-    await fireEvent.click(btn)
+
+  it("should try to initialize the ", async () => {
+    // Todo mock connection to web3
+    const wrapper = mountFunction({})
+    const btn = wrapper.find('[role="button"]')
+    const web3Store = getModule(web3, store)
+    await btn.trigger("click")
+    expect(web3Store.modalInitializing).toBe(true)
   })
 })

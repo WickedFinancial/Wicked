@@ -1,12 +1,30 @@
+import Vuetify from "vuetify"
+import { createLocalVue, mount, MountOptions } from "@vue/test-utils"
+import Vue from "vue"
 import Logo from "~/components/AvowLogo.vue"
-import "@testing-library/jest-dom"
-import { renderWithVuetify as render } from "~/test/utils"
 
 describe("Logo", () => {
-  it("should have an image role", () => {
-    expect(render(Logo).getByRole("img")).toBeTruthy()
+  const localVue = createLocalVue()
+  let vuetify: any
+  beforeEach(() => {
+    vuetify = new Vuetify()
   })
-  it("should match a snapshot", () => {
-    expect(render(Logo).getByRole("img")).toMatchSnapshot()
+
+  const mountFunction = (options: MountOptions<Vue>) => {
+    return mount(Logo, {
+      localVue,
+      vuetify,
+      ...options,
+    })
+  }
+
+  it("should mount properly", () => {
+    const wrapper = mountFunction({})
+    expect(wrapper.exists()).toBe(true)
+  })
+
+  it("should match snapshot", () => {
+    const wrapper = mountFunction({})
+    expect(wrapper.html()).toMatchSnapshot()
   })
 })
