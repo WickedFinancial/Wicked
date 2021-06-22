@@ -6,11 +6,11 @@ import { ethers, getNamedAccounts } from "hardhat"
 import { waffleJest } from "@ethereum-waffle/jest"
 import { Address } from "hardhat-deploy/dist/types"
 import { BigNumber, Contract } from "ethers"
-import WETHAbi from "../../abis/WETH.json"
-import LSPABI from "../../abis/LSP.json"
-import LSPCreatorABI from "../../abis/LSPCreator.json"
-import ERC20ABI from "../../abis/ERC20.json"
-import LinearLongShortPairABI from "../../abis/LinearLongShortPairFinancialProductLibrary.json"
+import WETHAbi from "~/abis/WETH.json"
+import LSPABI from "~/abis/LSP.json"
+import LSPCreatorABI from "~/abis/LSPCreator.json"
+import ERC20ABI from "~/abis/ERC20.json"
+import LinearLongShortPairABI from "~/abis/LinearLongShortPairFinancialProductLibrary.json"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
@@ -32,7 +32,7 @@ describe("LSP", function () {
   const tokensToTransfer = ethers.utils.parseUnits("3")
   const collateralPerPair = ethers.utils.parseUnits("1")
   const tokensToKeep = tokensToCreate.sub(tokensToTransfer)
-  const tokensToRedeem = ethers.utils.parseUnits("1")
+  // const tokensToRedeem = ethers.utils.parseUnits("1")
 
   beforeAll(async () => {
     namedAccounts = await getNamedAccounts()

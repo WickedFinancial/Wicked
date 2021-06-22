@@ -6,10 +6,10 @@ import { ethers, getNamedAccounts } from "hardhat"
 import { waffleJest } from "@ethereum-waffle/jest"
 import { Address } from "hardhat-deploy/dist/types"
 import { BigNumber, Contract } from "ethers"
-import WETHAbi from "../../abis/WETH.json"
-import EMPABI from "../../abis/EMP.json"
-import EMPCreatorABI from "../../abis/EMPCreator.json"
-import ERC20ABI from "../../abis/ERC20.json"
+import WETHAbi from "~/abis/WETH.json"
+import EMPABI from "~/abis/EMP.json"
+import EMPCreatorABI from "~/abis/EMPCreator.json"
+import ERC20ABI from "~/abis/ERC20.json"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)

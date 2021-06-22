@@ -51,7 +51,7 @@
 <script lang="ts">
 /* eslint-disable getter-return */
 import { Component, namespace, Vue } from "nuxt-property-decorator"
-import { LSPConfiguration } from "~/hardhat.config"
+import { LSPConfiguration } from "~/types"
 
 const contracts = namespace("contracts")
 
@@ -90,9 +90,10 @@ export default class Contract extends Vue {
         (value, index) => {
           if (this.contractDetails) {
             return {
-              name: libraryParameters[
-                this.contractDetails.financialProductLibrary
-              ][index],
+              name:
+                libraryParameters[this.contractDetails.financialProductLibrary][
+                  index
+                ],
               value,
             }
           } else {
