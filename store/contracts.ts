@@ -11,8 +11,7 @@ type SyntheticTokenContractMapping = {
   longContract: ethers.Contract
 }
 
-type TokenBalances = {
-  collateralBalance: number
+type SyntheticTokenBalances = {
   shortBalance: number
   longBalance: number
 }
@@ -24,21 +23,60 @@ let syntheticTokenContracts: Record<string, SyntheticTokenContractMapping> = {}
 @Module
 export default class contracts extends VuexModule {
   contractConfigs: Array<LSPConfiguration> = require("../deployedContractConfigs.json")
-  tokenBalances: Record<string, TokenBalances> = {}
+  syntheticTokenBalances: Record<string, SyntheticTokenBalances> = {}
+  collateralTokenBalances: Record<string, number> = {}
 
   get syntheticNames() {
     return this.contractConfigs.map((config) => config.syntheticName)
   }
 
-  get getTokenbalances(): Record<string, TokenBalances> {
-    return this.tokenBalances
+  get getCollateralTokenBalances(): Record<string, number> {
+    return this.collateralTokenBalances
   }
 
-  /* @Action({ rawError: true}) */
-  /* async loadBalances() { */
-  /*     for (var config of this.contractConfigs) { */
-  /*     } */
-  /* } */
+  get getSyntheticTokenBalances(): Record<string, SyntheticTokenBalances> {
+    return this.syntheticTokenBalances
+  }
+
+  @Mutation
+  setCollateralTokenBalance(payload: {
+    collateralName: string
+    collateralBalance: number
+  }) {
+    const { collateralName, collateralBalance } = payload
+    console.log(`Set collateral balance of ${collateralName} to ${collateralBalance}`)
+    this.collateralTokenBalances[collateralName] = collateralBalance
+  }
+
+  @Mutation
+  setsyntheticTokenBalances(payload: {
+    syntheticName: string
+    longBalance: number
+    shortBalance: number
+  }) {
+    const { syntheticName, longBalance, shortBalance } = payload
+    this.syntheticTokenBalances[syntheticName] = { longBalance, shortBalance }
+  }
+
+  @Action({ rawError: true })
+  async updateTokenBalances() {
+      await this.context.dispatch("updateCollateralTokenBalances")
+  }
+
+  @Action({ rawError: true })
+  async updateCollateralTokenBalances() {
+    const selectedAccount = this.context.rootGetters["web3/selectedAccount"]
+
+    for (const [collateralName, collateralContract] of Object.entries(collateralContracts)) {
+      const collateralBalance = (await collateralContract.balanceOf(
+        selectedAccount
+      )).toNumber()
+      this.context.commit("setCollateralTokenBalance", {
+        collateralName,
+        collateralBalance,
+      })
+    }
+  }
 
   @Action({ rawError: true })
   async initializeContracts() {

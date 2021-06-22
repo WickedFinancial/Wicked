@@ -26,6 +26,9 @@ export default class Web3Btn extends Vue {
   @contracts.Action
   initializeContracts!: () => Promise<void>
 
+  @contracts.Action
+  updateTokenBalances!: () => Promise<void>
+
   get btnAction() {
     return this.isConnected ? "Disconnect" : "Connect"
   }
@@ -33,6 +36,7 @@ export default class Web3Btn extends Vue {
   async connect() {
     await this.connectWeb3()
     await this.initializeContracts()
+    await this.updateTokenBalances()
   }
 
   clear() {
