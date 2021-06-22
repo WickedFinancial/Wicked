@@ -10,6 +10,7 @@
 import { Vue, Component, namespace } from "nuxt-property-decorator"
 
 const web3 = namespace("web3")
+const contracts = namespace("contracts")
 
 @Component
 export default class Web3Btn extends Vue {
@@ -17,10 +18,13 @@ export default class Web3Btn extends Vue {
   isConnected!: boolean
 
   @web3.Action
-  connectWeb3!: () => void
+  connectWeb3!: () => Promise<void>
 
   @web3.Mutation
   clearProvider!: () => void
+
+  @contracts.Action
+  initializeContracts!: () => Promise<void>
 
   get btnAction() {
     return this.isConnected ? "Disconnect" : "Connect"
@@ -28,6 +32,7 @@ export default class Web3Btn extends Vue {
 
   async connect() {
     await this.connectWeb3()
+    await this.initializeContracts()
   }
 
   clear() {
