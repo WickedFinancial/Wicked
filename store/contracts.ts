@@ -1,10 +1,11 @@
 import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators"
-import { LSPConfiguration } from "~/types"
-import { getCurrentProvider } from "./web3"
 import { ethers } from "ethers"
-import LSPAbi from "@/abis/LSP.json"
-const abis: Record<string, Array<string>> = require("@/abis")
-const addresses: Record<string, string> = require("@/addresses.json")
+import LSPAbi from "~/abis/LSP.json"
+import { getCurrentProvider } from "~/store/web3"
+import { LSPConfiguration } from "~/types"
+
+const abis: Record<string, Array<string>> = require("~/abis")
+const addresses: Record<string, string> = require("~/addresses.json")
 
 type SyntheticTokenContractMapping = {
   shortContract: ethers.Contract
@@ -16,11 +17,18 @@ type SyntheticTokenBalances = {
   longBalance: number
 }
 
-let lspContracts: Record<string, ethers.Contract> = {}
-let collateralContracts: Record<string, ethers.Contract> = {}
-let syntheticTokenContracts: Record<string, SyntheticTokenContractMapping> = {}
+const lspContracts: Record<string, ethers.Contract> = {}
+const collateralContracts: Record<string, ethers.Contract> = {}
+const syntheticTokenContracts: Record<
+  string,
+  SyntheticTokenContractMapping
+> = {}
 
-@Module
+@Module({
+  stateFactory: true,
+  name: "contracts",
+  namespaced: true,
+})
 export default class contracts extends VuexModule {
   contractConfigs: Array<LSPConfiguration> = require("~/deployedContractConfigs.json")
   syntheticTokenBalances: Record<string, SyntheticTokenBalances> = {}
@@ -44,7 +52,9 @@ export default class contracts extends VuexModule {
     collateralBalance: number
   }) {
     const { collateralName, collateralBalance } = payload
-    console.log(`Set collateral balance of ${collateralName} to ${collateralBalance}`)
+    console.log(
+      `Set collateral balance of ${collateralName} to ${collateralBalance}`
+    )
     this.collateralTokenBalances[collateralName] = collateralBalance
   }
 
@@ -60,17 +70,19 @@ export default class contracts extends VuexModule {
 
   @Action({ rawError: true })
   async updateTokenBalances() {
-      await this.context.dispatch("updateCollateralTokenBalances")
+    await this.context.dispatch("updateCollateralTokenBalances")
   }
 
   @Action({ rawError: true })
   async updateCollateralTokenBalances() {
     const selectedAccount = this.context.rootGetters["web3/selectedAccount"]
 
-    for (const [collateralName, collateralContract] of Object.entries(collateralContracts)) {
-      const collateralBalance = (await collateralContract.balanceOf(
-        selectedAccount
-      )).toNumber()
+    for (const [collateralName, collateralContract] of Object.entries(
+      collateralContracts
+    )) {
+      const collateralBalance = (
+        await collateralContract.balanceOf(selectedAccount)
+      ).toNumber()
       this.context.commit("setCollateralTokenBalance", {
         collateralName,
         collateralBalance,
@@ -81,13 +93,14 @@ export default class contracts extends VuexModule {
   @Action({ rawError: true })
   async initializeContracts() {
     console.log("Connecting to contracts")
-    const provider: ethers.providers.Web3Provider | undefined =
-      getCurrentProvider()
+    const provider:
+      | ethers.providers.Web3Provider
+      | undefined = getCurrentProvider()
     if (provider === undefined) {
-      throw "Provider is undefined - cannot initialize contracts"
+      throw new Error("Provider is undefined - cannot initialize contracts")
     } else {
-      for (var config of this.contractConfigs) {
-        if (config.address != undefined) {
+      for (const config of this.contractConfigs) {
+        if (config.address !== undefined) {
           try {
             // Instantiate LSP Contract
             const lspContract = new ethers.Contract(

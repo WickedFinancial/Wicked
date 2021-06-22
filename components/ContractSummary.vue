@@ -50,9 +50,9 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from "nuxt-property-decorator"
-import { LSPConfiguration } from "@/hardhat.config"
+import { LSPConfiguration } from "~/types"
 
-const addresses: Record<string, string> = require("@/addresses.json")
+const addresses: Record<string, string> = require("~/addresses.json")
 
 const readableLibraryNames: Record<string, string> = {
   LinearLongShortPairFinancialProductLibrary: "Linear Payout Contract",

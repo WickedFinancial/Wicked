@@ -1,8 +1,8 @@
 <template>
   <v-row justify="center">
     <v-dialog v-model="dialog" persistent max-width="600px">
-      <template v-slot:activator="{ on, attrs }">
-        <v-btn color="primary" dark v-bind="attrs" v-on="on"> Mint </v-btn>
+      <template #activator="{ on, attrs }">
+        <v-btn color="primary" dark v-bind="attrs" v-on="on"> Mint</v-btn>
       </template>
       <v-card>
         <v-card-title>
@@ -14,36 +14,34 @@
               <v-row>
                 <v-col cols="12">
                   <v-text-field
-                    label="Synthetic Tokens to create"
                     v-model="syntheticTokens"
+                    label="Synthetic Tokens to create"
                     type="number"
                     required
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row
-                ><v-col cols="12">
+              <v-row>
+                <v-col cols="12">
                   <v-list-item>
-                    <v-list-item-title>
-                      Required Collateral
-                    </v-list-item-title>
-                    <v-list-item-subtitle>{{
-                      this.collateralAmount
-                    }}</v-list-item-subtitle>
+                    <v-list-item-title> Required Collateral</v-list-item-title>
+                    <v-list-item-subtitle
+                      >{{ collateralAmount }}
+                    </v-list-item-subtitle>
                   </v-list-item>
-                </v-col></v-row
-              >
+                </v-col>
+              </v-row>
             </v-container>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="close"> Cancel </v-btn>
+            <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
 
             <div v-if="approved">
               <v-progress-circular
+                v-if="loading"
                 indeterminate
                 color="primary"
-                v-if="loading"
               ></v-progress-circular>
               <v-btn v-else color="blue darken-1" text type="submit">
                 Mint
@@ -52,9 +50,9 @@
 
             <div v-else>
               <v-progress-circular
+                v-if="loading"
                 indeterminate
                 color="primary"
-                v-if="loading"
               ></v-progress-circular>
               <v-btn
                 v-else
@@ -74,8 +72,8 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from "nuxt-property-decorator"
-import { LSPConfiguration } from "@/hardhat.config"
+import { Component, Prop, Vue } from "nuxt-property-decorator"
+import { LSPConfiguration } from "~/types"
 
 @Component
 export default class mintTokens extends Vue {
@@ -93,7 +91,7 @@ export default class mintTokens extends Vue {
     )
   }
 
-  async approve() {
+  approve() {
     try {
       this.loading = true
       console.info("Approving amount of tokens: ", this.collateralAmount)
@@ -103,7 +101,7 @@ export default class mintTokens extends Vue {
     }
   }
 
-  async mint() {
+  mint() {
     try {
       this.loading = true
       console.info("Minting amount of tokens: ", this.syntheticTokens)
@@ -120,9 +118,9 @@ export default class mintTokens extends Vue {
 }
 </script>
 <style scoped>
-.stale {
-  /* Release the inner Jackson Pollock */
-  border: 1px solid red;
-  background-color: yellow;
-}
+/*.stale {*/
+/*  !* Release the inner Jackson Pollock *!*/
+/*  border: 1px solid red;*/
+/*  background-color: yellow;*/
+/*}*/
 </style>

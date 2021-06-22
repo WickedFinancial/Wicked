@@ -7,20 +7,19 @@ exports[`Contracts component should match snapshot 1`] = `
     <div class=\\"v-card__subtitle\\">Linear Payout Contract</div>
     <div class=\\"v-card__text\\">
       <div tabindex=\\"-1\\" class=\\"v-list-item theme--light\\">
-        <div class=\\"v-list-item__title\\"> Expiration Time</div>
+        <div class=\\"v-list-item__title\\"> Expiration Time </div>
         <div class=\\"v-list-item__subtitle\\">7/1/2021, 12:00:00 PM</div>
       </div>
       <div tabindex=\\"-1\\" class=\\"v-list-item theme--light\\">
-        <div class=\\"v-list-item__title\\"> Collateral</div>
+        <div class=\\"v-list-item__title\\"> Collateral </div>
         <div class=\\"v-list-item__subtitle\\"><a href=\\"https://kovan.etherscan.io/address/0xd0a1e359811322d97991e03f863a0c30c2cf029c\\">WETH</a></div>
       </div>
       <div tabindex=\\"-1\\" class=\\"v-list-item theme--light\\">
         <div class=\\"v-list-item__title\\"> Collateral Per Pair</div>
-        <div class=\\"v-list-item__subtitle\\">1
-        </div>
+        <div class=\\"v-list-item__subtitle\\">1</div>
       </div>
       <div tabindex=\\"-1\\" class=\\"v-list-item theme--light\\">
-        <div class=\\"v-list-item__title\\"> Price Feed</div>
+        <div class=\\"v-list-item__title\\"> Price Feed </div>
         <div class=\\"v-list-item__subtitle\\"><a href=\\"https://github.com/UMAprotocol/UMIPs/blob/master/UMIPs/umip-6.md\\">USDETH</a></div>
       </div>
       <div tabindex=\\"-1\\" class=\\"v-list-item theme--light\\">
@@ -30,6 +29,31 @@ exports[`Contracts component should match snapshot 1`] = `
       <div tabindex=\\"-1\\" class=\\"v-list-item theme--light\\">
         <div class=\\"v-list-item__title\\">Lower Bound</div>
         <div class=\\"v-list-item__subtitle\\">1000</div>
+      </div>
+    </div>
+  </div>
+  <div class=\\"mx-auto my-12 v-card v-sheet theme--light\\" style=\\"max-width: 500px;\\">
+    <div class=\\"v-card__title\\">Tokens</div>
+    <div class=\\"v-card__subtitle\\">0xd0a1e359811322d97991e03f863a0c30c2cf029c</div>
+    <div class=\\"v-card__text\\">
+      <div tabindex=\\"-1\\" class=\\"v-list-item theme--light\\">
+        <div class=\\"v-list-item__title\\"> Collateral Balance </div>
+        <div class=\\"v-list-item__subtitle\\">100</div>
+      </div>
+      <div tabindex=\\"-1\\" class=\\"v-list-item theme--light\\">
+        <div class=\\"v-list-item__title\\"> Long Balance </div>
+        <div class=\\"v-list-item__subtitle\\">20</div>
+      </div>
+      <div tabindex=\\"-1\\" class=\\"v-list-item theme--light\\">
+        <div class=\\"v-list-item__title\\"> Short Balance </div>
+        <div class=\\"v-list-item__subtitle\\">10</div>
+      </div>
+    </div>
+    <div class=\\"v-card__actions\\">
+      <div class=\\"row justify-center\\">
+        <div role=\\"dialog\\" class=\\"v-dialog__container\\"><button type=\\"button\\" class=\\"v-btn v-btn--is-elevated v-btn--has-bg theme--dark v-size--default primary\\" role=\\"button\\" aria-haspopup=\\"true\\" aria-expanded=\\"false\\"><span class=\\"v-btn__content\\"> Mint</span></button>
+          <!---->
+        </div>
       </div>
     </div>
   </div>
