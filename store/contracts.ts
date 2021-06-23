@@ -94,13 +94,13 @@ export default class contracts extends VuexModule {
       syntheticName,
       { shortContract, longContract },
     ] of Object.entries(syntheticTokenContracts)) {
-      const shortBalance = (
+      const shortBalance = parseFloat(ethers.utils.formatEther(
         await shortContract.balanceOf(selectedAccount)
-      ).toNumber()
+      ))
 
-      const longBalance = (
+      const longBalance = parseFloat(ethers.utils.formatEther(
         await longContract.balanceOf(selectedAccount)
-      ).toNumber()
+      ))
 
       this.context.commit("setSyntheticTokenBalances", {
         syntheticName,
@@ -116,9 +116,9 @@ export default class contracts extends VuexModule {
     for (const [collateralName, collateralContract] of Object.entries(
       collateralContracts
     )) {
-      const collateralBalance = (
+      const collateralBalance = parseFloat(ethers.utils.formatEther(
         await collateralContract.balanceOf(selectedAccount)
-      ).toNumber()
+      ))
       this.context.commit("setCollateralTokenBalance", {
         collateralName,
         collateralBalance,
