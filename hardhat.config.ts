@@ -53,7 +53,7 @@ task("collateral", "Mint Collateral Tokens for use in tests")
       { collateralName, amount, gasprice },
       { ethers, getNamedAccounts }
     ) => {
-      const addresses: Record<string, Address> = require("~/addresses.json")
+      const addresses: Record<string, Address> = require("./addresses.json")
       const abis = require("~/abis")
 
       const collateralContract = await ethers.getContractAt(
@@ -81,9 +81,9 @@ task("launch", "Launch all configured LSP contracts")
     types.int
   )
   .setAction(async ({ gasprice }, { ethers, getNamedAccounts }) => {
-    const contractConfigs: Array<LSPConfiguration> = require("~/types")
-    const addresses: Record<string, Address> = require("~/addresses.json")
-    const abis = require("~/abis")
+    const contractConfigs: Array<LSPConfiguration> = require("./contractConfigs.json")
+    const addresses: Record<string, Address> = require("./addresses.json")
+    const abis = require("./abis")
 
     const LSPCreator = await ethers.getContractAt(
       abis.LSPCreator,
@@ -126,11 +126,12 @@ task("launch", "Launch all configured LSP contracts")
 
         // Get Collateral Contract instance if not present already
         if (!(contractConfiguration.collateralToken in contracts)) {
-          contracts[contractConfiguration.collateralToken] =
-            await ethers.getContractAt(
-              abis[contractConfiguration.collateralToken],
-              collateralTokenAddress
-            )
+          contracts[
+            contractConfiguration.collateralToken
+          ] = await ethers.getContractAt(
+            abis[contractConfiguration.collateralToken],
+            collateralTokenAddress
+          )
         }
 
         // Create and Approve collateral for the proposer reward
@@ -195,11 +196,12 @@ task("launch", "Launch all configured LSP contracts")
         // Configure Financial ProductLibrary
         // Get Financial Product Library instance if not present already
         if (!(contractConfiguration.financialProductLibrary in contracts)) {
-          contracts[contractConfiguration.financialProductLibrary] =
-            await ethers.getContractAt(
-              abis[contractConfiguration.financialProductLibrary],
-              financialProductLibraryAddress
-            )
+          contracts[
+            contractConfiguration.financialProductLibrary
+          ] = await ethers.getContractAt(
+            abis[contractConfiguration.financialProductLibrary],
+            financialProductLibraryAddress
+          )
         }
 
         // Set Parameters
