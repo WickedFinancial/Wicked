@@ -7,7 +7,7 @@ import { HardhatUserConfig } from "hardhat/types"
 import { task, types } from "hardhat/config"
 import { Address } from "hardhat-deploy/dist/types"
 import { Contract } from "ethers"
-import { LSPConfiguration } from "~/types"
+import { LSPConfiguration } from "./types"
 
 function mnemonic() {
   try {
@@ -34,6 +34,44 @@ task(
     }
   }
 )
+
+task("collateral", "Mint Collateral Tokens for use in tests")
+  .addOptionalParam("collateralName", "Name of Collateral to mint", "WETH")
+  .addOptionalParam(
+    "amount",
+    "Amount of Ether for which to generate collateral",
+    "1"
+  )
+  .addOptionalParam(
+    "gasprice",
+    "Gas Price to use in transactions",
+    50 * 100000000,
+    types.int
+  )
+  .setAction(
+    async (
+      { collateralName, amount, gasprice },
+      { ethers, getNamedAccounts }
+    ) => {
+      const addresses: Record<string, Address> = require("~/addresses.json")
+      const abis = require("~/abis")
+
+      const collateralContract = await ethers.getContractAt(
+        abis[collateralName],
+        addresses[collateralName]
+      )
+
+      const namedAccounts = await getNamedAccounts()
+      const transactionOptions = {
+        gasPrice: gasprice, // gasprice arg * 1 GWEI
+        from: namedAccounts.deployer,
+        value: ethers.utils.parseUnits(amount),
+      }
+      const depositTx = await collateralContract.deposit(transactionOptions)
+      await depositTx.wait()
+      console.log(`Deposited ${amount} in ${collateralName}`)
+    }
+  )
 
 task("launch", "Launch all configured LSP contracts")
   .addOptionalParam(
@@ -88,12 +126,11 @@ task("launch", "Launch all configured LSP contracts")
 
         // Get Collateral Contract instance if not present already
         if (!(contractConfiguration.collateralToken in contracts)) {
-          contracts[
-            contractConfiguration.collateralToken
-          ] = await ethers.getContractAt(
-            abis[contractConfiguration.collateralToken],
-            collateralTokenAddress
-          )
+          contracts[contractConfiguration.collateralToken] =
+            await ethers.getContractAt(
+              abis[contractConfiguration.collateralToken],
+              collateralTokenAddress
+            )
         }
 
         // Create and Approve collateral for the proposer reward
@@ -158,12 +195,11 @@ task("launch", "Launch all configured LSP contracts")
         // Configure Financial ProductLibrary
         // Get Financial Product Library instance if not present already
         if (!(contractConfiguration.financialProductLibrary in contracts)) {
-          contracts[
-            contractConfiguration.financialProductLibrary
-          ] = await ethers.getContractAt(
-            abis[contractConfiguration.financialProductLibrary],
-            financialProductLibraryAddress
-          )
+          contracts[contractConfiguration.financialProductLibrary] =
+            await ethers.getContractAt(
+              abis[contractConfiguration.financialProductLibrary],
+              financialProductLibraryAddress
+            )
         }
 
         // Set Parameters
