@@ -19,10 +19,8 @@ type SyntheticTokenBalances = {
 
 const lspContracts: Record<string, ethers.Contract> = {}
 const collateralContracts: Record<string, ethers.Contract> = {}
-const syntheticTokenContracts: Record<
-  string,
-  SyntheticTokenContractMapping
-> = {}
+const syntheticTokenContracts: Record<string, SyntheticTokenContractMapping> =
+  {}
 
 @Module({
   stateFactory: true,
@@ -33,6 +31,8 @@ export default class contracts extends VuexModule {
   contractConfigs: Array<LSPConfiguration> = require("~/deployedContractConfigs.json")
   syntheticTokenBalances: Record<string, SyntheticTokenBalances> = {}
   collateralTokenBalances: Record<string, number> = {}
+  contractsInitialized: boolean = false
+  tokenBalancesLoaded: boolean = false
 
   get syntheticNames() {
     return this.contractConfigs.map((config) => config.syntheticName)
@@ -44,6 +44,11 @@ export default class contracts extends VuexModule {
 
   get getSyntheticTokenBalances(): Record<string, SyntheticTokenBalances> {
     return this.syntheticTokenBalances
+  }
+
+  @Mutation
+  setTokenBalancesLoaded(loaded: boolean) {
+    this.tokenBalancesLoaded = loaded
   }
 
   @Mutation
@@ -70,7 +75,9 @@ export default class contracts extends VuexModule {
 
   @Action({ rawError: true })
   async updateTokenBalances() {
+    this.context.commit("setTokenBalancesLoaded", false)
     await this.context.dispatch("updateCollateralTokenBalances")
+    this.context.commit("setTokenBalancesLoaded", true)
   }
 
   @Action({ rawError: true })
@@ -93,9 +100,8 @@ export default class contracts extends VuexModule {
   @Action({ rawError: true })
   async initializeContracts() {
     console.log("Connecting to contracts")
-    const provider:
-      | ethers.providers.Web3Provider
-      | undefined = getCurrentProvider()
+    const provider: ethers.providers.Web3Provider | undefined =
+      getCurrentProvider()
     if (provider === undefined) {
       throw new Error("Provider is undefined - cannot initialize contracts")
     } else {

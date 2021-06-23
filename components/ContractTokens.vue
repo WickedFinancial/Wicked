@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto my-12" max-width="500">
+  <v-card v-if="tokenBalancesLoaded" class="mx-auto my-12" max-width="500">
     <v-card-title>Tokens</v-card-title>
     <v-card-subtitle>{{ this.collateralAddress }}</v-card-subtitle>
     <v-card-text>
@@ -26,23 +26,33 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from "nuxt-property-decorator"
+import { Vue, Component, namespace, Prop } from "nuxt-property-decorator"
 import MintTokens from "@/components/MintTokens.vue"
 import { LSPConfiguration } from "~/types"
 
 const addresses: Record<string, string> = require("@/addresses.json")
+const contracts = namespace("contracts")
 
 @Component({ components: { MintTokens } })
 export default class contractTokens extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration
 
+  @contracts.State
+  collateralTokenBalances!: Record<string, number>
+
+  @contracts.State
+  tokenBalancesLoaded!: boolean
+
   get collateralAddress(): string | undefined {
     return addresses[this.contractDetails.collateralToken]
   }
 
   get collateralTokens(): number {
-    return 100
+    const collateralBalances = this.collateralTokenBalances
+    if (this.contractDetails.collateralToken in collateralBalances)
+      return collateralBalances[this.contractDetails.collateralToken]
+    else return -1
   }
 
   get shortTokens(): number {
