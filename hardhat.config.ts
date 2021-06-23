@@ -54,7 +54,7 @@ task("collateral", "Mint Collateral Tokens for use in tests")
       { ethers, getNamedAccounts }
     ) => {
       const addresses: Record<string, Address> = require("./addresses.json")
-      const abis = require("~/abis")
+      const abis = require("./abis")
 
       const collateralContract = await ethers.getContractAt(
         abis[collateralName],
