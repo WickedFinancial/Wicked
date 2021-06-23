@@ -19,22 +19,18 @@
       </v-list-item>
     </v-card-text>
 
-    <v-card-actions>
-      <MintTokens :contractDetails="contractDetails" />
-    </v-card-actions>
   </v-card>
 </template>
 
 <script lang="ts">
 import { Vue, Component, namespace, Prop } from "nuxt-property-decorator"
-import MintTokens from "@/components/MintTokens.vue"
 import SyntheticTokenBalances from "@/store/contracts"
 import { LSPConfiguration } from "~/types"
 
 const addresses: Record<string, string> = require("@/addresses.json")
 const contracts = namespace("contracts")
 
-@Component({ components: { MintTokens } })
+@Component
 export default class contractTokens extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration
