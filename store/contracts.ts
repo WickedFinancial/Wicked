@@ -64,12 +64,17 @@ export default class contracts extends VuexModule {
   }
 
   @Mutation
-  setsyntheticTokenBalances(payload: {
+  setSyntheticTokenBalances(payload: {
     syntheticName: string
     longBalance: number
     shortBalance: number
   }) {
     const { syntheticName, longBalance, shortBalance } = payload
+    console.log(
+      `Setting long / short balances for ${syntheticName} to:`,
+      longBalance,
+      shortBalance
+    )
     this.syntheticTokenBalances[syntheticName] = { longBalance, shortBalance }
   }
 
@@ -77,13 +82,37 @@ export default class contracts extends VuexModule {
   async updateTokenBalances() {
     this.context.commit("setTokenBalancesLoaded", false)
     await this.context.dispatch("updateCollateralTokenBalances")
+    await this.context.dispatch("updateSyntheticTokenBalances")
     this.context.commit("setTokenBalancesLoaded", true)
+  }
+
+  @Action({ rawError: true })
+  async updateSyntheticTokenBalances() {
+    const selectedAccount = this.context.rootGetters["web3/selectedAccount"]
+
+    for (const [
+      syntheticName,
+      { shortContract, longContract },
+    ] of Object.entries(syntheticTokenContracts)) {
+      const shortBalance = (
+        await shortContract.balanceOf(selectedAccount)
+      ).toNumber()
+
+      const longBalance = (
+        await longContract.balanceOf(selectedAccount)
+      ).toNumber()
+
+      this.context.commit("setSyntheticTokenBalances", {
+        syntheticName,
+        shortBalance,
+        longBalance,
+      })
+    }
   }
 
   @Action({ rawError: true })
   async updateCollateralTokenBalances() {
     const selectedAccount = this.context.rootGetters["web3/selectedAccount"]
-
     for (const [collateralName, collateralContract] of Object.entries(
       collateralContracts
     )) {

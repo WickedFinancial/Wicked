@@ -10,12 +10,12 @@
 
       <v-list-item>
         <v-list-item-title> Long Balance </v-list-item-title>
-        <v-list-item-subtitle>{{ this.longTokens }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ this.syntheticTokens.longBalance }}</v-list-item-subtitle>
       </v-list-item>
 
       <v-list-item>
         <v-list-item-title> Short Balance </v-list-item-title>
-        <v-list-item-subtitle>{{ this.shortTokens }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ this.syntheticTokens.shortBalance }}</v-list-item-subtitle>
       </v-list-item>
     </v-card-text>
 
@@ -28,6 +28,7 @@
 <script lang="ts">
 import { Vue, Component, namespace, Prop } from "nuxt-property-decorator"
 import MintTokens from "@/components/MintTokens.vue"
+import SyntheticTokenBalances from "@/store/contracts"
 import { LSPConfiguration } from "~/types"
 
 const addresses: Record<string, string> = require("@/addresses.json")
@@ -38,8 +39,11 @@ export default class contractTokens extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration
 
-  @contracts.State
-  collateralTokenBalances!: Record<string, number>
+  @contracts.Getter
+  getCollateralTokenBalances!: Record<string, number>
+
+  @contracts.Getter
+  getSyntheticTokenBalances!: Record<string, SyntheticTokenBalances>
 
   @contracts.State
   tokenBalancesLoaded!: boolean
@@ -49,10 +53,15 @@ export default class contractTokens extends Vue {
   }
 
   get collateralTokens(): number {
-    const collateralBalances = this.collateralTokenBalances
+    const collateralBalances = this.getCollateralTokenBalances
     if (this.contractDetails.collateralToken in collateralBalances)
       return collateralBalances[this.contractDetails.collateralToken]
     else return -1
+  }
+
+  get syntheticTokens(): SyntheticTokenBalances {
+    const syntheticBalances = this.getSyntheticTokenBalances
+    return syntheticBalances[this.contractDetails.syntheticName]
   }
 
   get shortTokens(): number {
