@@ -60,7 +60,13 @@ export default class contracts extends VuexModule {
     console.log(
       `Set collateral balance of ${collateralName} to ${collateralBalance}`
     )
-    this.collateralTokenBalances[collateralName] = collateralBalance
+    let newValues: Record<string, number> = {}
+    newValues[collateralName] = collateralBalance
+    this.collateralTokenBalances = Object.assign(
+      {},
+      this.collateralTokenBalances,
+      newValues
+    )
   }
 
   @Mutation
@@ -75,7 +81,15 @@ export default class contracts extends VuexModule {
       longBalance,
       shortBalance
     )
-    this.syntheticTokenBalances[syntheticName] = { longBalance, shortBalance }
+
+    let newValues: Record<string, SyntheticTokenBalances> = {}
+    newValues[syntheticName] = { longBalance, shortBalance }
+
+    this.syntheticTokenBalances = Object.assign(
+      {},
+      this.syntheticTokenBalances,
+      newValues
+    )
   }
 
   @Action({ rawError: true })
@@ -94,13 +108,13 @@ export default class contracts extends VuexModule {
       syntheticName,
       { shortContract, longContract },
     ] of Object.entries(syntheticTokenContracts)) {
-      const shortBalance = parseFloat(ethers.utils.formatEther(
-        await shortContract.balanceOf(selectedAccount)
-      ))
+      const shortBalance = parseFloat(
+        ethers.utils.formatEther(await shortContract.balanceOf(selectedAccount))
+      )
 
-      const longBalance = parseFloat(ethers.utils.formatEther(
-        await longContract.balanceOf(selectedAccount)
-      ))
+      const longBalance = parseFloat(
+        ethers.utils.formatEther(await longContract.balanceOf(selectedAccount))
+      )
 
       this.context.commit("setSyntheticTokenBalances", {
         syntheticName,
@@ -116,9 +130,11 @@ export default class contracts extends VuexModule {
     for (const [collateralName, collateralContract] of Object.entries(
       collateralContracts
     )) {
-      const collateralBalance = parseFloat(ethers.utils.formatEther(
-        await collateralContract.balanceOf(selectedAccount)
-      ))
+      const collateralBalance = parseFloat(
+        ethers.utils.formatEther(
+          await collateralContract.balanceOf(selectedAccount)
+        )
+      )
       this.context.commit("setCollateralTokenBalance", {
         collateralName,
         collateralBalance,
