@@ -167,7 +167,6 @@ export default class mintTokens extends Vue {
         syntheticName: this.contractDetails.syntheticName,
       })
       this.dialog = false
-      this.approved = false
     } finally {
       this.loading = false
     }
