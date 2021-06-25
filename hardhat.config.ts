@@ -33,7 +33,7 @@ const config: HardhatUserConfig = {
       forking: {
         url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
       },
-      chainId: 1337,
+      chainId: 42,
     },
     kovan: {
       url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",

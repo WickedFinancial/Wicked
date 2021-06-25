@@ -8,7 +8,7 @@
         <v-card-title>
           <span class="headline">Mint Tokens</span>
         </v-card-title>
-        <form @submit.prevent="mint">
+        <form>
           <v-card-text>
             <v-container>
               <v-row>
@@ -54,7 +54,7 @@
                 indeterminate
                 color="primary"
               ></v-progress-circular>
-              <v-btn v-else color="blue darken-1" text type="submit">
+              <v-btn v-else color="blue darken-1" text type="button" @click.prevent="mint">
                 Mint
               </v-btn>
             </div>
@@ -104,9 +104,15 @@ export default class mintTokens extends Vue {
   @contracts.Action
   approveCollateral!: (payload: {
     collateralName: string
+    syntheticName: string
+  }) => Promise<void>
+
+  @contracts.Action
+  mintTokens!: (payload: {
     amount: number
     syntheticName: string
   }) => Promise<void>
+
 
   get collateralAmount(): number {
     return (
@@ -134,7 +140,6 @@ export default class mintTokens extends Vue {
       console.info("Approving amount of tokens: ", this.collateralAmount)
       await this.approveCollateral({
         collateralName: this.contractDetails.collateralToken,
-        amount: this.collateralAmount,
         syntheticName: this.contractDetails.syntheticName,
       })
       this.approved = true
@@ -143,10 +148,14 @@ export default class mintTokens extends Vue {
     }
   }
 
-  mint() {
+  async mint() {
     try {
       this.loading = true
       console.info("Minting amount of tokens: ", this.syntheticTokens)
+      await this.mintTokens({
+        amount: this.collateralAmount,
+        syntheticName: this.contractDetails.syntheticName,
+      })
       this.dialog = false
       this.approved = false
     } finally {

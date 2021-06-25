@@ -89,32 +89,49 @@ export default class contracts extends VuexModule {
   @Action({ rawError: true })
   async approveCollateral(payload: {
     collateralName: string
-    amount: number
     syntheticName: string
   }) {
-    const { collateralName, amount, syntheticName } = payload
+    const { collateralName, syntheticName } = payload
     console.log(
-      `Approving ${amount} tokens of ${collateralName} to ${syntheticName}`
+      `Approving tokens of ${collateralName} to ${syntheticName}`
     )
-
     const lspAddress = lspContracts[syntheticName].address
     const signer = this.context.rootGetters["web3/signer"]
     console.log("Using signer: ", signer)
     if (signer !== undefined) {
-      const collateralContract = collateralContracts[collateralName].connect(
-        signer
-      )
-      const parsedAmount = ethers.utils.parseUnits(amount.toString())
+      const collateralContract =
+        collateralContracts[collateralName].connect(signer)
+    const amount = ethers.constants.MaxUint256
       console.log("Parsed values: ", {
         lspAddress,
         collateralContract,
-        parsedAmount,
+        amount,
       })
       const approveTx = await collateralContract.approve(
         lspAddress,
-        parsedAmount
+        amount
       )
       await approveTx.wait()
+    }
+  }
+
+  @Action({ rawError: true })
+  async mintTokens(payload: { amount: number; syntheticName: string }) {
+    const { amount, syntheticName } = payload
+    console.log(`Minting ${amount} tokens of ${syntheticName}`)
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const lspContract = lspContracts[syntheticName].connect(signer)
+      const parsedAmount = ethers.utils.parseUnits(amount.toString())
+      console.log("Parsed values: ", {
+        lspContract,
+        parsedAmount,
+      })
+      const mintTx = await lspContract.create(
+        parsedAmount
+      )
+      await mintTx.wait()
     }
   }
 
