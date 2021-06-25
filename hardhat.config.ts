@@ -7,7 +7,11 @@ import { HardhatUserConfig } from "hardhat/types"
 import { task, types } from "hardhat/config"
 import { Address } from "hardhat-deploy/dist/types"
 import { Contract } from "ethers"
-import { LSPConfiguration } from "~/types"
+import { LSPConfiguration } from "./types"
+const contractConfigs: Array<LSPConfiguration> = require("./contractConfigs.json")
+const deployedContractConfigs: Array<LSPConfiguration> = require("./deployedContractConfigs.json")
+const addresses: Record<string, Address> = require("./addresses.json")
+const abis = require("./abis")
 
 function mnemonic() {
   try {
@@ -17,6 +21,28 @@ function mnemonic() {
   }
   return ""
 }
+
+const config: HardhatUserConfig = {
+  solidity: "0.7.3",
+  namedAccounts: {
+    deployer: 0,
+    tokenRecipient: 1,
+  },
+  networks: {
+    hardhat: {
+      forking: {
+        url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
+      },
+    },
+    kovan: {
+      url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
+      accounts: {
+        mnemonic: mnemonic(),
+      },
+    },
+  },
+}
+export default config
 
 task(
   "convert",
@@ -35,6 +61,103 @@ task(
   }
 )
 
+task("collateral", "Mint Collateral Tokens for use in tests")
+  .addOptionalParam("collateralName", "Name of Collateral to mint", "WETH")
+  .addOptionalParam(
+    "amount",
+    "Amount of Ether for which to generate collateral",
+    "1"
+  )
+  .addOptionalParam(
+    "gasprice",
+    "Gas Price to use in transactions",
+    50 * 100000000,
+    types.int
+  )
+  .setAction(
+    async (
+      { collateralName, amount, gasprice },
+      { ethers, getNamedAccounts }
+    ) => {
+      const collateralContract = await ethers.getContractAt(
+        abis[collateralName],
+        addresses[collateralName]
+      )
+
+      const namedAccounts = await getNamedAccounts()
+      const transactionOptions = {
+        gasPrice: gasprice, // gasprice arg * 1 GWEI
+        from: namedAccounts.deployer,
+        value: ethers.utils.parseUnits(amount),
+      }
+      const depositTx = await collateralContract.deposit(transactionOptions)
+      await depositTx.wait()
+      console.log(`Deposited ${amount} in ${collateralName}`)
+    }
+  )
+
+task("synthetic", "Mint Synthetic Tokens for use in tests")
+  .addParam("syntheticName", "Name of Synthetic to mint")
+  .addOptionalParam("amount", "Amount of synthetic tokens to mint", "1")
+  .addOptionalParam(
+    "gasprice",
+    "Gas Price to use in transactions",
+    50 * 100000000,
+    types.int
+  )
+  .setAction(
+    async (
+      { syntheticName, amount, gasprice },
+      { ethers, getNamedAccounts }
+    ) => {
+      const contractConfig = deployedContractConfigs.find(
+        (config) => config.syntheticName === syntheticName
+      )
+      if (contractConfig !== undefined) {
+        const namedAccounts = await getNamedAccounts()
+        const transactionOptions = {
+          gasPrice: gasprice, // gasprice arg * 1 GWEI
+          from: namedAccounts.deployer,
+        }
+        const LSPContract = await ethers.getContractAt(
+          abis.LSP,
+          contractConfig.address || ""
+        )
+
+        // Approve Collateral
+        const necessaryCollateral = ethers.utils.parseUnits(
+          (
+            parseFloat(amount) * parseFloat(contractConfig.collateralPerPair)
+          ).toString()
+        )
+        const collateralAddress = addresses[contractConfig.collateralToken]
+        const collateralAbi = abis[contractConfig.collateralToken]
+        console.log("Collateral Address: ", collateralAddress)
+        const collateralContract = await ethers.getContractAt(
+          collateralAbi,
+          collateralAddress || ""
+        )
+
+        const approveTx = await collateralContract.approve(
+          contractConfig.address,
+          necessaryCollateral,
+          transactionOptions
+        )
+        await approveTx.wait()
+        console.log(`Approve tx for ${necessaryCollateral.toString()} of collateral`, approveTx)
+
+        // Sends transaction
+        const createTx = await LSPContract.create(
+          ethers.utils.parseUnits(amount),
+          transactionOptions
+        )
+        await createTx.wait()
+
+        console.log(`Create tx for ${amount} of tokens`, createTx)
+      }
+    }
+  )
+
 task("launch", "Launch all configured LSP contracts")
   .addOptionalParam(
     "gasprice",
@@ -43,10 +166,6 @@ task("launch", "Launch all configured LSP contracts")
     types.int
   )
   .setAction(async ({ gasprice }, { ethers, getNamedAccounts }) => {
-    const contractConfigs: Array<LSPConfiguration> = require("~/types")
-    const addresses: Record<string, Address> = require("~/addresses.json")
-    const abis = require("~/abis")
-
     const LSPCreator = await ethers.getContractAt(
       abis.LSPCreator,
       addresses.LSPCreator
@@ -88,12 +207,11 @@ task("launch", "Launch all configured LSP contracts")
 
         // Get Collateral Contract instance if not present already
         if (!(contractConfiguration.collateralToken in contracts)) {
-          contracts[
-            contractConfiguration.collateralToken
-          ] = await ethers.getContractAt(
-            abis[contractConfiguration.collateralToken],
-            collateralTokenAddress
-          )
+          contracts[contractConfiguration.collateralToken] =
+            await ethers.getContractAt(
+              abis[contractConfiguration.collateralToken],
+              collateralTokenAddress
+            )
         }
 
         // Create and Approve collateral for the proposer reward
@@ -158,12 +276,11 @@ task("launch", "Launch all configured LSP contracts")
         // Configure Financial ProductLibrary
         // Get Financial Product Library instance if not present already
         if (!(contractConfiguration.financialProductLibrary in contracts)) {
-          contracts[
-            contractConfiguration.financialProductLibrary
-          ] = await ethers.getContractAt(
-            abis[contractConfiguration.financialProductLibrary],
-            financialProductLibraryAddress
-          )
+          contracts[contractConfiguration.financialProductLibrary] =
+            await ethers.getContractAt(
+              abis[contractConfiguration.financialProductLibrary],
+              financialProductLibraryAddress
+            )
         }
 
         // Set Parameters
@@ -193,24 +310,4 @@ task("launch", "Launch all configured LSP contracts")
     await writeFile(outputFile, JSON.stringify(contractConfigs, null, 2))
   })
 
-const config: HardhatUserConfig = {
-  solidity: "0.7.3",
-  namedAccounts: {
-    deployer: 0,
-    tokenRecipient: 1,
-  },
-  networks: {
-    hardhat: {
-      forking: {
-        url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
-      },
-    },
-    kovan: {
-      url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
-      accounts: {
-        mnemonic: mnemonic(),
-      },
-    },
-  },
-}
-export default config
+

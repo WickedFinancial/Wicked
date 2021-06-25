@@ -18,7 +18,7 @@ expect.extend(waffleJest)
 describe("LSP", function () {
   const addresses: Record<string, Address> = {
     WETH: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
-    LSPCreator: "0x81b0A8206C559a0747D86B4489D0055db4720E84",
+    LSPCreator: "0x4C68829DBD07FEbB250B90f5624d4a5C30BBeC2c",
     LinearLongShortPairFinancialProductLibrary:
       "0x46b541E0fE2E817340A1A88740607329fF5ED279",
   }
@@ -32,7 +32,7 @@ describe("LSP", function () {
   const tokensToTransfer = ethers.utils.parseUnits("3")
   const collateralPerPair = ethers.utils.parseUnits("1")
   const tokensToKeep = tokensToCreate.sub(tokensToTransfer)
-  // const tokensToRedeem = ethers.utils.parseUnits("1")
+  const tokensToRedeem = ethers.utils.parseUnits("1")
 
   beforeAll(async () => {
     namedAccounts = await getNamedAccounts()
@@ -256,5 +256,41 @@ describe("LSP", function () {
       namedAccounts.deployer
     )
     expect(syntheticBalanceDeployer).toEqBN(tokensToKeep)
+  })
+  it("Sponsor can redeem remaining tokens", async function () {
+    // Transaction parameters
+    const transactionOptions = {
+      gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
+      gasLimit: 12000000,
+      from: namedAccounts.deployer,
+    }
+
+    const oldCollateralBalance = await contracts.WETH.balanceOf(
+      namedAccounts.deployer
+    )
+
+    // Check that sponsor still has enough L / S Tokens
+    const syntheticBalances = await contracts.LSP.getPositionTokens(
+      namedAccounts.deployer
+    )
+    expect(syntheticBalances[0]).toBeGteBN(tokensToRedeem)
+    expect(syntheticBalances[1]).toBeGteBN(tokensToRedeem)
+
+    // Check contract state
+    const contractState = await contracts.LSP.contractState()
+    const openState = 0
+    expect(contractState).toEqual(openState)
+
+    const redeemTx = await contracts.LSP.redeem(
+      tokensToRedeem,
+      transactionOptions
+    )
+
+    await redeemTx.wait()
+    const newCollateralBalance = await contracts.WETH.balanceOf(
+      namedAccounts.deployer
+    )
+    const expectedCollateralBalance = oldCollateralBalance.add(tokensToRedeem)
+    expect(newCollateralBalance).toEqBN(expectedCollateralBalance)
   })
 })
