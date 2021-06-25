@@ -83,8 +83,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "nuxt-property-decorator"
+import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
 import { LSPConfiguration } from "~/types"
+
+const contracts = namespace("contracts")
 
 @Component
 export default class mintTokens extends Vue {
@@ -98,6 +100,13 @@ export default class mintTokens extends Vue {
 
   @Prop()
   collateralTokens!: number
+
+  @contracts.Action
+  approveCollateral!: (payload: {
+    collateralName: string
+    amount: number
+    syntheticName: string
+  }) => Promise<void>
 
   get collateralAmount(): number {
     return (
@@ -119,10 +128,15 @@ export default class mintTokens extends Vue {
     return [positive, enoughCollateral]
   }
 
-  approve() {
+  async approve() {
     try {
       this.loading = true
       console.info("Approving amount of tokens: ", this.collateralAmount)
+      await this.approveCollateral({
+        collateralName: this.contractDetails.collateralToken,
+        amount: this.collateralAmount,
+        syntheticName: this.contractDetails.syntheticName,
+      })
       this.approved = true
     } finally {
       this.loading = false

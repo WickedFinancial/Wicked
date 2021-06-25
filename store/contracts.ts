@@ -87,6 +87,18 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
+  async approveCollateral(payload: {
+    collateralName: string
+    amount: number
+    syntheticName: string
+  }) {
+      const {collateralName, amount, syntheticName} = payload
+    console.log(
+      `Approving ${amount} tokens of ${collateralName} to ${syntheticName}`
+    )
+  }
+
+  @Action({ rawError: true })
   async updateTokenBalances() {
     this.context.commit("setTokenBalancesLoaded", false)
     await this.context.dispatch("updateCollateralTokenBalances")
