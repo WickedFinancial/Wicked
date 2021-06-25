@@ -152,6 +152,7 @@ export default class contracts extends VuexModule {
       })
       const mintTx = await lspContract.create(parsedAmount)
       await mintTx.wait()
+      await this.updateTokenBalances()
     }
   }
 

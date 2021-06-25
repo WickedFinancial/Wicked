@@ -48,39 +48,32 @@
             <v-spacer></v-spacer>
             <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
 
-            <div v-if="collateralApproved">
-              <v-progress-circular
-                v-if="loading"
-                indeterminate
-                color="primary"
-              ></v-progress-circular>
-              <v-btn
-                v-else
-                color="blue darken-1"
-                text
-                type="button"
-                @click.prevent="mint"
-              >
-                Mint
-              </v-btn>
-            </div>
-
-            <div v-else>
-              <v-progress-circular
-                v-if="loading"
-                indeterminate
-                color="primary"
-              ></v-progress-circular>
-              <v-btn
-                v-else
-                color="blue darken-1"
-                text
-                type="button"
-                @click.prevent="approve"
-              >
-                Approve
-              </v-btn>
-            </div>
+            <v-btn
+              v-if="collateralApproved"
+              color="blue darken-1"
+              type="button"
+              @click.prevent="mint"
+              :loading="loading"
+              :disabled="loading"
+            >
+              Mint
+              <template v-slot:loader>
+                <span>Loading...</span>
+              </template>
+            </v-btn>
+            <v-btn
+              v-else
+              color="blue darken-1"
+              type="button"
+              @click.prevent="approve"
+              :loading="loading"
+              :disabled="loading"
+            >
+              Approve
+              <template v-slot:loader>
+                <span>Loading...</span>
+              </template>
+            </v-btn>
           </v-card-actions>
         </form>
       </v-card>
