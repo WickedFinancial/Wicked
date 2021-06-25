@@ -27,6 +27,7 @@ export default class contracts extends VuexModule {
   collateralTokenBalances: Record<string, number> = {}
   contractsInitialized: boolean = false
   tokenBalancesLoaded: boolean = false
+  collateralAllowances: Record<string, ethers.BigNumber> = {}
 
   get syntheticNames() {
     return this.contractConfigs.map((config) => config.syntheticName)
@@ -36,6 +37,10 @@ export default class contracts extends VuexModule {
     return this.collateralTokenBalances
   }
 
+  get getCollateralAllowances(): Record<string, ethers.BigNumber> {
+    return this.collateralAllowances
+  }
+
   get getSyntheticTokenBalances(): Record<string, SyntheticTokenBalances> {
     return this.syntheticTokenBalances
   }
@@ -43,6 +48,24 @@ export default class contracts extends VuexModule {
   @Mutation
   setTokenBalancesLoaded(loaded: boolean) {
     this.tokenBalancesLoaded = loaded
+  }
+
+  @Mutation
+  setCollateralAllowance(payload: {
+    syntheticName: string
+    collateralAllowance: ethers.BigNumber
+  }) {
+    const { syntheticName, collateralAllowance } = payload
+    console.log(
+      `Set collateral allowance of ${syntheticName} to ${collateralAllowance}`
+    )
+    let newValues: Record<string, ethers.BigNumber> = {}
+    newValues[syntheticName] = collateralAllowance
+    this.collateralAllowances = Object.assign(
+      {},
+      this.collateralAllowances,
+      newValues
+    )
   }
 
   @Mutation
@@ -92,26 +115,25 @@ export default class contracts extends VuexModule {
     syntheticName: string
   }) {
     const { collateralName, syntheticName } = payload
-    console.log(
-      `Approving tokens of ${collateralName} to ${syntheticName}`
-    )
+    console.log(`Approving tokens of ${collateralName} to ${syntheticName}`)
     const lspAddress = lspContracts[syntheticName].address
     const signer = this.context.rootGetters["web3/signer"]
     console.log("Using signer: ", signer)
     if (signer !== undefined) {
       const collateralContract =
         collateralContracts[collateralName].connect(signer)
-    const amount = ethers.constants.MaxUint256
+      const amount = ethers.constants.MaxUint256
       console.log("Parsed values: ", {
         lspAddress,
         collateralContract,
         amount,
       })
-      const approveTx = await collateralContract.approve(
-        lspAddress,
-        amount
-      )
+      const approveTx = await collateralContract.approve(lspAddress, amount)
       await approveTx.wait()
+      this.context.commit("setCollateralAllowance", {
+        syntheticName,
+        collateralAllowance: amount,
+      })
     }
   }
 
@@ -128,9 +150,7 @@ export default class contracts extends VuexModule {
         lspContract,
         parsedAmount,
       })
-      const mintTx = await lspContract.create(
-        parsedAmount
-      )
+      const mintTx = await lspContract.create(parsedAmount)
       await mintTx.wait()
     }
   }
@@ -140,6 +160,7 @@ export default class contracts extends VuexModule {
     this.context.commit("setTokenBalancesLoaded", false)
     await this.context.dispatch("updateCollateralTokenBalances")
     await this.context.dispatch("updateSyntheticTokenBalances")
+    await this.context.dispatch("updateCollateralAllowances")
     this.context.commit("setTokenBalancesLoaded", true)
   }
 
@@ -181,6 +202,23 @@ export default class contracts extends VuexModule {
       this.context.commit("setCollateralTokenBalance", {
         collateralName,
         collateralBalance,
+      })
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateCollateralAllowances() {
+    const selectedAccount = this.context.rootGetters["web3/selectedAccount"]
+    for (const config of this.contractConfigs) {
+      const collateralName = config.collateralToken
+      const collateralContract = collateralContracts[collateralName]
+      const collateralAllowance = await collateralContract.allowance(
+        selectedAccount,
+        config.address
+      )
+      this.context.commit("setCollateralAllowance", {
+        syntheticName: config.syntheticName,
+        collateralAllowance,
       })
     }
   }

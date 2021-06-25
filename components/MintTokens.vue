@@ -48,13 +48,19 @@
             <v-spacer></v-spacer>
             <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
 
-            <div v-if="approved">
+            <div v-if="collateralApproved">
               <v-progress-circular
                 v-if="loading"
                 indeterminate
                 color="primary"
               ></v-progress-circular>
-              <v-btn v-else color="blue darken-1" text type="button" @click.prevent="mint">
+              <v-btn
+                v-else
+                color="blue darken-1"
+                text
+                type="button"
+                @click.prevent="mint"
+              >
                 Mint
               </v-btn>
             </div>
@@ -85,6 +91,7 @@
 <script lang="ts">
 import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
 import { LSPConfiguration } from "~/types"
+import { ethers } from "ethers"
 
 const contracts = namespace("contracts")
 
@@ -92,7 +99,6 @@ const contracts = namespace("contracts")
 export default class mintTokens extends Vue {
   dialog = false
   loading = false
-  approved = false
   syntheticTokens = 0
 
   @Prop()
@@ -113,11 +119,23 @@ export default class mintTokens extends Vue {
     syntheticName: string
   }) => Promise<void>
 
+  @contracts.Getter
+  getCollateralAllowances!: Record<string, ethers.BigNumber>
 
   get collateralAmount(): number {
     return (
       this.syntheticTokens * parseFloat(this.contractDetails.collateralPerPair)
     )
+  }
+
+  get collateralApproved(): boolean {
+    const collateralAllowance =
+      this.getCollateralAllowances[this.contractDetails.syntheticName]
+    if (collateralAllowance === undefined) {
+      return false
+    } else {
+      return collateralAllowance.eq(ethers.constants.MaxUint256)
+    }
   }
 
   get rules() {
@@ -142,7 +160,6 @@ export default class mintTokens extends Vue {
         collateralName: this.contractDetails.collateralToken,
         syntheticName: this.contractDetails.syntheticName,
       })
-      this.approved = true
     } finally {
       this.loading = false
     }
