@@ -33,6 +33,7 @@ const config: HardhatUserConfig = {
       forking: {
         url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
       },
+      chainId: 42,
     },
     kovan: {
       url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
@@ -144,7 +145,10 @@ task("synthetic", "Mint Synthetic Tokens for use in tests")
           transactionOptions
         )
         await approveTx.wait()
-        console.log(`Approve tx for ${necessaryCollateral.toString()} of collateral`, approveTx)
+        console.log(
+          `Approve tx for ${necessaryCollateral.toString()} of collateral`,
+          approveTx
+        )
 
         // Sends transaction
         const createTx = await LSPContract.create(
@@ -309,5 +313,3 @@ task("launch", "Launch all configured LSP contracts")
     const outputFile = "./deployedContractConfigs.json"
     await writeFile(outputFile, JSON.stringify(contractConfigs, null, 2))
   })
-
-

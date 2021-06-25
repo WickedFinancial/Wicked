@@ -55,6 +55,15 @@ export default class web3 extends VuexModule {
     }
   }
 
+  get signer() {
+    const modalProvider = getCurrentProvider()
+    if (modalProvider !== undefined) {
+      return modalProvider.getSigner(this.selectedAccount)
+    } else {
+      return undefined
+    }
+  }
+
   @Mutation
   setConnectionStatus(status: boolean) {
     this.isConnected = status

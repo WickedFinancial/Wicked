@@ -27,6 +27,7 @@ export default class contracts extends VuexModule {
   collateralTokenBalances: Record<string, number> = {}
   contractsInitialized: boolean = false
   tokenBalancesLoaded: boolean = false
+  collateralAllowances: Record<string, ethers.BigNumber> = {}
 
   get syntheticNames() {
     return this.contractConfigs.map((config) => config.syntheticName)
@@ -36,6 +37,10 @@ export default class contracts extends VuexModule {
     return this.collateralTokenBalances
   }
 
+  get getCollateralAllowances(): Record<string, ethers.BigNumber> {
+    return this.collateralAllowances
+  }
+
   get getSyntheticTokenBalances(): Record<string, SyntheticTokenBalances> {
     return this.syntheticTokenBalances
   }
@@ -43,6 +48,24 @@ export default class contracts extends VuexModule {
   @Mutation
   setTokenBalancesLoaded(loaded: boolean) {
     this.tokenBalancesLoaded = loaded
+  }
+
+  @Mutation
+  setCollateralAllowance(payload: {
+    syntheticName: string
+    collateralAllowance: ethers.BigNumber
+  }) {
+    const { syntheticName, collateralAllowance } = payload
+    console.log(
+      `Set collateral allowance of ${syntheticName} to ${collateralAllowance}`
+    )
+    let newValues: Record<string, ethers.BigNumber> = {}
+    newValues[syntheticName] = collateralAllowance
+    this.collateralAllowances = Object.assign(
+      {},
+      this.collateralAllowances,
+      newValues
+    )
   }
 
   @Mutation
@@ -87,10 +110,58 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
+  async approveCollateral(payload: {
+    collateralName: string
+    syntheticName: string
+  }) {
+    const { collateralName, syntheticName } = payload
+    console.log(`Approving tokens of ${collateralName} to ${syntheticName}`)
+    const lspAddress = lspContracts[syntheticName].address
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const collateralContract =
+        collateralContracts[collateralName].connect(signer)
+      const amount = ethers.constants.MaxUint256
+      console.log("Parsed values: ", {
+        lspAddress,
+        collateralContract,
+        amount,
+      })
+      const approveTx = await collateralContract.approve(lspAddress, amount)
+      await approveTx.wait()
+      this.context.commit("setCollateralAllowance", {
+        syntheticName,
+        collateralAllowance: amount,
+      })
+    }
+  }
+
+  @Action({ rawError: true })
+  async mintTokens(payload: { amount: number; syntheticName: string }) {
+    const { amount, syntheticName } = payload
+    console.log(`Minting ${amount} tokens of ${syntheticName}`)
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const lspContract = lspContracts[syntheticName].connect(signer)
+      const parsedAmount = ethers.utils.parseUnits(amount.toString())
+      console.log("Parsed values: ", {
+        lspContract,
+        parsedAmount,
+      })
+      const mintTx = await lspContract.create(parsedAmount)
+      await mintTx.wait()
+      await this.updateTokenBalances()
+    }
+  }
+
+  @Action({ rawError: true })
   async updateTokenBalances() {
     this.context.commit("setTokenBalancesLoaded", false)
     await this.context.dispatch("updateCollateralTokenBalances")
     await this.context.dispatch("updateSyntheticTokenBalances")
+    await this.context.dispatch("updateCollateralAllowances")
     this.context.commit("setTokenBalancesLoaded", true)
   }
 
@@ -132,6 +203,23 @@ export default class contracts extends VuexModule {
       this.context.commit("setCollateralTokenBalance", {
         collateralName,
         collateralBalance,
+      })
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateCollateralAllowances() {
+    const selectedAccount = this.context.rootGetters["web3/selectedAccount"]
+    for (const config of this.contractConfigs) {
+      const collateralName = config.collateralToken
+      const collateralContract = collateralContracts[collateralName]
+      const collateralAllowance = await collateralContract.allowance(
+        selectedAccount,
+        config.address
+      )
+      this.context.commit("setCollateralAllowance", {
+        syntheticName: config.syntheticName,
+        collateralAllowance,
       })
     }
   }
