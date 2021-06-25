@@ -32,6 +32,16 @@
                   </v-list-item>
                 </v-col>
               </v-row>
+              <v-row>
+                <v-col cols="12">
+                  <v-list-item>
+                    <v-list-item-title> Available Collateral</v-list-item-title>
+                    <v-list-item-subtitle
+                      >{{ collateralTokens }}
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                </v-col>
+              </v-row>
             </v-container>
           </v-card-text>
           <v-card-actions>
@@ -96,14 +106,17 @@ export default class mintTokens extends Vue {
   }
 
   get rules() {
-      let self = this;
+    let self = this
     function enoughCollateral(value: number): boolean | string {
       return (
-        (value * parseFloat(self.contractDetails.collateralPerPair) <=
-        self.collateralTokens) || "Not enough collateral"
+        value * parseFloat(self.contractDetails.collateralPerPair) <=
+          self.collateralTokens || "Not enough collateral"
       )
     }
-    return [enoughCollateral]
+    function positive(value: number): boolean | string {
+      return value > 0 || "Number of tokens must be positive"
+    }
+    return [positive, enoughCollateral]
   }
 
   approve() {
