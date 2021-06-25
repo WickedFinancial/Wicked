@@ -22,6 +22,28 @@ function mnemonic() {
   return ""
 }
 
+const config: HardhatUserConfig = {
+  solidity: "0.7.3",
+  namedAccounts: {
+    deployer: 0,
+    tokenRecipient: 1,
+  },
+  networks: {
+    hardhat: {
+      forking: {
+        url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
+      },
+    },
+    kovan: {
+      url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
+      accounts: {
+        mnemonic: mnemonic(),
+      },
+    },
+  },
+}
+export default config
+
 task(
   "convert",
   "Convert all json abis to human readable format",
@@ -288,24 +310,4 @@ task("launch", "Launch all configured LSP contracts")
     await writeFile(outputFile, JSON.stringify(contractConfigs, null, 2))
   })
 
-const config: HardhatUserConfig = {
-  solidity: "0.7.3",
-  namedAccounts: {
-    deployer: 0,
-    tokenRecipient: 1,
-  },
-  networks: {
-    hardhat: {
-      forking: {
-        url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
-      },
-    },
-    kovan: {
-      url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
-      accounts: {
-        mnemonic: mnemonic(),
-      },
-    },
-  },
-}
-export default config
+
