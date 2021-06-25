@@ -92,10 +92,30 @@ export default class contracts extends VuexModule {
     amount: number
     syntheticName: string
   }) {
-      const {collateralName, amount, syntheticName} = payload
+    const { collateralName, amount, syntheticName } = payload
     console.log(
       `Approving ${amount} tokens of ${collateralName} to ${syntheticName}`
     )
+
+    const lspAddress = lspContracts[syntheticName].address
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const collateralContract = collateralContracts[collateralName].connect(
+        signer
+      )
+      const parsedAmount = ethers.utils.parseUnits(amount.toString())
+      console.log("Parsed values: ", {
+        lspAddress,
+        collateralContract,
+        parsedAmount,
+      })
+      const approveTx = await collateralContract.approve(
+        lspAddress,
+        parsedAmount
+      )
+      await approveTx.wait()
+    }
   }
 
   @Action({ rawError: true })
