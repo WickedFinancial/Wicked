@@ -20,7 +20,7 @@
     </v-card-text>
 
     <v-card-actions>
-      <MintTokens :contractDetails="contractDetails" />
+      <MintTokens :contractDetails="contractDetails" :collateralTokens="collateralTokens"/>
     </v-card-actions>
   </v-card>
 </template>

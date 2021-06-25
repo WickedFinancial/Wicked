@@ -17,6 +17,7 @@
                     v-model="syntheticTokens"
                     label="Synthetic Tokens to create"
                     type="number"
+                    :rules="rules"
                     required
                   ></v-text-field>
                 </v-col>
@@ -85,10 +86,24 @@ export default class mintTokens extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration
 
+  @Prop()
+  collateralTokens!: number
+
   get collateralAmount(): number {
     return (
       this.syntheticTokens * parseFloat(this.contractDetails.collateralPerPair)
     )
+  }
+
+  get rules() {
+      let self = this;
+    function enoughCollateral(value: number): boolean | string {
+      return (
+        (value * parseFloat(self.contractDetails.collateralPerPair) <=
+        self.collateralTokens) || "Not enough collateral"
+      )
+    }
+    return [enoughCollateral]
   }
 
   approve() {
