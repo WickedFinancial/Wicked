@@ -20,7 +20,7 @@ import ContractTokens from "@/components/ContractTokens.vue"
 const contracts = namespace("contracts")
 
 @Component({ components: { ContractSummary, ContractTokens } })
-export default class contract extends Vue {
+export default class Contract extends Vue {
   @contracts.State
   contractConfigs!: Array<LSPConfiguration>
 

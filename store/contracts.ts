@@ -2,20 +2,14 @@ import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators"
 import { ethers } from "ethers"
 import LSPAbi from "~/abis/LSP.json"
 import { getCurrentProvider } from "~/store/web3"
-import { LSPConfiguration } from "~/types"
+import {
+  LSPConfiguration,
+  SyntheticTokenContractMapping,
+  SyntheticTokenBalances,
+} from "~/types"
 
 const abis: Record<string, Array<string>> = require("~/abis")
 const addresses: Record<string, string> = require("~/addresses.json")
-
-type SyntheticTokenContractMapping = {
-  shortContract: ethers.Contract
-  longContract: ethers.Contract
-}
-
-type SyntheticTokenBalances = {
-  shortBalance: number
-  longBalance: number
-}
 
 const lspContracts: Record<string, ethers.Contract> = {}
 const collateralContracts: Record<string, ethers.Contract> = {}

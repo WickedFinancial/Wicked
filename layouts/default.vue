@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { Component, namespace, Vue, Watch } from "nuxt-property-decorator"
+import { Component, namespace, Vue } from "nuxt-property-decorator"
 
 import Web3Btn from "~/components/Web3Btn.vue"
 
@@ -54,7 +54,6 @@ export default class DefaultLayout extends Vue {
 
   @web3.Getter
   selectedAccount!: string
-
 
   clipped = true
   drawer = true
@@ -76,7 +75,5 @@ export default class DefaultLayout extends Vue {
     })
     return this.menuItems.concat(contractItems)
   }
-
-
 }
 </script>

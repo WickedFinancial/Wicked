@@ -14,3 +14,15 @@ export type LSPConfiguration = {
   success?: boolean
   error?: string
 }
+
+type SyntheticTokenContractMapping = {
+  shortContract: ethers.Contract
+  longContract: ethers.Contract
+}
+
+type SyntheticTokenBalances = {
+  shortBalance: number
+  longBalance: number
+}
+
+
