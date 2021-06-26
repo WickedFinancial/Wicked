@@ -55,7 +55,7 @@
 
 <script lang="ts">
 import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
-import { LSPConfiguration } from "~/types"
+import { SyntheticTokenBalances, LSPConfiguration } from "~/types"
 import { ethers } from "ethers"
 
 const contracts = namespace("contracts")
@@ -75,8 +75,14 @@ export default class RedeemTokens extends Vue {
     syntheticName: string
   }) => Promise<void>
 
+  @contracts.Getter
+  getSyntheticTokenBalances!: Record<string, SyntheticTokenBalances>
+
   get tokenPairs(): number {
-    return 10
+    const tokenBalances =
+      this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
+    if (tokenBalances === undefined) return 0
+    return Math.min(tokenBalances.shortBalance, tokenBalances.longBalance)
   }
 
   get rules() {
