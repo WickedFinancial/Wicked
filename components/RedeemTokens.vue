@@ -1,62 +1,56 @@
 <template>
-  <v-row justify="center">
-    <v-dialog v-model="dialog" persistent max-width="600px">
-      <template #activator="{ on, attrs }">
-        <v-btn color="primary" dark v-bind="attrs" v-on="on"> Redeem</v-btn>
-      </template>
-      <v-card>
-        <v-card-title>
-          <span class="headline">Redeem Tokens</span>
-        </v-card-title>
-        <form>
-          <v-card-text>
-            <v-container>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="syntheticTokens"
-                    label="Synthetic Tokens to create"
-                    type="number"
-                    :rules="rules"
-                    required
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12">
-                  <v-list-item>
-                    <v-list-item-title>
-                      Available Token Pairs</v-list-item-title
-                    >
-                    <v-list-item-subtitle
-                      >{{ tokenPairs }}
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
+  <v-dialog v-model="dialog" persistent max-width="600px">
+    <template #activator="{ on, attrs }">
+      <v-btn color="primary" text v-bind="attrs" v-on="on"> Redeem</v-btn>
+    </template>
+    <v-card>
+      <v-card-title>
+        <span class="headline">Redeem Tokens</span>
+      </v-card-title>
+      <form>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="syntheticTokens"
+                  label="Synthetic Tokens to create"
+                  type="number"
+                  :rules="rules"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-list-item>
+                  <v-list-item-title> Available Token Pairs</v-list-item-title>
+                  <v-list-item-subtitle>{{ tokenPairs }} </v-list-item-subtitle>
+                </v-list-item>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
 
-            <v-btn
-              color="blue darken-1"
-              type="button"
-              @click.prevent="redeem"
-              :loading="loading"
-              :disabled="loading"
-            >
-              Redeem
-              <template v-slot:loader>
-                <span>Loading...</span>
-              </template>
-            </v-btn>
-          </v-card-actions>
-        </form>
-      </v-card>
-    </v-dialog>
-  </v-row>
+          <v-btn
+            color="blue darken-1"
+            type="button"
+            @click.prevent="redeem"
+            :loading="loading"
+            :disabled="loading"
+          >
+            Redeem
+            <template v-slot:loader>
+              <span>Loading...</span>
+            </template>
+          </v-btn>
+        </v-card-actions>
+      </form>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script lang="ts">

@@ -10,18 +10,28 @@
 
       <v-list-item>
         <v-list-item-title> Long Balance </v-list-item-title>
-        <v-list-item-subtitle>{{ this.syntheticTokens.longBalance }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{
+          this.syntheticTokens.longBalance
+        }}</v-list-item-subtitle>
       </v-list-item>
 
       <v-list-item>
         <v-list-item-title> Short Balance </v-list-item-title>
-        <v-list-item-subtitle>{{ this.syntheticTokens.shortBalance }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{
+          this.syntheticTokens.shortBalance
+        }}</v-list-item-subtitle>
       </v-list-item>
     </v-card-text>
 
-    <v-card-actions>
-      <MintTokens :contractDetails="contractDetails" :collateralTokens="collateralTokens"/>
-      <RedeemTokens :contractDetails="contractDetails" :collateralTokens="collateralTokens"/>
+    <v-card-actions class="justify-between">
+      <MintTokens
+        :contractDetails="contractDetails"
+        :collateralTokens="collateralTokens"
+      />
+      <RedeemTokens
+        :contractDetails="contractDetails"
+        :collateralTokens="collateralTokens"
+      />
     </v-card-actions>
   </v-card>
 </template>
