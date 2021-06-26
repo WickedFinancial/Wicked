@@ -25,7 +25,7 @@ export default class contracts extends VuexModule {
   contractConfigs: Array<LSPConfiguration> = require("~/deployedContractConfigs.json")
   syntheticTokenBalances: Record<string, SyntheticTokenBalances> = {}
   collateralTokenBalances: Record<string, number> = {}
-  contractsInitialized: boolean = false
+  contractStatuses: Record<string, boolean> = {}
   tokenBalancesLoaded: boolean = false
   collateralAllowances: Record<string, ethers.BigNumber> = {}
 
@@ -49,6 +49,23 @@ export default class contracts extends VuexModule {
 
   get getSyntheticTokenBalances(): Record<string, SyntheticTokenBalances> {
     return this.syntheticTokenBalances
+  }
+
+  get getContractStatuses(): Record<string, boolean> {
+    return this.contractStatuses
+  }
+
+  @Mutation
+  resetContractStatuses() {
+    this.contractStatuses = {}
+  }
+
+  @Mutation
+  setContractStatus(payload: { syntheticName: string; status: boolean }) {
+    const { syntheticName, status } = payload
+    const newValues: Record<string, boolean> = {}
+    newValues[syntheticName] = status
+    this.contractStatuses = Object.assign({}, this.contractStatuses, newValues)
   }
 
   @Mutation
@@ -253,6 +270,7 @@ export default class contracts extends VuexModule {
 
   @Action({ rawError: true })
   async initializeContracts() {
+    this.context.commit("resetContractStatuses")
     if (this.canUpdate) {
       console.log("Connecting to contracts")
       const provider: ethers.providers.Web3Provider | undefined =
@@ -313,6 +331,10 @@ export default class contracts extends VuexModule {
                 shortContract,
               }
 
+              this.context.commit("setContractStatus", {
+                syntheticName,
+                status: true,
+              })
               console.log(`Connected to contract ${syntheticName} succesfully`)
             } catch (e) {
               console.log(
