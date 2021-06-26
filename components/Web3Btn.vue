@@ -1,8 +1,11 @@
 <template>
   <div>
-    <v-btn role="button" @click.p="connectToWeb3">
+    <v-btn role="button" :loading="loading" @click.p="connectToWeb3">
       <v-icon>mdi-plus</v-icon>
       {{ btnAction }}
+      <template v-slot:loader>
+        <span>Loading...</span>
+      </template>
     </v-btn>
   </div>
 </template>
@@ -14,6 +17,7 @@ const contracts = namespace("contracts")
 
 @Component
 export default class Web3Btn extends Vue {
+  loading: boolean = false
   @web3.State
   isConnected!: boolean
 
@@ -40,10 +44,15 @@ export default class Web3Btn extends Vue {
   }
 
   async connect() {
-    await this.connectWeb3()
-    await this.registerListeners()
-    await this.initializeContracts()
-    await this.updateTokenBalances()
+    this.loading = true
+    try {
+      await this.connectWeb3()
+      await this.registerListeners()
+      await this.initializeContracts()
+      await this.updateTokenBalances()
+    } finally {
+      this.loading = false
+    }
   }
 
   clear() {
