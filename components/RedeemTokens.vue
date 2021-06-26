@@ -40,7 +40,7 @@
             type="button"
             @click.prevent="redeem"
             :loading="loading"
-            :disabled="loading"
+            :disabled="loading || anyRuleViolated"
           >
             Redeem
             <template v-slot:loader>
@@ -82,7 +82,14 @@ export default class RedeemTokens extends Vue {
     const tokenBalances =
       this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
     if (tokenBalances === undefined) return 0
-    return Math.min(tokenBalances.shortBalance, tokenBalances.longBalance)
+    else {
+      console.log("Balances: ", tokenBalances)
+      return Math.min(tokenBalances.shortBalance, tokenBalances.longBalance)
+    }
+  }
+
+  get anyRuleViolated(): boolean {
+    return this.syntheticTokens > this.tokenPairs || this.syntheticTokens <= 0
   }
 
   get rules() {

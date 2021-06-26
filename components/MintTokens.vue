@@ -53,7 +53,7 @@
             type="button"
             @click.prevent="mint"
             :loading="loading"
-            :disabled="loading"
+            :disabled="loading || anyRuleViolated"
           >
             Mint
             <template v-slot:loader>
@@ -66,7 +66,7 @@
             type="button"
             @click.prevent="approve"
             :loading="loading"
-            :disabled="loading"
+            :disabled="loading || anyRuleViolated"
           >
             Approve
             <template v-slot:loader>
@@ -116,6 +116,14 @@ export default class mintTokens extends Vue {
   get collateralAmount(): number {
     return (
       this.syntheticTokens * parseFloat(this.contractDetails.collateralPerPair)
+    )
+  }
+
+  get anyRuleViolated(): boolean {
+    return (
+      this.syntheticTokens *
+        parseFloat(this.contractDetails.collateralPerPair) >
+        this.collateralTokens || this.syntheticTokens <= 0
     )
   }
 
