@@ -21,6 +21,7 @@
 
     <v-card-actions>
       <MintTokens :contractDetails="contractDetails" :collateralTokens="collateralTokens"/>
+      <RedeemTokens :contractDetails="contractDetails" :collateralTokens="collateralTokens"/>
     </v-card-actions>
   </v-card>
 </template>
@@ -28,13 +29,14 @@
 <script lang="ts">
 import { Vue, Component, namespace, Prop } from "nuxt-property-decorator"
 import MintTokens from "@/components/MintTokens.vue"
+import RedeemTokens from "@/components/RedeemTokens.vue"
 import SyntheticTokenBalances from "@/store/contracts"
 import { LSPConfiguration } from "~/types"
 
 const addresses: Record<string, string> = require("@/addresses.json")
 const contracts = namespace("contracts")
 
-@Component({ components: { MintTokens } })
+@Component({ components: { MintTokens, RedeemTokens } })
 export default class contractTokens extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration

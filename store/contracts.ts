@@ -157,6 +157,27 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
+  async redeemTokens(payload: { amount: number; syntheticName: string }) {
+    const { amount, syntheticName } = payload
+    console.log(`Redeeming ${amount} tokens of ${syntheticName}`)
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const lspContract = lspContracts[syntheticName].connect(signer)
+      const parsedAmount = ethers.utils.parseUnits(amount.toString())
+      console.log("Parsed values: ", {
+        lspContract,
+        parsedAmount,
+      })
+      const redeemTx = await lspContract.redeem(
+        parsedAmount
+      )
+      await redeemTx.wait()
+      await this.updateTokenBalances()
+    }
+  }
+
+  @Action({ rawError: true })
   async updateTokenBalances() {
     this.context.commit("setTokenBalancesLoaded", false)
     await this.context.dispatch("updateCollateralTokenBalances")
