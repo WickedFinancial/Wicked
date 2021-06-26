@@ -17,6 +17,9 @@ export default class Web3Btn extends Vue {
   @web3.State
   isConnected!: boolean
 
+  @web3.Getter
+  onCorrectNetwork!: boolean
+
   @web3.Action
   connectWeb3!: () => Promise<void>
 

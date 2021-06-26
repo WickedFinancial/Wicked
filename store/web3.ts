@@ -45,9 +45,29 @@ export default class web3 extends VuexModule {
   modalInitializing = false
   providerSet = false
   selectedAccountAddress = ""
+  networkInfo: ethers.providers.Network = { name: "", chainId: -1 }
+  correctNetwork = "kovan"
 
   get selectedAccount(): string {
     return this.selectedAccountAddress
+  }
+
+  get getConnectionStatus(): boolean {
+    return this.isConnected
+  }
+
+
+  get onCorrectNetwork() {
+    return this.networkInfo.name === this.correctNetwork
+  }
+
+  get getNetworkInfo(): ethers.providers.Network {
+    return this.networkInfo
+  }
+
+  @Mutation
+  setNetworkInfo(networkInfo: ethers.providers.Network) {
+    this.networkInfo = networkInfo
   }
 
   @Mutation
@@ -78,6 +98,9 @@ export default class web3 extends VuexModule {
   setConnectionStatus(status: boolean) {
     this.isConnected = status
   }
+
+  @Mutation
+  setNetwork() {}
 
   @Mutation
   setEthersProvider(provider: any) {
@@ -115,11 +138,21 @@ export default class web3 extends VuexModule {
       this.context.commit("setEthersProvider", provider)
       this.context.commit("setConnectionStatus", true)
       this.context.commit("setSelectedAccount")
+      await this.context.dispatch("updateNetworkInfo")
     } catch (e: unknown) {
       console.log("Error connecting to Web3")
       this.context.commit("setConnectionStatus", false)
     } finally {
       this.context.commit("setModalInitializing", false)
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateNetworkInfo() {
+    if (this.providerSet) {
+      const provider = getCurrentProvider()
+      const networkInfo = await provider?.getNetwork()
+      this.context.commit("setNetworkInfo", networkInfo)
     }
   }
 

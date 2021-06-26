@@ -30,7 +30,9 @@
       {{ selectedAccount }}
       <web3-btn></web3-btn>
     </v-app-bar>
+
     <v-main>
+      <NetworkStatusBanner />
       <v-container>
         <nuxt />
       </v-container>
@@ -42,12 +44,13 @@
 import { Component, namespace, Vue } from "nuxt-property-decorator"
 
 import Web3Btn from "~/components/Web3Btn.vue"
+import NetworkStatusBanner from "~/components/NetworkStatusBanner.vue"
 
 const contracts = namespace("contracts")
 
 const web3 = namespace("web3")
 
-@Component({ components: { Web3Btn } })
+@Component({ components: { Web3Btn, NetworkStatusBanner } })
 export default class DefaultLayout extends Vue {
   @web3.State
   isConnected!: boolean

@@ -25,4 +25,3 @@ type SyntheticTokenBalances = {
   longBalance: number
 }
 
-
