@@ -14,7 +14,7 @@
     "customAncillaryData": "",
     "prepaidProposerReward": "0.01",
     "collateralPriceInEth": 1,
-    "address": "0xc20C4CaeAAb00cB88C78A93E7Fc14E3fC31E6cad",
+    "address": "0x0367EB656001dFc0E731729d28193Dc1268e2e0d",
     "success": true
   },
   {
@@ -32,7 +32,7 @@
     "customAncillaryData": "",
     "prepaidProposerReward": "0.01",
     "collateralPriceInEth": 1,
-    "address": "0x86DE29169AE712b61F2Dc41A0209BAD8Fd018047",
+    "address": "0xb03EF1a20449b2ce24a17850332868910C4f30B0",
     "success": true
   }
 ]
