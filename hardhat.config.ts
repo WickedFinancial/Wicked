@@ -15,9 +15,18 @@ const abis = require("./abis")
 
 function mnemonic() {
   try {
-    return fs.readFileSync("~/mnemonic.txt").toString().trim()
+    return fs.readFileSync("./mnemonic.txt").toString().trim()
   } catch (e) {
     console.log("WARNING: No mnemonic file")
+  }
+  return ""
+}
+
+function url() {
+  try {
+    return fs.readFileSync("./url.txt").toString().trim()
+  } catch (e) {
+    console.log("WARNING: No url file")
   }
   return ""
 }
@@ -31,12 +40,12 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
+        url: url(),
       },
       chainId: 42,
     },
     kovan: {
-      url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
+      url: url(),
       accounts: {
         mnemonic: mnemonic(),
       },
