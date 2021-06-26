@@ -6,6 +6,7 @@ import {
   LSPConfiguration,
   SyntheticTokenContractMapping,
   SyntheticTokenBalances,
+  SyntheticTokenAddresses,
 } from "~/types"
 
 const abis: Record<string, Array<string>> = require("~/abis")
@@ -24,6 +25,7 @@ const syntheticTokenContracts: Record<string, SyntheticTokenContractMapping> =
 export default class contracts extends VuexModule {
   contractConfigs: Array<LSPConfiguration> = require("~/deployedContractConfigs.json")
   syntheticTokenBalances: Record<string, SyntheticTokenBalances> = {}
+  syntheticTokenAddresses: Record<string, SyntheticTokenAddresses> = {}
   collateralTokenBalances: Record<string, number> = {}
   contractStatuses: Record<string, boolean> = {}
   tokenBalancesLoaded: boolean = false
@@ -50,6 +52,11 @@ export default class contracts extends VuexModule {
   get getSyntheticTokenBalances(): Record<string, SyntheticTokenBalances> {
     return this.syntheticTokenBalances
   }
+
+  get getSyntheticTokenAddresses(): Record<string, SyntheticTokenAddresses> {
+    return this.syntheticTokenAddresses
+  }
+
 
   get getContractStatuses(): Record<string, boolean> {
     return this.contractStatuses
@@ -105,6 +112,29 @@ export default class contracts extends VuexModule {
     this.collateralTokenBalances = Object.assign(
       {},
       this.collateralTokenBalances,
+      newValues
+    )
+  }
+
+  @Mutation
+  setSyntheticTokenAddresses(payload: {
+    syntheticName: string
+    longAddress: string
+    shortAddress: string
+  }) {
+    const { syntheticName, longAddress, shortAddress } = payload
+    console.log(
+      `Setting long / short addresses for ${syntheticName} to:`,
+      longAddress,
+      shortAddress
+    )
+
+    let newValues: Record<string, SyntheticTokenAddresses> = {}
+    newValues[syntheticName] = { longAddress, shortAddress }
+
+    this.syntheticTokenAddresses = Object.assign(
+      {},
+      this.syntheticTokenAddresses,
       newValues
     )
   }
@@ -330,6 +360,12 @@ export default class contracts extends VuexModule {
                 longContract,
                 shortContract,
               }
+              
+              this.context.commit("setSyntheticTokenAddresses", {
+                syntheticName,
+                shortAddress,
+                longAddress,
+              })
 
               this.context.commit("setContractStatus", {
                 syntheticName,
