@@ -44,15 +44,25 @@ export default class web3 extends VuexModule {
   isConnected = false
   modalInitializing = false
   providerSet = false
+  selectedAccountAddress = ""
 
   get selectedAccount(): string {
-    if (this.isConnected) {
-      const modalProvider = getCurrentProvider()
-      const provider = modalProvider?.provider as any
-      return provider.selectedAddress
-    } else {
-      return ""
+    return this.selectedAccountAddress
+  }
+
+  @Mutation
+  setSelectedAccount(selectedAccount: string | undefined) {
+    if (selectedAccount === undefined) {
+      selectedAccount = ""
+      if (this.isConnected) {
+        const modalProvider = getCurrentProvider()
+        const provider = modalProvider?.provider as any
+        selectedAccount = provider.selectedAddress
+      }
     }
+
+    console.log("Setting selected account to: ", selectedAccount)
+    this.selectedAccountAddress = selectedAccount || ""
   }
 
   get signer() {
@@ -104,11 +114,36 @@ export default class web3 extends VuexModule {
       provider = await webModal.connect()
       this.context.commit("setEthersProvider", provider)
       this.context.commit("setConnectionStatus", true)
+      this.context.commit("setSelectedAccount")
     } catch (e: unknown) {
       console.log("Error connecting to Web3")
       this.context.commit("setConnectionStatus", false)
     } finally {
       this.context.commit("setModalInitializing", false)
+    }
+  }
+
+  @Action({ rawError: true })
+  async registerListeners() {
+    // TODO: Find equivalent ethers.provider event to avoid relying on metamask api
+    if (window.ethereum) {
+      console.log("Registering account listener")
+      window.ethereum.on("accountsChanged", async () => {
+        console.log("Detected account update")
+        await this.context.dispatch("connectWeb3")
+        await this.context.dispatch(
+          "contracts/updateTokenBalances",
+          {},
+          { root: true }
+        )
+      })
+
+      // Note that this will not be triggered if we change between networks with the same chain id
+      // Tried this but did not work: https://docs.ethers.io/v5/concepts/best-practices/#best-practices
+      window.ethereum.on("chainChanged", () => {
+        console.log("Detected network change, reload page")
+        window.location.reload()
+      })
     }
   }
 }

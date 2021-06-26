@@ -20,6 +20,9 @@ export default class Web3Btn extends Vue {
   @web3.Action
   connectWeb3!: () => Promise<void>
 
+  @web3.Action
+  registerListeners!: () => Promise<void>
+
   @web3.Mutation
   clearProvider!: () => void
 
@@ -35,6 +38,7 @@ export default class Web3Btn extends Vue {
 
   async connect() {
     await this.connectWeb3()
+    await this.registerListeners()
     await this.initializeContracts()
     await this.updateTokenBalances()
   }
