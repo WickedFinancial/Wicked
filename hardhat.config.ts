@@ -341,6 +341,21 @@ task("time:expiry", "Set time to expiry date of given contract")
     }
   })
 
+task(
+  "time:dispute",
+  "Advances time by the default dispute liveness value"
+).setAction(async (_, { ethers }) => {
+  const optimisticOracle = await ethers.getContractAt(
+    abis.OptimisticOracle,
+    addresses.OptimisticOracle
+  )
+  const defaultLiveness = await optimisticOracle.defaultLiveness()
+
+  console.log("Default Liveness: ", defaultLiveness.toNumber())
+
+  await ethers.provider.send("evm_increaseTime", [defaultLiveness.toNumber()])
+})
+
 task("propose", "Propose price for given contract")
   .addParam(
     "syntheticName",
@@ -372,7 +387,7 @@ task("propose", "Propose price for given contract")
 
       const approveTx = await collateralContract.approve(
         addresses.OptimisticOracle,
-        ethers.constants.MaxUint256,
+        ethers.constants.MaxUint256
       )
       await approveTx.wait()
       console.log("Approved collateral")
@@ -400,3 +415,4 @@ task("propose", "Propose price for given contract")
       console.log("Proposed Price")
     }
   })
+
