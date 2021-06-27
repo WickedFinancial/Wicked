@@ -27,7 +27,7 @@ export default class contracts extends VuexModule {
   syntheticTokenBalances: Record<string, SyntheticTokenBalances> = {}
   syntheticTokenAddresses: Record<string, SyntheticTokenAddresses> = {}
   collateralTokenBalances: Record<string, number> = {}
-  contractStatuses: Record<string, boolean> = {}
+  contractStatuses: Record<string, number> = {}
   tokenBalancesLoaded: boolean = false
   collateralAllowances: Record<string, ethers.BigNumber> = {}
 
@@ -57,8 +57,7 @@ export default class contracts extends VuexModule {
     return this.syntheticTokenAddresses
   }
 
-
-  get getContractStatuses(): Record<string, boolean> {
+  get getContractStatuses(): Record<string, number> {
     return this.contractStatuses
   }
 
@@ -68,9 +67,18 @@ export default class contracts extends VuexModule {
   }
 
   @Mutation
-  setContractStatus(payload: { syntheticName: string; status: boolean }) {
+  resetTokenBalances() {
+    this.syntheticTokenBalances = {}
+    this.collateralTokenBalances = {}
+    this.collateralAllowances = {}
+    this.tokenBalancesLoaded = false
+  }
+
+  @Mutation
+  setContractStatus(payload: { syntheticName: string; status: number }) {
     const { syntheticName, status } = payload
-    const newValues: Record<string, boolean> = {}
+    console.log(`Setting state of contract ${syntheticName} to ${status}`)
+    const newValues: Record<string, number> = {}
     newValues[syntheticName] = status
     this.contractStatuses = Object.assign({}, this.contractStatuses, newValues)
   }
@@ -163,6 +171,25 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
+  clearContracts() {
+    this.context.commit("resetContractStatuses")
+    this.context.commit("resetTokenBalances")
+  }
+
+  @Action({ rawError: true })
+  async expireContract(syntheticName: string) {
+    console.log(`Expiring contract ${syntheticName}`)
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const lspContract = lspContracts[syntheticName].connect(signer)
+      const expireTx = await lspContract.expire()
+      await expireTx.wait()
+      this.context.dispatch("updateContractStatuses")
+    }
+  }
+
+  @Action({ rawError: true })
   async approveCollateral(payload: {
     collateralName: string
     syntheticName: string
@@ -205,7 +232,7 @@ export default class contracts extends VuexModule {
       })
       const mintTx = await lspContract.create(parsedAmount)
       await mintTx.wait()
-      await this.updateTokenBalances()
+      await this.updateContractData()
     }
   }
 
@@ -224,17 +251,18 @@ export default class contracts extends VuexModule {
       })
       const redeemTx = await lspContract.redeem(parsedAmount)
       await redeemTx.wait()
-      await this.updateTokenBalances()
+      await this.updateContractData()
     }
   }
 
   @Action({ rawError: true })
-  async updateTokenBalances() {
+  async updateContractData() {
     this.context.commit("setTokenBalancesLoaded", false)
     if (this.canUpdate) {
       await this.context.dispatch("updateCollateralTokenBalances")
       await this.context.dispatch("updateSyntheticTokenBalances")
       await this.context.dispatch("updateCollateralAllowances")
+      await this.context.dispatch("updateContractStatuses")
       this.context.commit("setTokenBalancesLoaded", true)
     }
   }
@@ -294,6 +322,19 @@ export default class contracts extends VuexModule {
       this.context.commit("setCollateralAllowance", {
         syntheticName: config.syntheticName,
         collateralAllowance,
+      })
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateContractStatuses() {
+    this.context.commit("resetContractStatuses")
+    for (const [syntheticName, lspContract] of Object.entries(lspContracts)) {
+      const contractState = await lspContract.contractState()
+
+      this.context.commit("setContractStatus", {
+        syntheticName,
+        status: parseInt(contractState.toString()),
       })
     }
   }
@@ -360,17 +401,13 @@ export default class contracts extends VuexModule {
                 longContract,
                 shortContract,
               }
-              
+
               this.context.commit("setSyntheticTokenAddresses", {
                 syntheticName,
                 shortAddress,
                 longAddress,
               })
 
-              this.context.commit("setContractStatus", {
-                syntheticName,
-                status: true,
-              })
               console.log(`Connected to contract ${syntheticName} succesfully`)
             } catch (e) {
               console.log(
