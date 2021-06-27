@@ -63,6 +63,11 @@ export default class contracts extends VuexModule {
     return this.contractStatuses
   }
 
+  get getExpiryData(): Record<string, ExpiryData> {
+    return this.expiryData
+  }
+
+
   @Mutation
   resetContractStatuses() {
     this.contractStatuses = {}
@@ -72,7 +77,6 @@ export default class contracts extends VuexModule {
   resetExpiryData() {
     this.expiryData = {}
   }
-
 
   @Mutation
   resetTokenBalances() {
@@ -394,9 +398,7 @@ export default class contracts extends VuexModule {
       const percentageLong = parseFloat(
         ethers.utils.formatUnits(await lspContract.expiryPercentLong())
       )
-      const price = parseFloat(
-        await lspContract.expiryPrice()
-      )
+      const price = parseFloat(await lspContract.expiryPrice())
       this.context.commit("setExpiryData", {
         syntheticName,
         data: { percentageLong, price },

@@ -30,11 +30,47 @@
                 ></v-text-field>
               </v-col>
             </v-row>
+
             <v-row>
               <v-col cols="12">
                 <v-list-item>
-                  <v-list-item-title> Available Token Pairs</v-list-item-title>
-                  <v-list-item-subtitle>{{ tokenPairs }} </v-list-item-subtitle>
+                  <v-list-item-title> Expiry Price</v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{ expiryPrice }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="12">
+                <v-list-item>
+                  <v-list-item-title> Collateral / Long</v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{ collateralPerLong }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="12">
+                <v-list-item>
+                  <v-list-item-title> Collateral / Short</v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{ collateralPerShort }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="12">
+                <v-list-item>
+                  <v-list-item-title> Returned Collateral</v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{ returnedCollateral }}
+                  </v-list-item-subtitle>
                 </v-list-item>
               </v-col>
             </v-row>
@@ -64,7 +100,7 @@
 
 <script lang="ts">
 import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
-import { SyntheticTokenBalances, LSPConfiguration } from "~/types"
+import { ExpiryData, SyntheticTokenBalances, LSPConfiguration } from "~/types"
 import { ethers } from "ethers"
 
 const contracts = namespace("contracts")
@@ -89,14 +125,35 @@ export default class SettleTokens extends Vue {
   @contracts.Getter
   getSyntheticTokenBalances!: Record<string, SyntheticTokenBalances>
 
-  get tokenPairs(): number {
-    const tokenBalances =
-      this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
-    if (tokenBalances === undefined) return 0
-    else {
-      console.log("Balances: ", tokenBalances)
-      return Math.min(tokenBalances.shortBalance, tokenBalances.longBalance)
-    }
+  @contracts.Getter
+  getExpiryData!: Record<string, ExpiryData>
+
+  get returnedCollateral(): number {
+    return (
+      (this.collateralPerShort || 0) * this.shortTokens +
+      (this.collateralPerLong || 0) * this.longTokens
+    )
+  }
+
+  get collateralPerShort(): number | undefined {
+    const percentagePerLong: number =
+      this.getExpiryData[this.contractDetails.syntheticName].percentageLong
+    const percentagePerShort = 1 - percentagePerLong
+    return (
+      percentagePerShort * parseFloat(this.contractDetails.collateralPerPair)
+    )
+  }
+
+  get collateralPerLong(): number | undefined {
+    const percentagePerLong: number =
+      this.getExpiryData[this.contractDetails.syntheticName].percentageLong
+    return (
+      percentagePerLong * parseFloat(this.contractDetails.collateralPerPair)
+    )
+  }
+
+  get expiryPrice(): number | undefined {
+    return this.getExpiryData[this.contractDetails.syntheticName].price
   }
 
   get anyRuleViolated(): boolean {
