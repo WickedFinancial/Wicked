@@ -1,7 +1,6 @@
 <template>
   <div>
-    <v-btn role="button" :loading="loading" @click.p="connectToWeb3">
-      <v-icon>mdi-plus</v-icon>
+    <v-btn role="button" text outlined :loading="loading" @click.p="connectToWeb3">
       {{ btnAction }}
       <template v-slot:loader>
         <span>Loading...</span>
@@ -44,7 +43,7 @@ export default class Web3Btn extends Vue {
 
 
   get btnAction() {
-    return this.isConnected ? "Disconnect" : "Connect"
+    return this.isConnected ? "Disconnect" : "+ Connect"
   }
 
   async connect() {
