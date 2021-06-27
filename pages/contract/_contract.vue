@@ -5,6 +5,7 @@
       :contractName="contractName"
     />
     <contract-tokens
+      v-if="getContractStatuses[contractName]"
       :contractDetails="contractDetails"
     />
   </v-container>
@@ -23,6 +24,9 @@ const contracts = namespace("contracts")
 export default class Contract extends Vue {
   @contracts.State
   contractConfigs!: Array<LSPConfiguration>
+
+  @contracts.Getter
+  getContractStatuses!: Record<string, boolean>
 
   get contractDetails(): LSPConfiguration | undefined {
     return this.contractConfigs.find(
