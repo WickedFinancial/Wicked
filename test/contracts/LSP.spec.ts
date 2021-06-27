@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { ethers, getNamedAccounts } from "hardhat"
+import { config, ethers, getNamedAccounts } from "hardhat"
 import { waffleJest } from "@ethereum-waffle/jest"
 import { Address } from "hardhat-deploy/dist/types"
 import { BigNumber, Contract } from "ethers"
@@ -10,20 +10,25 @@ import WETHAbi from "~/abis/WETH.json"
 import LSPABI from "~/abis/LSP.json"
 import LSPCreatorABI from "~/abis/LSPCreator.json"
 import ERC20ABI from "~/abis/ERC20.json"
+import OptimisticOracle from "~/abis/OptomisticOracle.json"
 import LinearLongShortPairABI from "~/abis/LinearLongShortPairFinancialProductLibrary.json"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
 
 describe("LSP", function () {
-  const addresses: Record<string, Address> = {
+  const addresses = {
     WETH: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
     LSPCreator: "0x4C68829DBD07FEbB250B90f5624d4a5C30BBeC2c",
     LinearLongShortPairFinancialProductLibrary:
       "0x46b541E0fE2E817340A1A88740607329fF5ED279",
+    OptimisticOracle: "0xB1d3A89333BBC3F5e98A991d6d4C1910802986BC",
+    LSP: "",
+    longToken: "",
+    shortToken: "",
   }
-  const contracts: Record<string, Contract> = {}
-  let namedAccounts: Record<string, Address>
+  let contracts: Record<keyof typeof addresses, Contract>
+  let namedAccounts: Record<keyof typeof config.namedAccounts, Address>
 
   const gasprice = 50
   const prepaidProposerReward = ethers.utils.parseUnits("0.01")
@@ -86,7 +91,7 @@ describe("LSP", function () {
 
     const approvePromise = new Promise<void>((resolve) => {
       contracts.WETH.once(
-        contracts.WETH.filters.Approval(null, addresses.EMP),
+        contracts.WETH.filters.Approval(null, addresses.LSP),
         (_1, _2, allowance) => {
           expect(allowance).toEqBN(prepaidProposerReward)
           resolve()
@@ -335,10 +340,10 @@ describe("LSP", function () {
     expect(syntheticBalances[1]).toBeGteBN(tokensToSettle)
 
     // Check contract state
-    const ContractState = {
-      Open: 0,
-      ExpiredPriceRequested: 1,
-      ExpiredPriceReceived: 2,
+    enum ContractState {
+      Open,
+      ExpiredPriceRequested,
+      ExpiredPriceReceived,
     }
 
     let contractState: number = await contracts.LSP.contractState()
@@ -356,5 +361,11 @@ describe("LSP", function () {
     contractState = await contracts.LSP.contractState()
 
     expect(contractState).toEqual(ContractState.ExpiredPriceRequested)
+  })
+  it("Should settle tokens after receiving expired price. ", async () => {
+    contracts.OptimisticOracle = await ethers.getContractAt(
+      OptimisticOracle,
+      addresses.OptimisticOracle
+    )
   })
 })

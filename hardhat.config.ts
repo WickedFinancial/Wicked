@@ -58,9 +58,10 @@ task(
   "convert",
   "Convert all json abis to human readable format",
   async (_, { ethers }) => {
-    const path = "~/abis/"
+    const path = "./abis/"
     const files = await readdir(path)
     for (const file of files) {
+      if (file === "index.ts") continue
       const jsonBuffer = await readFile(path.concat(file))
       const jsonAbi = JSON.parse(jsonBuffer.toString())
       const iface = new ethers.utils.Interface(jsonAbi)
@@ -220,11 +221,12 @@ task("launch", "Launch all configured LSP contracts")
 
         // Get Collateral Contract instance if not present already
         if (!(contractConfiguration.collateralToken in contracts)) {
-          contracts[contractConfiguration.collateralToken] =
-            await ethers.getContractAt(
-              abis[contractConfiguration.collateralToken],
-              collateralTokenAddress
-            )
+          contracts[
+            contractConfiguration.collateralToken
+          ] = await ethers.getContractAt(
+            abis[contractConfiguration.collateralToken],
+            collateralTokenAddress
+          )
         }
 
         // Create and Approve collateral for the proposer reward
@@ -289,11 +291,12 @@ task("launch", "Launch all configured LSP contracts")
         // Configure Financial ProductLibrary
         // Get Financial Product Library instance if not present already
         if (!(contractConfiguration.financialProductLibrary in contracts)) {
-          contracts[contractConfiguration.financialProductLibrary] =
-            await ethers.getContractAt(
-              abis[contractConfiguration.financialProductLibrary],
-              financialProductLibraryAddress
-            )
+          contracts[
+            contractConfiguration.financialProductLibrary
+          ] = await ethers.getContractAt(
+            abis[contractConfiguration.financialProductLibrary],
+            financialProductLibraryAddress
+          )
         }
 
         // Set Parameters
