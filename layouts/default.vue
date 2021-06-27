@@ -1,6 +1,12 @@
 <template>
   <v-app dark>
-    <v-navigation-drawer class="navigationdrawer" v-model="drawer" :clipped="clipped" stateless app>
+    <v-navigation-drawer
+      v-model="drawer"
+      class="navigationdrawer"
+      :clipped="clipped"
+      stateless
+      app
+    >
       <v-list>
         <v-list-item
           v-for="(item, i) in items"
@@ -22,7 +28,7 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
 
       <v-toolbar-title v-text="title" />
-      <avow-logo id="Logo" />
+      <wicked-logo id="Logo" />
       <v-spacer />
       {{ selectedAccount }}
       <web3-btn></web3-btn>
@@ -38,13 +44,11 @@
 <script lang="ts">
 import { Component, namespace, Vue } from "nuxt-property-decorator"
 
-import Web3Btn from "~/components/Web3Btn.vue"
-
 const contracts = namespace("contracts")
 
 const web3 = namespace("web3")
 
-@Component({ components: { Web3Btn } })
+@Component
 export default class DefaultLayout extends Vue {
   @web3.State
   isConnected!: boolean
@@ -54,11 +58,9 @@ export default class DefaultLayout extends Vue {
 
   clipped = true
   drawer = false
-  menuItems = [
-    { icon: "mdi-home", title: "Home", to: "/" },
-    { icon: "mdi-apps", title: "App", to: "/app" },
-  ]
-  title = "Wicked Finance"
+  menuItems = [{ icon: "mdi-home", title: "Home", to: "/" }]
+
+  title = "Wicked Financial"
 
   @contracts.Getter
   syntheticNames!: Array<string>
@@ -77,11 +79,12 @@ export default class DefaultLayout extends Vue {
 </script>
 
 <style type="text/css" scoped>
-header{
+header {
   background: transparent !important;
   box-shadow: none !important;
 }
-.navigationdrawer{
+
+.navigationdrawer {
   background: rgba(0, 0, 0, 0.3);
   padding-top: 15px;
 }

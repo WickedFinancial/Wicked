@@ -1,4 +1,4 @@
-# avow
+# Wicked
 
 ## Build Setup
 
