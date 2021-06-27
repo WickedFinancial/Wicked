@@ -219,7 +219,7 @@ export default class contracts extends VuexModule {
       })
       const mintTx = await lspContract.create(parsedAmount)
       await mintTx.wait()
-      await this.updateTokenBalances()
+      await this.updateContractData()
     }
   }
 
@@ -238,12 +238,12 @@ export default class contracts extends VuexModule {
       })
       const redeemTx = await lspContract.redeem(parsedAmount)
       await redeemTx.wait()
-      await this.updateTokenBalances()
+      await this.updateContractData()
     }
   }
 
   @Action({ rawError: true })
-  async updateTokenBalances() {
+  async updateContractData() {
     this.context.commit("setTokenBalancesLoaded", false)
     if (this.canUpdate) {
       await this.context.dispatch("updateCollateralTokenBalances")

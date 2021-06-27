@@ -37,7 +37,7 @@ export default class Web3Btn extends Vue {
   initializeContracts!: () => Promise<void>
 
   @contracts.Action
-  updateTokenBalances!: () => Promise<void>
+  updateContractData!: () => Promise<void>
 
   @contracts.Action
   clearContracts!: () => void
@@ -53,7 +53,7 @@ export default class Web3Btn extends Vue {
       await this.connectWeb3()
       await this.registerListeners()
       await this.initializeContracts()
-      await this.updateTokenBalances()
+      await this.updateContractData()
     } finally {
       this.loading = false
     }
