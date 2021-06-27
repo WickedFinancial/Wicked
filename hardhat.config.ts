@@ -323,7 +323,7 @@ task("launch", "Launch all configured LSP contracts")
     await writeFile(outputFile, JSON.stringify(contractConfigs, null, 2))
   })
 
-task("time", "Time Travel")
+task("time:expiry", "Set time to expiry date of given contract")
   .addParam(
     "syntheticName",
     "Name of the contract whose expiration time you want to travel to / past"

@@ -30,12 +30,17 @@
       <MintTokens
         :contractDetails="contractDetails"
         :collateralTokens="collateralTokens"
+        v-if="contractState === 0"
       />
       <RedeemTokens
         :contractDetails="contractDetails"
         :collateralTokens="collateralTokens"
+        v-if="contractState === 0"
       />
-      <ExpireContract :contractDetails="contractDetails" />
+      <ExpireContract
+        v-if="contractState === 0"
+        :contractDetails="contractDetails"
+      />
     </v-card-actions>
   </v-card>
 </template>
@@ -59,6 +64,9 @@ const contracts = namespace("contracts")
 export default class contractTokens extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration
+
+  @Prop()
+  contractState!: number | undefined
 
   @contracts.Getter
   getCollateralTokenBalances!: Record<string, number>

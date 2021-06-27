@@ -8,6 +8,7 @@
     <contract-tokens
       v-if="contractState !== undefined"
       :contractDetails="contractDetails"
+      :contractState="contractState"
     />
   </v-container>
 </template>
