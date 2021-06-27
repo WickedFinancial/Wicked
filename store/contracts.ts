@@ -6,6 +6,7 @@ import {
   LSPConfiguration,
   SyntheticTokenContractMapping,
   SyntheticTokenBalances,
+  SyntheticTokenAddresses,
 } from "~/types"
 
 const abis: Record<string, Array<string>> = require("~/abis")
@@ -24,11 +25,18 @@ const syntheticTokenContracts: Record<string, SyntheticTokenContractMapping> =
 export default class contracts extends VuexModule {
   contractConfigs: Array<LSPConfiguration> = require("~/deployedContractConfigs.json")
   syntheticTokenBalances: Record<string, SyntheticTokenBalances> = {}
+  syntheticTokenAddresses: Record<string, SyntheticTokenAddresses> = {}
   collateralTokenBalances: Record<string, number> = {}
-  contractsInitialized: boolean = false
+  contractStatuses: Record<string, number> = {}
   tokenBalancesLoaded: boolean = false
   collateralAllowances: Record<string, ethers.BigNumber> = {}
 
+  get canUpdate(): boolean {
+    return (
+      this.context.rootGetters["web3/getConnectionStatus"] &&
+      this.context.rootGetters["web3/onCorrectNetwork"]
+    )
+  }
   get syntheticNames() {
     return this.contractConfigs.map((config) => config.syntheticName)
   }
@@ -43,6 +51,36 @@ export default class contracts extends VuexModule {
 
   get getSyntheticTokenBalances(): Record<string, SyntheticTokenBalances> {
     return this.syntheticTokenBalances
+  }
+
+  get getSyntheticTokenAddresses(): Record<string, SyntheticTokenAddresses> {
+    return this.syntheticTokenAddresses
+  }
+
+  get getContractStatuses(): Record<string, number> {
+    return this.contractStatuses
+  }
+
+  @Mutation
+  resetContractStatuses() {
+    this.contractStatuses = {}
+  }
+
+  @Mutation
+  resetTokenBalances() {
+    this.syntheticTokenBalances = {}
+    this.collateralTokenBalances = {}
+    this.collateralAllowances = {}
+    this.tokenBalancesLoaded = false
+  }
+
+  @Mutation
+  setContractStatus(payload: { syntheticName: string; status: number }) {
+    const { syntheticName, status } = payload
+    console.log(`Setting state of contract ${syntheticName} to ${status}`)
+    const newValues: Record<string, number> = {}
+    newValues[syntheticName] = status
+    this.contractStatuses = Object.assign({}, this.contractStatuses, newValues)
   }
 
   @Mutation
@@ -87,6 +125,29 @@ export default class contracts extends VuexModule {
   }
 
   @Mutation
+  setSyntheticTokenAddresses(payload: {
+    syntheticName: string
+    longAddress: string
+    shortAddress: string
+  }) {
+    const { syntheticName, longAddress, shortAddress } = payload
+    console.log(
+      `Setting long / short addresses for ${syntheticName} to:`,
+      longAddress,
+      shortAddress
+    )
+
+    let newValues: Record<string, SyntheticTokenAddresses> = {}
+    newValues[syntheticName] = { longAddress, shortAddress }
+
+    this.syntheticTokenAddresses = Object.assign(
+      {},
+      this.syntheticTokenAddresses,
+      newValues
+    )
+  }
+
+  @Mutation
   setSyntheticTokenBalances(payload: {
     syntheticName: string
     longBalance: number
@@ -107,6 +168,25 @@ export default class contracts extends VuexModule {
       this.syntheticTokenBalances,
       newValues
     )
+  }
+
+  @Action({ rawError: true })
+  clearContracts() {
+    this.context.commit("resetContractStatuses")
+    this.context.commit("resetTokenBalances")
+  }
+
+  @Action({ rawError: true })
+  async expireContract(syntheticName: string) {
+    console.log(`Expiring contract ${syntheticName}`)
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const lspContract = lspContracts[syntheticName].connect(signer)
+      const expireTx = await lspContract.expire()
+      await expireTx.wait()
+      this.context.dispatch("updateContractStatuses")
+    }
   }
 
   @Action({ rawError: true })
@@ -152,17 +232,39 @@ export default class contracts extends VuexModule {
       })
       const mintTx = await lspContract.create(parsedAmount)
       await mintTx.wait()
-      await this.updateTokenBalances()
+      await this.updateContractData()
     }
   }
 
   @Action({ rawError: true })
-  async updateTokenBalances() {
+  async redeemTokens(payload: { amount: number; syntheticName: string }) {
+    const { amount, syntheticName } = payload
+    console.log(`Redeeming ${amount} tokens of ${syntheticName}`)
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const lspContract = lspContracts[syntheticName].connect(signer)
+      const parsedAmount = ethers.utils.parseUnits(amount.toString())
+      console.log("Parsed values: ", {
+        lspContract,
+        parsedAmount,
+      })
+      const redeemTx = await lspContract.redeem(parsedAmount)
+      await redeemTx.wait()
+      await this.updateContractData()
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateContractData() {
     this.context.commit("setTokenBalancesLoaded", false)
-    await this.context.dispatch("updateCollateralTokenBalances")
-    await this.context.dispatch("updateSyntheticTokenBalances")
-    await this.context.dispatch("updateCollateralAllowances")
-    this.context.commit("setTokenBalancesLoaded", true)
+    if (this.canUpdate) {
+      await this.context.dispatch("updateCollateralTokenBalances")
+      await this.context.dispatch("updateSyntheticTokenBalances")
+      await this.context.dispatch("updateCollateralAllowances")
+      await this.context.dispatch("updateContractStatuses")
+      this.context.commit("setTokenBalancesLoaded", true)
+    }
   }
 
   @Action({ rawError: true })
@@ -225,72 +327,94 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
+  async updateContractStatuses() {
+    this.context.commit("resetContractStatuses")
+    for (const [syntheticName, lspContract] of Object.entries(lspContracts)) {
+      const contractState = await lspContract.contractState()
+
+      this.context.commit("setContractStatus", {
+        syntheticName,
+        status: parseInt(contractState.toString()),
+      })
+    }
+  }
+
+  @Action({ rawError: true })
   async initializeContracts() {
-    console.log("Connecting to contracts")
-    const provider: ethers.providers.Web3Provider | undefined =
-      getCurrentProvider()
-    if (provider === undefined) {
-      throw new Error("Provider is undefined - cannot initialize contracts")
-    } else {
-      for (const config of this.contractConfigs) {
-        if (config.address !== undefined) {
-          try {
-            // Instantiate LSP Contract
-            const lspContract = new ethers.Contract(
-              config.address,
-              LSPAbi,
-              provider
-            )
-            // Will throw an error if contract is not deployed on current network
-            await lspContract.deployed()
-            const syntheticName = config.syntheticName
-            lspContracts[syntheticName] = lspContract
+    this.context.commit("resetContractStatuses")
+    if (this.canUpdate) {
+      console.log("Connecting to contracts")
+      const provider: ethers.providers.Web3Provider | undefined =
+        getCurrentProvider()
+      if (provider === undefined) {
+        throw new Error("Provider is undefined - cannot initialize contracts")
+      } else {
+        for (const config of this.contractConfigs) {
+          if (config.address !== undefined) {
+            try {
+              // Instantiate LSP Contract
+              const lspContract = new ethers.Contract(
+                config.address,
+                LSPAbi,
+                provider
+              )
+              // Will throw an error if contract is not deployed on current network
+              await lspContract.deployed()
+              const syntheticName = config.syntheticName
+              lspContracts[syntheticName] = lspContract
 
-            // Instantiate Collateral Contract
-            const collateralName = config.collateralToken
-            const collateralAddress = addresses[collateralName]
-            const collateralAbi = abis[collateralName]
-            console.log(
-              `Connecting to collateral ${collateralName} at ${collateralAddress} with abi: `,
-              collateralAbi
-            )
-            const collateralContract = new ethers.Contract(
-              collateralAddress,
-              collateralAbi,
-              provider
-            )
+              // Instantiate Collateral Contract
+              const collateralName = config.collateralToken
+              const collateralAddress = addresses[collateralName]
+              const collateralAbi = abis[collateralName]
+              console.log(
+                `Connecting to collateral ${collateralName} at ${collateralAddress} with abi: `,
+                collateralAbi
+              )
+              const collateralContract = new ethers.Contract(
+                collateralAddress,
+                collateralAbi,
+                provider
+              )
 
-            // Will throw an error if contract is not deployed on current network
-            await collateralContract.deployed()
-            collateralContracts[collateralName] = collateralContract
+              // Will throw an error if contract is not deployed on current network
+              await collateralContract.deployed()
+              collateralContracts[collateralName] = collateralContract
 
-            // Instantiate Long / Short Token Contracts
-            const erc20Abi = abis.ERC20
-            const longAddress = await lspContract.longToken()
-            const longContract = new ethers.Contract(
-              longAddress,
-              erc20Abi,
-              provider
-            )
+              // Instantiate Long / Short Token Contracts
+              const erc20Abi = abis.ERC20
+              const longAddress = await lspContract.longToken()
+              const longContract = new ethers.Contract(
+                longAddress,
+                erc20Abi,
+                provider
+              )
 
-            const shortAddress = await lspContract.shortToken()
-            const shortContract = new ethers.Contract(
-              shortAddress,
-              erc20Abi,
-              provider
-            )
+              const shortAddress = await lspContract.shortToken()
+              const shortContract = new ethers.Contract(
+                shortAddress,
+                erc20Abi,
+                provider
+              )
 
-            syntheticTokenContracts[syntheticName] = {
-              longContract,
-              shortContract,
+              syntheticTokenContracts[syntheticName] = {
+                longContract,
+                shortContract,
+              }
+
+              this.context.commit("setSyntheticTokenAddresses", {
+                syntheticName,
+                shortAddress,
+                longAddress,
+              })
+
+              console.log(`Connected to contract ${syntheticName} succesfully`)
+            } catch (e) {
+              console.log(
+                `Couldnt connect to contract ${config.syntheticName} due to exception: `,
+                e
+              )
             }
-
-            console.log(`Connected to contract ${syntheticName} succesfully`)
-          } catch (e) {
-            console.log(
-              `Couldnt connect to contract ${config.syntheticName} due to exception: `,
-              e
-            )
           }
         }
       }

@@ -33,7 +33,9 @@
       {{ selectedAccount }}
       <web3-btn></web3-btn>
     </v-app-bar>
+
     <v-main>
+      <NetworkStatusBanner />
       <v-container>
         <nuxt />
       </v-container>
@@ -45,7 +47,6 @@
 import { Component, namespace, Vue } from "nuxt-property-decorator"
 
 const contracts = namespace("contracts")
-
 const web3 = namespace("web3")
 
 @Component

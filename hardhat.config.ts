@@ -15,9 +15,18 @@ const abis = require("./abis")
 
 function mnemonic() {
   try {
-    return fs.readFileSync("~/mnemonic.txt").toString().trim()
+    return fs.readFileSync("./mnemonic.txt").toString().trim()
   } catch (e) {
     console.log("WARNING: No mnemonic file")
+  }
+  return ""
+}
+
+function url() {
+  try {
+    return fs.readFileSync("./url.txt").toString().trim()
+  } catch (e) {
+    console.log("WARNING: No url file")
   }
   return ""
 }
@@ -31,12 +40,12 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
+        url: url(),
       },
       chainId: 42,
     },
     kovan: {
-      url: "https://kovan.infura.io/v3/3ce35c3d389a4461bffd073fbf27d23e",
+      url: url(),
       accounts: {
         mnemonic: mnemonic(),
       },
@@ -312,4 +321,22 @@ task("launch", "Launch all configured LSP contracts")
     }
     const outputFile = "./deployedContractConfigs.json"
     await writeFile(outputFile, JSON.stringify(contractConfigs, null, 2))
+  })
+
+task("time:expiry", "Set time to expiry date of given contract")
+  .addParam(
+    "syntheticName",
+    "Name of the contract whose expiration time you want to travel to / past"
+  )
+  .setAction(async ({ syntheticName }, { ethers }) => {
+    const contractConfig = deployedContractConfigs.find(
+      (config) => config.syntheticName === syntheticName
+    )
+    if (contractConfig !== undefined) {
+      const expirationTime = contractConfig.expirationTime
+      console.log("Traveling to expiration time: ", expirationTime)
+      const timeStamp = (new Date(expirationTime).getTime() / 1000)
+      await ethers.provider.send("evm_setNextBlockTimestamp", [timeStamp+1])
+      await ethers.provider.send("evm_mine", [])
+    }
   })

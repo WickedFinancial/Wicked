@@ -1,7 +1,6 @@
 <template>
   <v-card v-if="tokenBalancesLoaded" class="mx-auto my-12" max-width="500">
     <v-card-title>Tokens</v-card-title>
-    <v-card-subtitle>{{ this.collateralAddress }}</v-card-subtitle>
     <v-card-text>
       <v-list-item>
         <v-list-item-title> Collateral Balance </v-list-item-title>
@@ -9,18 +8,40 @@
       </v-list-item>
 
       <v-list-item>
-        <v-list-item-title> Long Balance </v-list-item-title>
-        <v-list-item-subtitle>{{ this.syntheticTokens.longBalance }}</v-list-item-subtitle>
+        <v-list-item-title
+          ><a :href="etherscanLinkLongToken"> Long Balance</a>
+        </v-list-item-title>
+        <v-list-item-subtitle>{{
+          this.syntheticTokens.longBalance
+        }}</v-list-item-subtitle>
       </v-list-item>
 
       <v-list-item>
-        <v-list-item-title> Short Balance </v-list-item-title>
-        <v-list-item-subtitle>{{ this.syntheticTokens.shortBalance }}</v-list-item-subtitle>
+        <v-list-item-title
+          ><a :href="etherscanLinkShortToken"> Short Balance</a>
+        </v-list-item-title>
+        <v-list-item-subtitle>{{
+          this.syntheticTokens.shortBalance
+        }}</v-list-item-subtitle>
       </v-list-item>
     </v-card-text>
 
-    <v-card-actions>
-      <MintTokens :contractDetails="contractDetails" :collateralTokens="collateralTokens"/>
+    <v-card-actions class="justify-between">
+      <MintTokens
+        :contractDetails="contractDetails"
+        :collateralTokens="collateralTokens"
+        v-if="contractState === 0"
+      />
+      <RedeemTokens
+        :contractDetails="contractDetails"
+        :collateralTokens="collateralTokens"
+        v-if="contractState === 0"
+      />
+      <!-- TODO: Later (when done with testing) we will want to show this only if the current date is past the expiry date  -->
+      <ExpireContract
+        v-if="contractState === 0"
+        :contractDetails="contractDetails"
+      />
     </v-card-actions>
   </v-card>
 </template>
@@ -28,19 +49,31 @@
 <script lang="ts">
 import { Vue, Component, namespace, Prop } from "nuxt-property-decorator"
 import MintTokens from "@/components/MintTokens.vue"
-import SyntheticTokenBalances from "@/store/contracts"
-import { LSPConfiguration } from "~/types"
+import RedeemTokens from "@/components/RedeemTokens.vue"
+import ExpireContract from "@/components/ExpireContract.vue"
+import {
+  LSPConfiguration,
+  SyntheticTokenContractMapping,
+  SyntheticTokenBalances,
+  SyntheticTokenAddresses,
+} from "~/types"
 
 const addresses: Record<string, string> = require("@/addresses.json")
 const contracts = namespace("contracts")
 
-@Component({ components: { MintTokens } })
+@Component({ components: { MintTokens, RedeemTokens, ExpireContract } })
 export default class contractTokens extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration
 
+  @Prop()
+  contractState!: number | undefined
+
   @contracts.Getter
   getCollateralTokenBalances!: Record<string, number>
+
+  @contracts.Getter
+  getSyntheticTokenAddresses!: Record<string, SyntheticTokenAddresses>
 
   @contracts.Getter
   getSyntheticTokenBalances!: Record<string, SyntheticTokenBalances>
@@ -48,8 +81,24 @@ export default class contractTokens extends Vue {
   @contracts.State
   tokenBalancesLoaded!: boolean
 
-  get collateralAddress(): string | undefined {
-    return addresses[this.contractDetails.collateralToken]
+  get etherscanLinkShortToken(): string | undefined {
+    return `https://kovan.etherscan.io/address/${
+      this.getSyntheticTokenAddresses[this.contractDetails.syntheticName]
+        .shortAddress
+    }`
+  }
+
+  get etherscanLinkLongToken(): string | undefined {
+    return `https://kovan.etherscan.io/address/${
+      this.getSyntheticTokenAddresses[this.contractDetails.syntheticName]
+        .longAddress
+    }`
+  }
+
+  get etherscanLinkCollateral(): string | undefined {
+    return `https://kovan.etherscan.io/address/${
+      addresses[this.contractDetails.collateralToken]
+    }`
   }
 
   get collateralTokens(): number {

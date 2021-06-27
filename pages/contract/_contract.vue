@@ -3,9 +3,12 @@
     <contract-summary
       :contractDetails="contractDetails"
       :contractName="contractName"
+      :contractState="contractState"
     />
     <contract-tokens
+      v-if="contractState !== undefined"
       :contractDetails="contractDetails"
+      :contractState="contractState"
     />
   </v-container>
 </template>
@@ -23,6 +26,13 @@ const contracts = namespace("contracts")
 export default class Contract extends Vue {
   @contracts.State
   contractConfigs!: Array<LSPConfiguration>
+
+  @contracts.Getter
+  getContractStatuses!: Record<string, number>
+
+  get contractState(): number | undefined {
+    return this.getContractStatuses[this.contractName]
+  }
 
   get contractDetails(): LSPConfiguration | undefined {
     return this.contractConfigs.find(

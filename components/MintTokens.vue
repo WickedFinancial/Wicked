@@ -1,84 +1,82 @@
 <template>
-  <v-row justify="center">
-    <v-dialog v-model="dialog" persistent max-width="600px">
-      <template #activator="{ on, attrs }">
-        <v-btn color="primary" dark v-bind="attrs" v-on="on"> Mint</v-btn>
-      </template>
-      <v-card>
-        <v-card-title>
-          <span class="headline">Mint Tokens</span>
-        </v-card-title>
-        <form>
-          <v-card-text>
-            <v-container>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="syntheticTokens"
-                    label="Synthetic Tokens to create"
-                    type="number"
-                    :rules="rules"
-                    required
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12">
-                  <v-list-item>
-                    <v-list-item-title> Required Collateral</v-list-item-title>
-                    <v-list-item-subtitle
-                      >{{ collateralAmount }}
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12">
-                  <v-list-item>
-                    <v-list-item-title> Available Collateral</v-list-item-title>
-                    <v-list-item-subtitle
-                      >{{ collateralTokens }}
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
+  <v-dialog v-model="dialog" persistent max-width="600px">
+    <template #activator="{ on, attrs }">
+      <v-btn color="primary" text v-bind="attrs" v-on="on"> Mint</v-btn>
+    </template>
+    <v-card>
+      <v-card-title>
+        <span class="headline">Mint Tokens</span>
+      </v-card-title>
+      <form>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="syntheticTokens"
+                  label="Synthetic Tokens to create"
+                  type="number"
+                  :rules="rules"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-list-item>
+                  <v-list-item-title> Required Collateral</v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{ collateralAmount }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-list-item>
+                  <v-list-item-title> Available Collateral</v-list-item-title>
+                  <v-list-item-subtitle
+                    >{{ collateralTokens }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
 
-            <v-btn
-              v-if="collateralApproved"
-              color="blue darken-1"
-              type="button"
-              @click.prevent="mint"
-              :loading="loading"
-              :disabled="loading"
-            >
-              Mint
-              <template v-slot:loader>
-                <span>Loading...</span>
-              </template>
-            </v-btn>
-            <v-btn
-              v-else
-              color="blue darken-1"
-              type="button"
-              @click.prevent="approve"
-              :loading="loading"
-              :disabled="loading"
-            >
-              Approve
-              <template v-slot:loader>
-                <span>Loading...</span>
-              </template>
-            </v-btn>
-          </v-card-actions>
-        </form>
-      </v-card>
-    </v-dialog>
-  </v-row>
+          <v-btn
+            v-if="collateralApproved"
+            color="blue darken-1"
+            type="button"
+            @click.prevent="mint"
+            :loading="loading"
+            :disabled="loading || anyRuleViolated"
+          >
+            Mint
+            <template v-slot:loader>
+              <span>Loading...</span>
+            </template>
+          </v-btn>
+          <v-btn
+            v-else
+            color="blue darken-1"
+            type="button"
+            @click.prevent="approve"
+            :loading="loading"
+            :disabled="loading || anyRuleViolated"
+          >
+            Approve
+            <template v-slot:loader>
+              <span>Loading...</span>
+            </template>
+          </v-btn>
+        </v-card-actions>
+      </form>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script lang="ts">
@@ -118,6 +116,14 @@ export default class mintTokens extends Vue {
   get collateralAmount(): number {
     return (
       this.syntheticTokens * parseFloat(this.contractDetails.collateralPerPair)
+    )
+  }
+
+  get anyRuleViolated(): boolean {
+    return (
+      this.syntheticTokens *
+        parseFloat(this.contractDetails.collateralPerPair) >
+        this.collateralTokens || this.syntheticTokens <= 0
     )
   }
 
