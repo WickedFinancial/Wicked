@@ -9,3 +9,9 @@
     aria-label="Site Logo"
   />
 </template>
+<script lang="ts">
+import { Component, Vue } from "nuxt-property-decorator"
+
+@Component
+export default class WickedLogo extends Vue {}
+</script>
