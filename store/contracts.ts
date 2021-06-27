@@ -177,6 +177,19 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
+  async expireContract(syntheticName: string) {
+    console.log(`Expiring contract ${syntheticName}`)
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const lspContract = lspContracts[syntheticName].connect(signer)
+      const expireTx = await lspContract.expire()
+      await expireTx.wait()
+      this.context.dispatch("updateContractStatuses")
+    }
+  }
+
+  @Action({ rawError: true })
   async approveCollateral(payload: {
     collateralName: string
     syntheticName: string
