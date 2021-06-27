@@ -19,11 +19,6 @@
       </v-list>
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-
-      <v-btn icon @click.stop="clipped = !clipped">
-        <v-icon>mdi-application</v-icon>
-      </v-btn>
       <v-toolbar-title v-text="title" />
       <avow-logo id="Logo" />
       <v-spacer />
@@ -57,10 +52,13 @@ export default class DefaultLayout extends Vue {
 
   clipped = true
   drawer = true
-  menuItems = [{ icon: "mdi-apps", title: "Dashboard", to: "/" }]
+  menuItems = [
+    { icon: "mdi-home", title: "Home", to: "/" },
+    { icon: "mdi-apps", title: "App", to: "/app" },
+  ]
   right = true
   rightDrawer = false
-  title = "Avow"
+  title = "Wicked Finance"
 
   @contracts.Getter
   syntheticNames!: Array<string>
@@ -77,3 +75,10 @@ export default class DefaultLayout extends Vue {
   }
 }
 </script>
+
+<style type="text/css" scoped>
+header{
+  background: transparent !important;
+  box-shadow: none !important;
+}
+</style>
