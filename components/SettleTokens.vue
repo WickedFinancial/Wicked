@@ -1,22 +1,31 @@
 <template>
   <v-dialog v-model="dialog" persistent max-width="600px">
     <template #activator="{ on, attrs }">
-      <v-btn color="primary" text v-bind="attrs" v-on="on"> Redeem</v-btn>
+      <v-btn color="primary" text v-bind="attrs" v-on="on"> Settle</v-btn>
     </template>
     <v-card>
       <v-card-title>
-        <span class="headline">Redeem Tokens</span>
+        <span class="headline">Settle Tokens</span>
       </v-card-title>
       <form>
         <v-card-text>
           <v-container>
             <v-row>
-              <v-col cols="12">
+              <v-col cols="6">
                 <v-text-field
-                  v-model="syntheticTokens"
-                  label="Synthetic Tokens to redeem"
+                  v-model="longTokens"
+                  label="Long Tokens to settle"
                   type="number"
-                  :rules="rules"
+                  :rules="rulesLong"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  v-model="shortTokens"
+                  label="short Tokens to settle"
+                  type="number"
+                  :rules="rulesShort"
                   required
                 ></v-text-field>
               </v-col>
@@ -38,11 +47,11 @@
           <v-btn
             color="blue darken-1"
             type="button"
-            @click.prevent="redeem"
+            @click.prevent="settle"
             :loading="loading"
             :disabled="loading || anyRuleViolated"
           >
-            Redeem
+            Settle
             <template v-slot:loader>
               <span>Loading...</span>
             </template>
@@ -61,17 +70,19 @@ import { ethers } from "ethers"
 const contracts = namespace("contracts")
 
 @Component
-export default class RedeemTokens extends Vue {
+export default class SettleTokens extends Vue {
   dialog = false
   loading = false
-  syntheticTokens = 0
+  longTokens = 0
+  shortTokens = 0
 
   @Prop()
   contractDetails!: LSPConfiguration
 
   @contracts.Action
-  redeemTokens!: (payload: {
-    amount: number
+  settleTokens!: (payload: {
+    longTokens: number
+    shortTokens: number
     syntheticName: string
   }) => Promise<void>
 
@@ -89,26 +100,46 @@ export default class RedeemTokens extends Vue {
   }
 
   get anyRuleViolated(): boolean {
-    return this.syntheticTokens > this.tokenPairs || this.syntheticTokens <= 0
+    const tokenBalances =
+      this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
+    return (
+      this.longTokens > tokenBalances.longTokens ||
+      this.longTokens < 0 ||
+      this.shortTokens > tokenBalances.shortTokens ||
+      this.shortTokens < 0
+    )
   }
 
-  get rules() {
-    let self = this
-    function enoughCollateral(value: number): boolean | string {
-      return value <= self.tokenPairs || "Not enough pairs of synthetic tokens"
+  get rulesShort() {
+    const tokenBalances =
+      this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
+    function enoughTokens(value: number): boolean | string {
+      return value <= tokenBalances.shortBalance || "Not enouth tokens"
     }
     function positive(value: number): boolean | string {
       return value > 0 || "Number of tokens must be positive"
     }
-    return [positive, enoughCollateral]
+    return [positive, enoughTokens]
   }
 
-  async redeem() {
+  get rulesLong() {
+    const tokenBalances =
+      this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
+    function enoughTokens(value: number): boolean | string {
+      return value <= tokenBalances.longBalance || "Not enouth tokens"
+    }
+    function positive(value: number): boolean | string {
+      return value > 0 || "Number of tokens must be positive"
+    }
+    return [positive, enoughTokens]
+  }
+
+  async settle() {
     try {
       this.loading = true
-      console.info("Redeeming amount of tokens: ", this.syntheticTokens)
-      await this.redeemTokens({
-        amount: this.syntheticTokens,
+      await this.settleTokens({
+        longTokens: this.longTokens,
+        shortTokens: this.shortTokens,
         syntheticName: this.contractDetails.syntheticName,
       })
       this.dialog = false

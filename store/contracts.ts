@@ -236,6 +236,33 @@ export default class contracts extends VuexModule {
     }
   }
 
+  @Action
+  async settleTokens(payload: {
+    longTokens: number
+    shortTokens: number
+    syntheticName: string
+  }): Promise<void> {
+    const { longTokens, shortTokens, syntheticName } = payload
+    console.log(
+      `Settling ${longTokens} long and ${shortTokens} short Tokens of ${syntheticName}`
+    )
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const lspContract = lspContracts[syntheticName].connect(signer)
+      const parsedLongTokens = ethers.utils.parseUnits(longTokens.toString())
+      const parsedShortTokens = ethers.utils.parseUnits(shortTokens.toString())
+      console.log("Parsed values: ", {
+        lspContract,
+        parsedLongTokens,
+        parsedShortTokens,
+      })
+      const settleTx = await lspContract.settle(parsedLongTokens, parsedShortTokens)
+      await settleTx.wait()
+      await this.updateContractData()
+    }
+  }
+
   @Action({ rawError: true })
   async redeemTokens(payload: { amount: number; syntheticName: string }) {
     const { amount, syntheticName } = payload

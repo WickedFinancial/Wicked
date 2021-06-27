@@ -42,6 +42,10 @@
         v-if="contractState === 0"
         :contractDetails="contractDetails"
       />
+      <SettleTokens
+        v-if="contractState === 1 || contractState === 2"
+        :contractDetails="contractDetails"
+      />
     </v-card-actions>
   </v-card>
 </template>
@@ -50,6 +54,7 @@
 import { Vue, Component, namespace, Prop } from "nuxt-property-decorator"
 import MintTokens from "@/components/MintTokens.vue"
 import RedeemTokens from "@/components/RedeemTokens.vue"
+import SettleTokens from "@/components/SettleTokens.vue"
 import ExpireContract from "@/components/ExpireContract.vue"
 import {
   LSPConfiguration,
@@ -61,7 +66,9 @@ import {
 const addresses: Record<string, string> = require("@/addresses.json")
 const contracts = namespace("contracts")
 
-@Component({ components: { MintTokens, RedeemTokens, ExpireContract } })
+@Component({
+  components: { MintTokens, SettleTokens, RedeemTokens, ExpireContract },
+})
 export default class contractTokens extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration
