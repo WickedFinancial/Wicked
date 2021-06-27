@@ -74,7 +74,6 @@ export default class contracts extends VuexModule {
     this.tokenBalancesLoaded = false
   }
 
-
   @Mutation
   setContractStatus(payload: { syntheticName: string; status: number }) {
     const { syntheticName, status } = payload
@@ -173,10 +172,9 @@ export default class contracts extends VuexModule {
 
   @Action({ rawError: true })
   clearContracts() {
-      this.context.commit("resetContractStatuses")
-      this.context.commit("resetTokenBalances")
+    this.context.commit("resetContractStatuses")
+    this.context.commit("resetTokenBalances")
   }
-
 
   @Action({ rawError: true })
   async approveCollateral(payload: {
@@ -251,6 +249,7 @@ export default class contracts extends VuexModule {
       await this.context.dispatch("updateCollateralTokenBalances")
       await this.context.dispatch("updateSyntheticTokenBalances")
       await this.context.dispatch("updateCollateralAllowances")
+      await this.context.dispatch("updateContractStatuses")
       this.context.commit("setTokenBalancesLoaded", true)
     }
   }
@@ -310,6 +309,19 @@ export default class contracts extends VuexModule {
       this.context.commit("setCollateralAllowance", {
         syntheticName: config.syntheticName,
         collateralAllowance,
+      })
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateContractStatuses() {
+    this.context.commit("resetContractStatuses")
+    for (const [syntheticName, lspContract] of Object.entries(lspContracts)) {
+      const contractState = await lspContract.contractState()
+
+      this.context.commit("setContractStatus", {
+        syntheticName,
+        status: parseInt(contractState.toString()),
       })
     }
   }
@@ -383,12 +395,6 @@ export default class contracts extends VuexModule {
                 longAddress,
               })
 
-              const contractState = await lspContract.contractState()
-
-              this.context.commit("setContractStatus", {
-                syntheticName,
-                status: parseInt(contractState.toString()),
-              })
               console.log(`Connected to contract ${syntheticName} succesfully`)
             } catch (e) {
               console.log(
