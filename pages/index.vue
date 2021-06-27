@@ -66,8 +66,15 @@ li i{
   margin: 30px 0 !important;
 }
 #app{
-  background: -webkit-radial-gradient(bottom right, #0eb035, #172733) !important;
-  background: -moz-radial-gradient(bottom right, #0eb035, #172733) !important;
-  background: radial-gradient(to top left, #0eb035, #172733) !important;
+  background: #151e2a !important;
+  background: linear-gradient(to top left, #295059, #151e2a) !important;
+}
+h1{
+  font-weight: bolder;
+}
+h1, h3{
+  background: -webkit-linear-gradient(left, #fff, #cbfdfd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 </style>

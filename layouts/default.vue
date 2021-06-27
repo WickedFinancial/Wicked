@@ -1,6 +1,6 @@
 <template>
   <v-app dark>
-    <v-navigation-drawer v-model="drawer" :clipped="clipped" fixed app>
+    <v-navigation-drawer class="navigationdrawer" v-model="drawer" :clipped="clipped" stateless app>
       <v-list>
         <v-list-item
           v-for="(item, i) in items"
@@ -19,6 +19,8 @@
       </v-list>
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+
       <v-toolbar-title v-text="title" />
       <avow-logo id="Logo" />
       <v-spacer />
@@ -51,13 +53,11 @@ export default class DefaultLayout extends Vue {
   selectedAccount!: string
 
   clipped = true
-  drawer = true
+  drawer = false
   menuItems = [
     { icon: "mdi-home", title: "Home", to: "/" },
     { icon: "mdi-apps", title: "App", to: "/app" },
   ]
-  right = true
-  rightDrawer = false
   title = "Wicked Finance"
 
   @contracts.Getter
@@ -80,5 +80,9 @@ export default class DefaultLayout extends Vue {
 header{
   background: transparent !important;
   box-shadow: none !important;
+}
+.navigationdrawer{
+  background: rgba(0, 0, 0, 0.3);
+  padding-top: 15px;
 }
 </style>
