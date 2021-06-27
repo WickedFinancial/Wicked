@@ -43,18 +43,6 @@ li {
 li i {
   padding-right: 10px;
 }
-/*.use-app {*/
-/*  margin: 30px 0 !important;*/
-/*  background: red;*/
-/*  border-radius: 0;*/
-/*  color: green !important;*/
-/*  text-transform: capitalize;*/
-/*  font-size: 12px;*/
-/*  padding: 25px !important;*/
-/*  font-weight: bolder;*/
-/*  letter-spacing: 0;*/
-/*  cursor: pointer;*/
-/*}*/
 h1 {
   font-weight: bolder;
   font-size: 46px;
