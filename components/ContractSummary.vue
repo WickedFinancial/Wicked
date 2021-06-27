@@ -37,6 +37,13 @@
         >
       </v-list-item>
 
+      <v-list-item>
+        <v-list-item-title>Contract State</v-list-item-title>
+        <v-list-item-subtitle>{{
+          this.contractStateLabel
+        }}</v-list-item-subtitle>
+      </v-list-item>
+
       <v-list-item
         v-for="(parameterInfo, index) in libraryConfiguration"
         :key="index"
@@ -73,6 +80,21 @@ export default class contractSummary extends Vue {
 
   @Prop()
   contractName!: string
+
+  @Prop()
+  contractState!: number | undefined
+
+  stateLabelMapping: Record<number, string> = {
+    0: "Open",
+    1: "Expired - Price Requested",
+    2: "Expired - Price Received",
+  }
+
+  get contractStateLabel(): string {
+    return this.contractState !== undefined
+      ? this.stateLabelMapping[this.contractState]
+      : "Not Connected"
+  }
 
   get expirationTime(): string | undefined {
     return new Date(this.contractDetails.expirationTime).toLocaleString()
