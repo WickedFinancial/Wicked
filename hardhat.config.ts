@@ -322,3 +322,21 @@ task("launch", "Launch all configured LSP contracts")
     const outputFile = "./deployedContractConfigs.json"
     await writeFile(outputFile, JSON.stringify(contractConfigs, null, 2))
   })
+
+task("time", "Time Travel")
+  .addParam(
+    "syntheticName",
+    "Name of the contract whose expiration time you want to travel to / past"
+  )
+  .setAction(async ({ syntheticName }, { ethers }) => {
+    const contractConfig = deployedContractConfigs.find(
+      (config) => config.syntheticName === syntheticName
+    )
+    if (contractConfig !== undefined) {
+      const expirationTime = contractConfig.expirationTime
+      console.log("Traveling to expiration time: ", expirationTime)
+      const timeStamp = (new Date(expirationTime).getTime() / 1000)
+      await ethers.provider.send("evm_setNextBlockTimestamp", [timeStamp+1])
+      await ethers.provider.send("evm_mine", [])
+    }
+  })
