@@ -356,13 +356,12 @@ task(
   await ethers.provider.send("evm_increaseTime", [defaultLiveness.toNumber()])
 })
 
-task("propose", "Propose price for given contract")
+task("settle:oracle", "Settle on oracle")
   .addParam(
     "syntheticName",
     "Name of the contract for which you want to propose a settlement price"
   )
-  .addParam("proposedPrice", "Price value to propose")
-  .setAction(async ({ syntheticName, proposedPrice }, { ethers }) => {
+  .setAction(async ({ syntheticName }, { ethers }) => {
     const contractConfig = deployedContractConfigs.find(
       (config) => config.syntheticName === syntheticName
     )
@@ -372,27 +371,7 @@ task("propose", "Propose price for given contract")
         addresses.OptimisticOracle
       )
 
-      await optimisticOracle.deployed()
-      console.log("Optimistic Oracle is deployed")
-
-      // Approve collateral for the bond
-      const collateralAddress = addresses[contractConfig.collateralToken]
-      const collateralAbi = abis[contractConfig.collateralToken]
-      console.log("Collateral Address: ", collateralAddress)
-      const collateralContract = await ethers.getContractAt(
-        collateralAbi,
-        collateralAddress || ""
-      )
-      console.log("Connected to collateral contract")
-
-      const approveTx = await collateralContract.approve(
-        addresses.OptimisticOracle,
-        ethers.constants.MaxUint256
-      )
-      await approveTx.wait()
-      console.log("Approved collateral")
-
-      //Send Proposal
+      //Send Settlement Transaction
       const requester = contractConfig.address
       const identifier = ethers.utils.formatBytes32String(
         contractConfig.priceIdentifier
@@ -404,15 +383,44 @@ task("propose", "Propose price for given contract")
         contractConfig.customAncillaryData
       )
 
-      const proposeTx = await optimisticOracle.proposePrice(
+      const settleTx = await optimisticOracle.settle(
         requester,
         identifier,
         timestamp,
-        ancillaryData,
-        proposedPrice
+        ancillaryData
       )
-      await proposeTx.wait()
-      console.log("Proposed Price")
+      await settleTx.wait()
+      console.log("Settled on Oracle")
     }
   })
 
+task("settle:lsp", "Settle on lsp contract")
+  .addParam(
+    "syntheticName",
+    "Name of the contract for which you want to propose a settlement price"
+  )
+  .addOptionalParam(
+    "longTokens",
+    "Amount of long tokens to redeem",
+    "0"
+  )
+  .addOptionalParam(
+    "shortTokens",
+    "Amount of short tokens to redeem",
+    "0"
+  )
+  .setAction(async ({ longTokens, shortTokens, syntheticName }, { ethers }) => {
+    const contractConfig = deployedContractConfigs.find(
+      (config) => config.syntheticName === syntheticName
+    )
+    if (contractConfig !== undefined) {
+      const lspContract = await ethers.getContractAt(
+        abis.LSP,
+        contractConfig.address || "NOADDRESS"
+      )
+      const longTokensParsed = ethers.utils.parseUnits(longTokens)
+      const shortTokensParsed = ethers.utils.parseUnits(shortTokens)
+      const settleTx = await lspContract.settle(longTokensParsed, shortTokensParsed)
+      await settleTx.wait()
+    }
+  })
