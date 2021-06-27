@@ -89,4 +89,9 @@ header {
   background: rgba(0, 0, 0, 0.3);
   padding-top: 15px;
 }
+
+#app {
+  background: #151e2a !important;
+  background: linear-gradient(to top left, #295059, #151e2a) !important;
+}
 </style>

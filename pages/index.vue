@@ -43,22 +43,18 @@ li {
 li i {
   padding-right: 10px;
 }
-.use-app {
-  margin: 30px 0 !important;
-  background: white;
-  border-radius: 0;
-  color: black !important;
-  text-transform: capitalize;
-  font-size: 12px;
-  padding: 25px !important;
-  font-weight: bolder;
-  letter-spacing: 0;
-  cursor: pointer;
-}
-#app {
-  background: #151e2a !important;
-  background: linear-gradient(to top left, #295059, #151e2a) !important;
-}
+/*.use-app {*/
+/*  margin: 30px 0 !important;*/
+/*  background: red;*/
+/*  border-radius: 0;*/
+/*  color: green !important;*/
+/*  text-transform: capitalize;*/
+/*  font-size: 12px;*/
+/*  padding: 25px !important;*/
+/*  font-weight: bolder;*/
+/*  letter-spacing: 0;*/
+/*  cursor: pointer;*/
+/*}*/
 h1 {
   font-weight: bolder;
   font-size: 46px;
