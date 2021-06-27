@@ -27,7 +27,7 @@ export default class contracts extends VuexModule {
   syntheticTokenBalances: Record<string, SyntheticTokenBalances> = {}
   syntheticTokenAddresses: Record<string, SyntheticTokenAddresses> = {}
   collateralTokenBalances: Record<string, number> = {}
-  contractStatuses: Record<string, boolean> = {}
+  contractStatuses: Record<string, number> = {}
   tokenBalancesLoaded: boolean = false
   collateralAllowances: Record<string, ethers.BigNumber> = {}
 
@@ -57,8 +57,7 @@ export default class contracts extends VuexModule {
     return this.syntheticTokenAddresses
   }
 
-
-  get getContractStatuses(): Record<string, boolean> {
+  get getContractStatuses(): Record<string, number> {
     return this.contractStatuses
   }
 
@@ -68,9 +67,19 @@ export default class contracts extends VuexModule {
   }
 
   @Mutation
-  setContractStatus(payload: { syntheticName: string; status: boolean }) {
+  resetTokenBalances() {
+    this.syntheticTokenBalances = {}
+    this.collateralTokenBalances = {}
+    this.collateralAllowances = {}
+    this.tokenBalancesLoaded = false
+  }
+
+
+  @Mutation
+  setContractStatus(payload: { syntheticName: string; status: number }) {
     const { syntheticName, status } = payload
-    const newValues: Record<string, boolean> = {}
+    console.log(`Setting state of contract ${syntheticName} to ${status}`)
+    const newValues: Record<string, number> = {}
     newValues[syntheticName] = status
     this.contractStatuses = Object.assign({}, this.contractStatuses, newValues)
   }
@@ -161,6 +170,13 @@ export default class contracts extends VuexModule {
       newValues
     )
   }
+
+  @Action({ rawError: true })
+  clearContracts() {
+      this.context.commit("resetContractStatuses")
+      this.context.commit("resetTokenBalances")
+  }
+
 
   @Action({ rawError: true })
   async approveCollateral(payload: {
@@ -360,16 +376,18 @@ export default class contracts extends VuexModule {
                 longContract,
                 shortContract,
               }
-              
+
               this.context.commit("setSyntheticTokenAddresses", {
                 syntheticName,
                 shortAddress,
                 longAddress,
               })
 
+              const contractState = await lspContract.contractState()
+
               this.context.commit("setContractStatus", {
                 syntheticName,
-                status: true,
+                status: parseInt(contractState.toString()),
               })
               console.log(`Connected to contract ${syntheticName} succesfully`)
             } catch (e) {
