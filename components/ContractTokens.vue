@@ -37,6 +37,7 @@
         :collateralTokens="collateralTokens"
         v-if="contractState === 0"
       />
+      <!-- TODO: Later (when done with testing) we will want to show this only if the current date is past the expiry date  -->
       <ExpireContract
         v-if="contractState === 0"
         :contractDetails="contractDetails"
