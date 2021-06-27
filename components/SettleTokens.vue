@@ -174,7 +174,7 @@ export default class SettleTokens extends Vue {
       return value <= tokenBalances.shortBalance || "Not enouth tokens"
     }
     function positive(value: number): boolean | string {
-      return value > 0 || "Number of tokens must be positive"
+      return value >= 0 || "Number of tokens must be non-negative"
     }
     return [positive, enoughTokens]
   }
@@ -186,7 +186,7 @@ export default class SettleTokens extends Vue {
       return value <= tokenBalances.longBalance || "Not enouth tokens"
     }
     function positive(value: number): boolean | string {
-      return value > 0 || "Number of tokens must be positive"
+      return value >= 0 || "Number of tokens must be non-negative"
     }
     return [positive, enoughTokens]
   }
