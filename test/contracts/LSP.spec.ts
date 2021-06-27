@@ -33,6 +33,7 @@ describe("LSP", function () {
   const collateralPerPair = ethers.utils.parseUnits("1")
   const tokensToKeep = tokensToCreate.sub(tokensToTransfer)
   const tokensToRedeem = ethers.utils.parseUnits("1")
+  const tokensToSettle = ethers.utils.parseUnits("1")
 
   beforeAll(async () => {
     namedAccounts = await getNamedAccounts()
@@ -257,7 +258,7 @@ describe("LSP", function () {
     )
     expect(syntheticBalanceDeployer).toEqBN(tokensToKeep)
   })
-  it("Sponsor can redeem remaining tokens", async function () {
+  it("Sponsor can redeem some tokens", async function () {
     // Transaction parameters
     const transactionOptions = {
       gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
@@ -292,5 +293,68 @@ describe("LSP", function () {
     )
     const expectedCollateralBalance = oldCollateralBalance.add(tokensToRedeem)
     expect(newCollateralBalance).toEqBN(expectedCollateralBalance)
+  })
+  it("Should change state to ExpiredPriceRequested after expire", async function () {
+    // Check that sponsor still has enough L / S Tokens
+    const syntheticBalances = await contracts.LSP.getPositionTokens(
+      namedAccounts.deployer
+    )
+    expect(syntheticBalances[0]).toBeGteBN(tokensToSettle)
+    expect(syntheticBalances[1]).toBeGteBN(tokensToSettle)
+
+    // Check contract state
+    const ContractState = {
+      Open: 0,
+      ExpiredPriceRequested: 1,
+      ExpiredPriceReceived: 2,
+    }
+
+    let contractState: number = await contracts.LSP.contractState()
+
+    expect(contractState).toEqual(ContractState.Open)
+
+    // fast forward 350 seconds
+    await ethers.provider.send("evm_increaseTime", [350])
+    await ethers.provider.send("evm_mine", [])
+
+    // expire the contract
+    const expireTx = await contracts.LSP.expire()
+
+    await expireTx.wait()
+    contractState = await contracts.LSP.contractState()
+
+    expect(contractState).toEqual(ContractState.ExpiredPriceRequested)
+  })
+
+  it("Should change the contract state after calling expire", async function () {
+    // Check that sponsor still has enough L / S Tokens
+    const syntheticBalances = await contracts.LSP.getPositionTokens(
+      namedAccounts.deployer
+    )
+    expect(syntheticBalances[0]).toBeGteBN(tokensToSettle)
+    expect(syntheticBalances[1]).toBeGteBN(tokensToSettle)
+
+    // Check contract state
+    const ContractState = {
+      Open: 0,
+      ExpiredPriceRequested: 1,
+      ExpiredPriceReceived: 2,
+    }
+
+    let contractState: number = await contracts.LSP.contractState()
+
+    expect(contractState).toEqual(ContractState.Open)
+
+    // fast forward 350 seconds
+    await ethers.provider.send("evm_increaseTime", [350])
+    await ethers.provider.send("evm_mine", [])
+
+    // expire the contract
+    const expireTx = await contracts.LSP.expire()
+
+    await expireTx.wait()
+    contractState = await contracts.LSP.contractState()
+
+    expect(contractState).toEqual(ContractState.ExpiredPriceRequested)
   })
 })
