@@ -335,8 +335,68 @@ task("time:expiry", "Set time to expiry date of given contract")
     if (contractConfig !== undefined) {
       const expirationTime = contractConfig.expirationTime
       console.log("Traveling to expiration time: ", expirationTime)
-      const timeStamp = (new Date(expirationTime).getTime() / 1000)
-      await ethers.provider.send("evm_setNextBlockTimestamp", [timeStamp+1])
+      const timeStamp = new Date(expirationTime).getTime() / 1000
+      await ethers.provider.send("evm_setNextBlockTimestamp", [timeStamp + 1])
       await ethers.provider.send("evm_mine", [])
+    }
+  })
+
+task("propose", "Propose price for given contract")
+  .addParam(
+    "syntheticName",
+    "Name of the contract for which you want to propose a settlement price"
+  )
+  .addParam("proposedPrice", "Price value to propose")
+  .setAction(async ({ syntheticName, proposedPrice }, { ethers }) => {
+    const contractConfig = deployedContractConfigs.find(
+      (config) => config.syntheticName === syntheticName
+    )
+    if (contractConfig !== undefined) {
+      const optimisticOracle = await ethers.getContractAt(
+        abis.OptimisticOracle,
+        addresses.OptimisticOracle
+      )
+
+      await optimisticOracle.deployed()
+      console.log("Optimistic Oracle is deployed")
+
+      // Approve collateral for the bond
+      const collateralAddress = addresses[contractConfig.collateralToken]
+      const collateralAbi = abis[contractConfig.collateralToken]
+      console.log("Collateral Address: ", collateralAddress)
+      const collateralContract = await ethers.getContractAt(
+        collateralAbi,
+        collateralAddress || ""
+      )
+      console.log("Connected to collateral contract")
+
+      const approveTx = await collateralContract.approve(
+        addresses.OptimisticOracle,
+        ethers.constants.MaxUint256,
+      )
+      await approveTx.wait()
+      console.log("Approved collateral")
+
+      //Send Proposal
+      const requester = contractConfig.address
+      const identifier = ethers.utils.formatBytes32String(
+        contractConfig.priceIdentifier
+      )
+      const timestamp = Math.floor(
+        new Date(contractConfig.expirationTime).getTime() / 1000
+      ).toString()
+      const ancillaryData = ethers.utils.formatBytes32String(
+        contractConfig.customAncillaryData
+      )
+
+      const proposeTx = await optimisticOracle.proposePrice(
+        requester,
+        identifier,
+        timestamp,
+        ancillaryData,
+        proposedPrice
+      )
+      await proposeTx.wait()
+      console.log("Proposed Price")
     }
   })
