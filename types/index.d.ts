@@ -1,3 +1,4 @@
+import { ethers } from "ethers"
 export type LSPConfiguration = {
   expirationTime: string
   collateralPerPair: string
@@ -13,4 +14,19 @@ export type LSPConfiguration = {
   address?: string
   success?: boolean
   error?: string
+}
+
+export type SyntheticTokenContractMapping = {
+  shortContract: ethers.Contract
+  longContract: ethers.Contract
+}
+
+export type SyntheticTokenBalances = {
+  shortBalance: number
+  longBalance: number
+}
+
+export type SyntheticTokenAddresses = {
+  shortAddress: string
+  longAddress: string
 }

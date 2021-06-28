@@ -1,4 +1,4 @@
-# 💲Avow
+# Wicked
 
 ## Build Setup  🧐
 

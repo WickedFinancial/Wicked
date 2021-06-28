@@ -1,6 +1,12 @@
 <template>
-  <v-app dark>
-    <v-navigation-drawer v-model="drawer" :clipped="clipped" fixed app>
+  <v-app id="app" dark>
+    <v-navigation-drawer
+      v-model="drawer"
+      class="navigationdrawer"
+      :clipped="clipped"
+      stateless
+      app
+    >
       <v-list>
         <v-list-item
           v-for="(item, i) in items"
@@ -21,16 +27,15 @@
     <v-app-bar :clipped-left="clipped" fixed app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
 
-      <v-btn icon @click.stop="clipped = !clipped">
-        <v-icon>mdi-application</v-icon>
-      </v-btn>
       <v-toolbar-title v-text="title" />
-      <avow-logo id="Logo" />
+      <wicked-logo id="Logo" />
       <v-spacer />
       {{ selectedAccount }}
       <web3-btn></web3-btn>
     </v-app-bar>
+
     <v-main>
+      <NetworkStatusBanner />
       <v-container>
         <nuxt />
       </v-container>
@@ -39,27 +44,24 @@
 </template>
 
 <script lang="ts">
-import { Component, namespace, Vue, Watch } from "nuxt-property-decorator"
-
-import Web3Btn from "~/components/Web3Btn.vue"
-import { getCurrentProvider } from "~/store/web3"
+import { Component, namespace, Vue } from "nuxt-property-decorator"
 
 const contracts = namespace("contracts")
-
 const web3 = namespace("web3")
 
-@Component({ components: { Web3Btn } })
+@Component
 export default class DefaultLayout extends Vue {
   @web3.State
   isConnected!: boolean
 
+  @web3.Getter
+  selectedAccount!: string
+
   clipped = true
-  drawer = true
-  menuItems = [{ icon: "mdi-apps", title: "Dashboard", to: "/" }]
-  right = true
-  rightDrawer = false
-  title = "Avow"
-  selectedAccount: string = ""
+  drawer = false
+  menuItems = [{ icon: "mdi-home", title: "Home", to: "/" }]
+
+  title = "Wicked Financial"
 
   @contracts.Getter
   syntheticNames!: Array<string>
@@ -74,16 +76,22 @@ export default class DefaultLayout extends Vue {
     })
     return this.menuItems.concat(contractItems)
   }
-
-  @Watch("isConnected")
-  onConnectStatus(status: boolean, oldStatus: boolean) {
-    if (status && !oldStatus) {
-      const modalProvider = getCurrentProvider()
-      const provider = modalProvider?.provider as any // Todo Make an interface with the different providers?
-      this.selectedAccount = provider.selectedAddress
-    } else if (!status && oldStatus) {
-      this.selectedAccount = ""
-    }
-  }
 }
 </script>
+
+<style type="text/css" scoped>
+header {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.navigationdrawer {
+  background: rgba(0, 0, 0, 0.3);
+  padding-top: 15px;
+}
+
+#app {
+  background: #151e2a !important;
+  background: linear-gradient(to top left, #295059, #151e2a) !important;
+}
+</style>
