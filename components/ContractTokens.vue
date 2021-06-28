@@ -52,10 +52,6 @@
 
 <script lang="ts">
 import { Vue, Component, namespace, Prop } from "nuxt-property-decorator"
-import MintTokens from "@/components/MintTokens.vue"
-import RedeemTokens from "@/components/RedeemTokens.vue"
-import SettleTokens from "@/components/SettleTokens.vue"
-import ExpireContract from "@/components/ExpireContract.vue"
 import {
   LSPConfiguration,
   SyntheticTokenContractMapping,
@@ -66,9 +62,7 @@ import {
 const addresses: Record<string, string> = require("@/addresses.json")
 const contracts = namespace("contracts")
 
-@Component({
-  components: { MintTokens, SettleTokens, RedeemTokens, ExpireContract },
-})
+@Component
 export default class contractTokens extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration
