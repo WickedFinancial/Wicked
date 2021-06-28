@@ -14,7 +14,7 @@
               <v-col cols="12">
                 <v-text-field
                   v-model="syntheticTokens"
-                  label="Synthetic Tokens to create"
+                  label="Synthetic Tokens to redeem"
                   type="number"
                   :rules="rules"
                   required

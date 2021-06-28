@@ -3,6 +3,7 @@ import { ethers } from "ethers"
 import LSPAbi from "~/abis/LSP.json"
 import { getCurrentProvider } from "~/store/web3"
 import {
+  ExpiryData,
   LSPConfiguration,
   SyntheticTokenContractMapping,
   SyntheticTokenBalances,
@@ -26,6 +27,7 @@ export default class contracts extends VuexModule {
   contractConfigs: Array<LSPConfiguration> = require("~/deployedContractConfigs.json")
   syntheticTokenBalances: Record<string, SyntheticTokenBalances> = {}
   syntheticTokenAddresses: Record<string, SyntheticTokenAddresses> = {}
+  expiryData: Record<string, ExpiryData> = {}
   collateralTokenBalances: Record<string, number> = {}
   contractStatuses: Record<string, number> = {}
   tokenBalancesLoaded: boolean = false
@@ -61,9 +63,19 @@ export default class contracts extends VuexModule {
     return this.contractStatuses
   }
 
+  get getExpiryData(): Record<string, ExpiryData> {
+    return this.expiryData
+  }
+
+
   @Mutation
   resetContractStatuses() {
     this.contractStatuses = {}
+  }
+
+  @Mutation
+  resetExpiryData() {
+    this.expiryData = {}
   }
 
   @Mutation
@@ -147,6 +159,16 @@ export default class contracts extends VuexModule {
     )
   }
 
+  @Mutation
+  setExpiryData(payload: { syntheticName: string; data: ExpiryData }) {
+    const { syntheticName, data } = payload
+    console.log(`Setting expiry data for ${syntheticName} to:`, data)
+
+    let newValues: Record<string, ExpiryData> = {}
+    newValues[syntheticName] = data
+
+    this.expiryData = Object.assign({}, this.expiryData, newValues)
+  }
   @Mutation
   setSyntheticTokenBalances(payload: {
     syntheticName: string
@@ -236,6 +258,36 @@ export default class contracts extends VuexModule {
     }
   }
 
+  @Action
+  async settleTokens(payload: {
+    longTokens: number
+    shortTokens: number
+    syntheticName: string
+  }): Promise<void> {
+    const { longTokens, shortTokens, syntheticName } = payload
+    console.log(
+      `Settling ${longTokens} long and ${shortTokens} short Tokens of ${syntheticName}`
+    )
+    const signer = this.context.rootGetters["web3/signer"]
+    console.log("Using signer: ", signer)
+    if (signer !== undefined) {
+      const lspContract = lspContracts[syntheticName].connect(signer)
+      const parsedLongTokens = ethers.utils.parseUnits(longTokens.toString())
+      const parsedShortTokens = ethers.utils.parseUnits(shortTokens.toString())
+      console.log("Parsed values: ", {
+        lspContract,
+        parsedLongTokens,
+        parsedShortTokens,
+      })
+      const settleTx = await lspContract.settle(
+        parsedLongTokens,
+        parsedShortTokens
+      )
+      await settleTx.wait()
+      await this.updateContractData()
+    }
+  }
+
   @Action({ rawError: true })
   async redeemTokens(payload: { amount: number; syntheticName: string }) {
     const { amount, syntheticName } = payload
@@ -263,6 +315,7 @@ export default class contracts extends VuexModule {
       await this.context.dispatch("updateSyntheticTokenBalances")
       await this.context.dispatch("updateCollateralAllowances")
       await this.context.dispatch("updateContractStatuses")
+      await this.context.dispatch("updateExpiryData")
       this.context.commit("setTokenBalancesLoaded", true)
     }
   }
@@ -331,10 +384,24 @@ export default class contracts extends VuexModule {
     this.context.commit("resetContractStatuses")
     for (const [syntheticName, lspContract] of Object.entries(lspContracts)) {
       const contractState = await lspContract.contractState()
-
       this.context.commit("setContractStatus", {
         syntheticName,
         status: parseInt(contractState.toString()),
+      })
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateExpiryData() {
+    this.context.commit("resetExpiryData")
+    for (const [syntheticName, lspContract] of Object.entries(lspContracts)) {
+      const percentageLong = parseFloat(
+        ethers.utils.formatUnits(await lspContract.expiryPercentLong())
+      )
+      const price = parseFloat(await lspContract.expiryPrice())
+      this.context.commit("setExpiryData", {
+        syntheticName,
+        data: { percentageLong, price },
       })
     }
   }
