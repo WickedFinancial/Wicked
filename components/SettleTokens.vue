@@ -220,10 +220,4 @@ export default class SettleTokens extends Vue {
   }
 }
 </script>
-<style scoped>
-/*.stale {*/
-/*  !* Release the inner Jackson Pollock *!*/
-/*  border: 1px solid red;*/
-/*  background-color: yellow;*/
-/*}*/
-</style>
+
