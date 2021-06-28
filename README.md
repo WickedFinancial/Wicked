@@ -1,4 +1,21 @@
 # Wicked
+This is the repo of the [wicked.financial](https://wicked.financial/) dapp for
+creating, redeeming and settling synthetich tokens based on UMA
+[LSP](https://medium.com/uma-project/introducing-umas-long-short-pair-lsp-financial-primitive-84596803864f) (Long Short Position)
+contracts.
+
+## Use Case
+The LSP contracts are a financial primitive that allow the user to build a variety of different derivatives by choosing the corresponding configuration parameters.
+We are currently focusing on a configuration that allows the user to achieve a
+leveraged exposure to exchange rate changes between fiat currencies (i.e.
+EUR/USD) while providing a (potentially interest yielding) Stable-Coin token as collateral.
+
+The ultimate goal is to enable people around the world to easily hedge their foreign currency risk in a distributed and permission-less way.
+
+Using the LSP contract for this purpose allows users to:
+1. Avoid liquidation risk / management effort
+2. Trade Long and Short Positions as individual tokens on secondary markets
+
 
 ## Build Setup  🧐
 
