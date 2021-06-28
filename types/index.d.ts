@@ -30,3 +30,8 @@ export type SyntheticTokenAddresses = {
   shortAddress: string
   longAddress: string
 }
+
+export type ExpiryData = {
+  percentageLong: number
+  price: number
+}

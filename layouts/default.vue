@@ -1,6 +1,12 @@
 <template>
-  <v-app dark>
-    <v-navigation-drawer v-model="drawer" :clipped="clipped" fixed app>
+  <v-app id="app" dark>
+    <v-navigation-drawer
+      v-model="drawer"
+      class="navigationdrawer"
+      :clipped="clipped"
+      stateless
+      app
+    >
       <v-list>
         <v-list-item
           v-for="(item, i) in items"
@@ -21,11 +27,8 @@
     <v-app-bar :clipped-left="clipped" fixed app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
 
-      <v-btn icon @click.stop="clipped = !clipped">
-        <v-icon>mdi-application</v-icon>
-      </v-btn>
       <v-toolbar-title v-text="title" />
-      <avow-logo id="Logo" />
+      <wicked-logo id="Logo" />
       <v-spacer />
       {{ selectedAccount }}
       <web3-btn></web3-btn>
@@ -43,14 +46,10 @@
 <script lang="ts">
 import { Component, namespace, Vue } from "nuxt-property-decorator"
 
-import Web3Btn from "~/components/Web3Btn.vue"
-import NetworkStatusBanner from "~/components/NetworkStatusBanner.vue"
-
 const contracts = namespace("contracts")
-
 const web3 = namespace("web3")
 
-@Component({ components: { Web3Btn, NetworkStatusBanner } })
+@Component
 export default class DefaultLayout extends Vue {
   @web3.State
   isConnected!: boolean
@@ -59,11 +58,10 @@ export default class DefaultLayout extends Vue {
   selectedAccount!: string
 
   clipped = true
-  drawer = true
-  menuItems = [{ icon: "mdi-apps", title: "Dashboard", to: "/" }]
-  right = true
-  rightDrawer = false
-  title = "Avow"
+  drawer = false
+  menuItems = [{ icon: "mdi-home", title: "Home", to: "/" }]
+
+  title = "Wicked"
 
   @contracts.Getter
   syntheticNames!: Array<string>
@@ -80,3 +78,20 @@ export default class DefaultLayout extends Vue {
   }
 }
 </script>
+
+<style type="text/css" scoped>
+header {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.navigationdrawer {
+  background: rgba(0, 0, 0, 0.3);
+  padding-top: 15px;
+}
+
+#app {
+  background: #151e2a !important;
+  background: linear-gradient(to top left, #295059, #151e2a) !important;
+}
+</style>
