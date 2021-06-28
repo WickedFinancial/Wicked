@@ -61,7 +61,7 @@ export default class DefaultLayout extends Vue {
   drawer = false
   menuItems = [{ icon: "mdi-home", title: "Home", to: "/" }]
 
-  title = "Wicked Financial"
+  title = "Wicked"
 
   @contracts.Getter
   syntheticNames!: Array<string>
