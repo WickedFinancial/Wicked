@@ -30,6 +30,13 @@ all other dependencies using:
 $ yarn install
 ```
 
+### Set RPC Url and Wallet Mnemonic
+Some of the tasks / tests described below will require hardhat to access a kovan RPC-node and / or a wallet using the first account
+in the wallet for various test / deployment tasks.
+
+For these purposes you will have to save the url of a Kovan RPC-Node as well as a wallet mnemonic in `url.txt` and `mnemonic.txt` files at the root level of the repository.
+Note that these files are added to the `.gitignore` file but you should be extra careful to NEVER commit / push these files to the repository.
+
 ### Run Tests 🧪
 The project contains a number of tests regarding the dapp itself as well as the UMA contract interfaces that we use which you can run with:
 
@@ -60,7 +67,7 @@ $ yarn start
 ## Using the Dapp 🐥
 
 Currently the relevant contract instances for the Dapp are only deployed on the Kovan-testnet.
-Therefore you have to options when using / manually testing the dapp:
+Therefore you have to options when using the dapp:
 1. Connect to Kovan directly
 2. Run a local fork of Kovan and connect to that
 
@@ -86,30 +93,68 @@ To setup your Metamask for this local network you should first conn
 1. Add a new network with RPC-URL: `http://localhost:8545` and Chain-ID:`42`
 2. Add the first account shown by above hardhat command using its private key.
 
+While using the local network you might get errors in Metamask saying something like `Transaction Nonce too high`, in this case you will need to reset the respective 
+account using the button in the settings.
+
 ### Custom Hardhat Tasks
 
+To speed up testing and allow the user to interactively step through the different phases of the contract lifecycle we 
+have implemented a number of custom hardhat tasks.
+Note that the parameter `--network localhost` runs all of these commands on the local kovan fork but you can also run them directly on
+kovan by adjusting this parameter accordingly.
+However this might result in spending significant amount of ETH from the wallet whose mnemonic you have provided.
+
+#### Generate Collateral
+Creating / Minting synthetic tokens for a given contract will require you to provide the configured collateral.
+To generate collateral of the respective Token (in this case WETH) you can run:
+```bash
+$ yarn hardhat collateral --amount 100 --collateral-name WETH --network localhost 
+```
+
+#### Fast Forward to Expiry time (only on local network)
+To forward the block timestamp to the expiry date of a contract identified by its `synthetic-name` run:
+```bash
+$ yarn hardhat time:expiry --synthetic-name USDETH-Linear-210701 --network localhost
+```
+
+#### Propose Price to Optimistc Oracle
+To propose a settlement price for the price feed of a given contract to the Optimistic Oracle run:
+```bash
+$ yarn hardhat time:expiry --synthetic-name USDETH-Linear-210701 --network localhost
+```
 
 
 
 
 
 
-We suggest the following workflow for testing which requires metamask and Kovan node access :
 
-1. Start local network based on kovan fork with:
 
-   `yarn hardhat node --fork KOVAN_RPC_URL --show-accounts`
 
-2. Copy paste the first account in the displayed list and register it in your metamask this is the deployer account which should have 10000 ETH on this network
-3. In a separate terminal run the "collateral" task to deposit/mint WETH collateral to your deployer account:
 
-   `yarn hardhat collateral --amount 100 --network localhost `
 
-4. Run the hardhat task to generate 1 pair of Long / Short Tokens (alternatively you can set a different number of synthetic tokens to create using the amount parameter
-5. Switch your metamask to the localhost network
-6. Open the app connect and navigate to the respective contract, you should see the correct balances for the respective token types
 
-For detailed explanation on how things work, check out the following resources.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Documentation 📚
 
