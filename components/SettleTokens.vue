@@ -83,12 +83,12 @@
           <v-btn
             color="blue darken-1"
             type="button"
-            @click.prevent="settle"
             :loading="loading"
             :disabled="loading || anyRuleViolated"
+            @click.prevent="settle"
           >
             Settle
-            <template v-slot:loader>
+            <template #loader>
               <span>Loading...</span>
             </template>
           </v-btn>
@@ -100,8 +100,7 @@
 
 <script lang="ts">
 import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
-import { ExpiryData, SyntheticTokenBalances, LSPConfiguration } from "~/types"
-import { ethers } from "ethers"
+import { ExpiryData, LSPConfiguration, SyntheticTokenBalances } from "~/types"
 
 const contracts = namespace("contracts")
 
@@ -136,8 +135,9 @@ export default class SettleTokens extends Vue {
   }
 
   get collateralPerShort(): number | undefined {
-    const percentagePerLong: number =
-      this.getExpiryData[this.contractDetails.syntheticName].percentageLong
+    const percentagePerLong: number = this.getExpiryData[
+      this.contractDetails.syntheticName
+    ].percentageLong
     const percentagePerShort = 1 - percentagePerLong
     return (
       percentagePerShort * parseFloat(this.contractDetails.collateralPerPair)
@@ -145,8 +145,9 @@ export default class SettleTokens extends Vue {
   }
 
   get collateralPerLong(): number | undefined {
-    const percentagePerLong: number =
-      this.getExpiryData[this.contractDetails.syntheticName].percentageLong
+    const percentagePerLong: number = this.getExpiryData[
+      this.contractDetails.syntheticName
+    ].percentageLong
     return (
       percentagePerLong * parseFloat(this.contractDetails.collateralPerPair)
     )
@@ -157,37 +158,46 @@ export default class SettleTokens extends Vue {
   }
 
   get anyRuleViolated(): boolean {
-    const tokenBalances =
-      this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
+    const tokenBalances = this.getSyntheticTokenBalances[
+      this.contractDetails.syntheticName
+    ]
     return (
-      this.longTokens > tokenBalances.longTokens ||
+      this.longTokens > tokenBalances.longBalance ||
       this.longTokens < 0 ||
-      this.shortTokens > tokenBalances.shortTokens ||
+      this.shortTokens > tokenBalances.shortBalance ||
       this.shortTokens < 0
     )
   }
 
   get rulesShort() {
-    const tokenBalances =
-      this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
+    const tokenBalances = this.getSyntheticTokenBalances[
+      this.contractDetails.syntheticName
+    ]
+
     function enoughTokens(value: number): boolean | string {
-      return value <= tokenBalances.shortBalance || "Not enouth tokens"
+      return value <= tokenBalances.shortBalance || "Not enough tokens"
     }
+
     function positive(value: number): boolean | string {
       return value >= 0 || "Number of tokens must be non-negative"
     }
+
     return [positive, enoughTokens]
   }
 
   get rulesLong() {
-    const tokenBalances =
-      this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
+    const tokenBalances = this.getSyntheticTokenBalances[
+      this.contractDetails.syntheticName
+    ]
+
     function enoughTokens(value: number): boolean | string {
       return value <= tokenBalances.longBalance || "Not enouth tokens"
     }
+
     function positive(value: number): boolean | string {
       return value >= 0 || "Number of tokens must be non-negative"
     }
+
     return [positive, enoughTokens]
   }
 
