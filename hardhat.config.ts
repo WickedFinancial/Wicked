@@ -397,7 +397,7 @@ task("settle:oracle", "Settle on oracle")
 task("settle:lsp", "Settle on lsp contract")
   .addParam(
     "syntheticName",
-    "Name of the contract for which you want to propose a settlement price"
+    "Name of the contract for which you want to settle tokens"
   )
   .addOptionalParam(
     "longTokens",

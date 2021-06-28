@@ -31,6 +31,7 @@ $ yarn install
 ```
 
 ### Set RPC Url and Wallet Mnemonic
+
 Some of the tasks / tests described below will require hardhat to access a kovan RPC-node and / or a wallet using the first account
 in the wallet for various test / deployment tasks.
 
@@ -38,6 +39,7 @@ For these purposes you will have to save the url of a Kovan RPC-Node as well as 
 Note that these files are added to the `.gitignore` file but you should be extra careful to NEVER commit / push these files to the repository.
 
 ### Run Tests 🧪
+
 The project contains a number of tests regarding the dapp itself as well as the UMA contract interfaces that we use which you can run with:
 
 ```bash
@@ -63,11 +65,11 @@ $ yarn build
 $ yarn start
 ```
 
-
 ## Using the Dapp 🐥
 
 Currently the relevant contract instances for the Dapp are only deployed on the Kovan-testnet.
 Therefore you have to options when using the dapp:
+
 1. Connect to Kovan directly
 2. Run a local fork of Kovan and connect to that
 
@@ -84,77 +86,69 @@ If you want to have unlimited test ETH and extended control over the state of th
 want to fork the Kovan network and run a local copy.
 
 You can achieve this by running the following hardhat command replacing `KOVAN_RPC_URL` with the URL of a Kovan RPC provider such as [Infura](https://infura.io/) or [Alchemy](https://www.alchemy.com/).
+
 ```bash
 $ yarn hardhat node --fork KOVAN_RPC_URL --show-accounts`
 ```
+
 We recommend to provide an RPC that allows archive access to avoid unnecessary transaction errors.
 The above command should show a number of accounts each of which should contain 10000 ETH on the local network.
 To setup your Metamask for this local network you should first conn
+
 1. Add a new network with RPC-URL: `http://localhost:8545` and Chain-ID:`42`
 2. Add the first account shown by above hardhat command using its private key.
 
-While using the local network you might get errors in Metamask saying something like `Transaction Nonce too high`, in this case you will need to reset the respective 
+While using the local network you might get errors in Metamask saying something like `Transaction Nonce too high`, in this case you will need to reset the respective
 account using the button in the settings.
 
 ### Custom Hardhat Tasks
 
-To speed up testing and allow the user to interactively step through the different phases of the contract lifecycle we 
+To speed up testing and allow the user to interactively step through the different phases of the contract lifecycle we
 have implemented a number of custom hardhat tasks.
 Note that the parameter `--network localhost` runs all of these commands on the local kovan fork but you can also run them directly on
 kovan by adjusting this parameter accordingly.
 However this might result in spending significant amount of ETH from the wallet whose mnemonic you have provided.
 
 #### Generate Collateral
+
 Creating / Minting synthetic tokens for a given contract will require you to provide the configured collateral.
 To generate collateral of the respective Token (in this case WETH) you can run:
+
 ```bash
-$ yarn hardhat collateral --amount 100 --collateral-name WETH --network localhost 
+$ yarn hardhat collateral --amount 100 --collateral-name WETH --network localhost
 ```
 
 #### Fast Forward to Expiry time (only on local network)
+
 To forward the block timestamp to the expiry date of a contract identified by its `synthetic-name` run:
+
 ```bash
 $ yarn hardhat time:expiry --synthetic-name USDETH-Linear-210701 --network localhost
 ```
 
 #### Propose Price to Optimistc Oracle
+
 To propose a settlement price for the price feed of a given contract to the Optimistic Oracle run:
+
 ```bash
-$ yarn hardhat time:expiry --synthetic-name USDETH-Linear-210701 --network localhost
+$ yarn hardhat propose --synthetic-name USDETH-Linear-210701 --proposed-price 3000 --network localhost
 ```
 
+#### Fast Forward past Dispute Liveness (only on local network)
 
+To fast forward the block timestamp by the default dispute liveness period of the Optimistic Oracle run:
 
+```bash
+$ yarn hardhat time:dispute --network localhost
+```
 
+#### Settle LSP Tokens (also possible in UI)
 
+If a price has been proposed (and not disputed) and the liveness period has past you can settle synthetic tokens that you have created before
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```bash
+$ yarn hardhat settle:lsp --synthetic-name USDETH-Linear-210701 --long-tokens 0 --short-tokens 0 --network localhost
+```
 
 ## Documentation 📚
 
