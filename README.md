@@ -45,7 +45,7 @@ Run a development `Nuxt` server with hot reload to serve the Dapp at [localhost:
 $ yarn dev
 ```
 
-### Build
+### Build / Run Prod Server
 
 ```bash
 # generate static project
@@ -57,7 +57,42 @@ $ yarn start
 ```
 
 
-## Test Frontend Setup 🐥
+## Using the Dapp 🐥
+
+Currently the relevant contract instances for the Dapp are only deployed on the Kovan-testnet.
+Therefore you have to options when using / manually testing the dapp:
+1. Connect to Kovan directly
+2. Run a local fork of Kovan and connect to that
+
+In both cases we suggest using the [Metamask](https://metamask.io/) browser wallet.
+All steps below should work identicially wether you use a locally hosted version of the dapp or the one hosted at [wicked.financial](https://wicked.financial/).
+
+### Connect to Kovan directly
+
+For this option all you have to do is switch your metamask wallet to the Kovan network and start using the dapp.
+
+### Run local Kovan fork
+
+If you want to have unlimited test ETH and extended control over the state of the network (i.e. setting timestamps) you might
+want to fork the Kovan network and run a local copy.
+
+You can achieve this by running the following hardhat command replacing `KOVAN_RPC_URL` with the URL of a Kovan RPC provider such as [Infura](https://infura.io/) or [Alchemy](https://www.alchemy.com/).
+```bash
+$ yarn hardhat node --fork KOVAN_RPC_URL --show-accounts`
+```
+We recommend to provide an RPC that allows archive access to avoid unnecessary transaction errors.
+The above command should show a number of accounts each of which should contain 10000 ETH on the local network.
+To setup your Metamask for this local network you should first conn
+1. Add a new network with RPC-URL: `http://localhost:8545` and Chain-ID:`42`
+2. Add the first account shown by above hardhat command using its private key.
+
+### Custom Hardhat Tasks
+
+
+
+
+
+
 
 We suggest the following workflow for testing which requires metamask and Kovan node access :
 
