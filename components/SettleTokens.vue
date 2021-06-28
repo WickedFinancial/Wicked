@@ -160,9 +160,9 @@ export default class SettleTokens extends Vue {
     const tokenBalances =
       this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
     return (
-      this.longTokens > tokenBalances.longTokens ||
+      this.longTokens > tokenBalances.longBalance ||
       this.longTokens < 0 ||
-      this.shortTokens > tokenBalances.shortTokens ||
+      this.shortTokens > tokenBalances.shortBalance ||
       this.shortTokens < 0
     )
   }
