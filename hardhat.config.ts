@@ -117,6 +117,7 @@ subtask("LUSD", "mint lusd")
   .setAction(async ({ amount }, { ethers }) => {
     const signer = (await ethers.getSigners())[0]
     const liquity = await EthersLiquity.connect(signer)
+    console.log(`Opening a trove....`)
 
     const { newTrove } = await liquity.openTrove({
       borrowLUSD: "2000",
@@ -252,7 +253,7 @@ task("launch", "Launch all configured LSP contracts")
           contracts[contractConfiguration.collateralToken]
 
         if (contractConfiguration.collateralToken === "LUSD") {
-          await run("LUSD", { amount: "1.5" })
+          await run("LUSD", { amount: "10" })
         } else {
           const depositTx = await collateralContract.deposit({
             value: prepaidProposerReward.mul(
@@ -504,7 +505,7 @@ task("propose", "Propose price for given contract")
         identifier,
         timestamp,
         ancillaryData,
-        proposedPrice
+        ethers.utils.parseUnits(proposedPrice)
       )
       await proposeTx.wait()
       console.log("Proposed Price")
