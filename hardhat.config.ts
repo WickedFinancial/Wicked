@@ -328,7 +328,12 @@ task("launch", "Launch all configured LSP contracts")
 
         await financialProductLibraryContract.setLongShortPairParameters(
           lspAddress,
-          ...contractConfiguration.financialProductLibraryParameters,
+          ethers.utils.parseUnits(
+            contractConfiguration.financialProductLibraryParameters[0]
+          ),
+          ethers.utils.parseUnits(
+            contractConfiguration.financialProductLibraryParameters[1]
+          ),
           transactionOptions
         )
         console.log(
