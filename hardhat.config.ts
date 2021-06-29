@@ -5,14 +5,12 @@ import fs from "fs"
 import { readdir, readFile, writeFile } from "fs/promises"
 import { HardhatUserConfig } from "hardhat/types"
 import { subtask, task, types } from "hardhat/config"
-import { Address } from "hardhat-deploy/dist/types"
 import { Contract } from "ethers"
-import { EthersLiquity } from "@liquity/lib-ethers"
 import { LSPConfiguration } from "./types"
 
 const contractConfigs: Array<LSPConfiguration> = require("./contractConfigs.json")
 const deployedContractConfigs: Array<LSPConfiguration> = require("./deployedContractConfigs.json")
-const addresses: Record<string, Address> = require("./addresses.json")
+const addresses = require("./addresses.json")
 const abis = require("./abis")
 
 function mnemonic() {
@@ -79,7 +77,7 @@ task("collateral", "Mint Collateral Tokens for use in tests")
   .addOptionalParam(
     "amount",
     "Amount of Ether for which to generate collateral",
-    "1"
+    "10"
   )
   .addOptionalParam(
     "gasprice",
@@ -113,17 +111,27 @@ task("collateral", "Mint Collateral Tokens for use in tests")
     }
   )
 subtask("LUSD", "mint lusd")
-  .addParam("amount", "Amount of Ether for which to generate collateral", "2")
-  .setAction(async ({ amount }, { ethers }) => {
-    const signer = (await ethers.getSigners())[0]
-    const liquity = await EthersLiquity.connect(signer)
-    console.log(`Opening a trove....`)
+  .addParam("amount", "Amount of Ether for which to generate collateral", "10")
+  .setAction(async ({ amount }, { ethers, getNamedAccounts }) => {
+    const namedAccounts = await getNamedAccounts()
+    const transactionOptions = {
+      from: namedAccounts.deployer,
+      value: ethers.utils.parseUnits(amount),
+    }
+    const borrowerOperations = await ethers.getContractAt(
+      abis.BorrowerOperations,
+      addresses.BorrowerOperations
+    )
 
-    const { newTrove } = await liquity.openTrove({
-      borrowLUSD: "2000",
-      depositCollateral: amount,
-    })
-    console.log(`Successfully opened a Liquity Trove (${newTrove})!`)
+    // Todo : implement getting real hints https://github.com/liquity/dev#example-borrower-operations-with-hints
+    const openTroveTx = await borrowerOperations.openTrove(
+      ethers.utils.parseUnits(".75"),
+      ethers.utils.parseUnits("2000"),
+      namedAccounts.deployer,
+      namedAccounts.deployer,
+      transactionOptions
+    )
+    await openTroveTx.wait()
   })
 
 task("synthetic", "Mint Synthetic Tokens for use in tests")
@@ -240,12 +248,11 @@ task("launch", "Launch all configured LSP contracts")
 
         // Get Collateral Contract instance if not present already
         if (!(contractConfiguration.collateralToken in contracts)) {
-          contracts[
-            contractConfiguration.collateralToken
-          ] = await ethers.getContractAt(
-            abis[contractConfiguration.collateralToken],
-            collateralTokenAddress
-          )
+          contracts[contractConfiguration.collateralToken] =
+            await ethers.getContractAt(
+              abis[contractConfiguration.collateralToken],
+              collateralTokenAddress
+            )
         }
 
         // Create and Approve collateral for the proposer reward
@@ -315,12 +322,11 @@ task("launch", "Launch all configured LSP contracts")
         // Configure Financial ProductLibrary
         // Get Financial Product Library instance if not present already
         if (!(contractConfiguration.financialProductLibrary in contracts)) {
-          contracts[
-            contractConfiguration.financialProductLibrary
-          ] = await ethers.getContractAt(
-            abis[contractConfiguration.financialProductLibrary],
-            financialProductLibraryAddress
-          )
+          contracts[contractConfiguration.financialProductLibrary] =
+            await ethers.getContractAt(
+              abis[contractConfiguration.financialProductLibrary],
+              financialProductLibraryAddress
+            )
         }
 
         // Set Parameters

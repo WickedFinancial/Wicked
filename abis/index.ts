@@ -5,6 +5,7 @@ import LinearLongShortPairFinancialProductLibrary from "./LinearLongShortPairFin
 import ERC20 from "./ERC20.json"
 import OptimisticOracle from "./OptimisticOracle.json"
 import LUSD from "./LUSD.json"
+import BorrowerOperations from "./BorrowerOperations.json"
 
 export {
   WETH,
@@ -14,4 +15,5 @@ export {
   OptimisticOracle,
   LinearLongShortPairFinancialProductLibrary,
   LUSD,
+  BorrowerOperations,
 }
