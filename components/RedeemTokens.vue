@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="600px">
+    <v-dialog v-model="dialog" persistent max-width="600px" v-if="tokenPairs>0">
     <template #activator="{ on, attrs }">
       <v-btn color="primary" text v-bind="attrs" v-on="on"> Redeem</v-btn>
     </template>
