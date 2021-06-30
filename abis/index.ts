@@ -4,6 +4,8 @@ import LSPCreator from "./LSPCreator.json"
 import LinearLongShortPairFinancialProductLibrary from "./LinearLongShortPairFinancialProductLibrary.json"
 import ERC20 from "./ERC20.json"
 import OptimisticOracle from "./OptimisticOracle.json"
+import LUSD from "./LUSD.json"
+import BorrowerOperations from "./BorrowerOperations.json"
 
 export {
   WETH,
@@ -12,4 +14,6 @@ export {
   ERC20,
   OptimisticOracle,
   LinearLongShortPairFinancialProductLibrary,
+  LUSD,
+  BorrowerOperations,
 }
