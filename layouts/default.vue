@@ -2,10 +2,10 @@
   <v-app id="app" dark>
     <v-navigation-drawer
       v-model="drawer"
-      class="navigationdrawer"
       :clipped="clipped"
-      stateless
       app
+      class="navigationdrawer"
+      stateless
     >
       <v-list>
         <v-list-item
@@ -24,13 +24,13 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-app-bar :clipped-left="clipped" fixed app>
+    <v-app-bar :clipped-left="clipped" app fixed>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
 
       <v-toolbar-title v-text="title" />
       <wicked-logo id="Logo" />
       <v-spacer />
-      <div v-if="isConnected" class="connected" :title="selectedAccount">
+      <div v-if="isConnected" :title="selectedAccount" class="connected">
         Connected: {{ selectedAccount }}
       </div>
       <web3-btn></web3-btn>
@@ -56,7 +56,7 @@ export default class DefaultLayout extends Vue {
   @web3.State
   isConnected!: boolean
 
-  @web3.Getter
+  @web3.State
   selectedAccount!: string
 
   clipped = true
@@ -81,7 +81,7 @@ export default class DefaultLayout extends Vue {
 }
 </script>
 
-<style type="text/css" scoped>
+<style scoped>
 header {
   background: #151e2a !important;
   box-shadow: none !important;
@@ -108,5 +108,4 @@ header {
   border-radius: 15px;
   cursor: pointer;
 }
-
 </style>
