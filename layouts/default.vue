@@ -83,7 +83,7 @@ export default class DefaultLayout extends Vue {
 
 <style type="text/css" scoped>
 header {
-  background: transparent !important;
+  background: #151e2a !important;
   box-shadow: none !important;
 }
 
