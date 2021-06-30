@@ -2,44 +2,77 @@
   <v-container>
     <v-row justify="center" align="center" data-testid="index-page">
       <v-col cols="12" sm="8" md="6">
-        <h1>Borrow from DeFi<br />without the currency risk</h1>
+        <h1>DeFi Currency Hedging<br />made simple</h1>
         <h3>
-          Collateralized debt positions are all the rage in Defi.
+          Manage exchange rate risk using Wicked derivatives.
           <br />
-          <p>
-            Presently most systems are USD centric which presents a currency
-            risk to European borrowers who may have their income denominated in
-            Euro.
-          </p>
         </h3>
         <br />
-        <h2>Introducing Wicked Candles as a solution</h2>
-        <h3>How does it work?</h3>
+        <h2>Benefits</h2>
         <ul>
           <li>
-            <v-icon medium color="gray"> mdi-piggy-bank-outline</v-icon>
-            Lockup ETH and borrow LUSD. A zero interest loan with a low one time
-            fee!
-          </li>
-          <li>
-            <v-icon medium color="gray"> mdi-web</v-icon>
-            Lockup some or all of that LUSD and receive a pair of ERC20 tokens.
-          </li>
-          <li>
             <v-icon medium color="gray"> mdi-scale-balance</v-icon>
-            Before expiry, you may redeem the pair for your stable coin.
+            Tokenized long / short positions on Exchange Rates (e.g. EUR/USD)
           </li>
           <li>
             <v-icon medium color="gray"> mdi-cash</v-icon>
-            After expiry, the tokens may be settled individually at a rate
-            determined by the upper bound and lower bound of the contract.
+            Capital efficiency through leveraged payout structure
           </li>
           <li>
-            <v-icon medium color="gray"> mdi-thumb-up</v-icon>
-            Sell the long tokens and if the Euro is worth less dollars at expiry
-            you profit at 5x leverage (capped at lower bound).
+            <v-icon medium color="gray"> mdi-piggy-bank-outline</v-icon>
+            No Liquidation risk for Liquidity Providers
           </li>
         </ul>
+
+        <br />
+        <h2>The Process</h2>
+        <ol>
+          <li>
+            Sponsors deposit collateral to mint equal amount of Long / Short
+            Tokens
+          </li>
+          <li>Users trade tokens to bet on either side of the currency pair</li>
+          <li>Contract Expires</li>
+          <li>Exchange Rate is provided by oracle system</li>
+          <li>
+            Collateral is distributed to Long / Short Token-Holders according to
+            payout function
+          </li>
+        </ol>
+
+        <br />
+        <h2>Example: </h2>
+        <ol>
+          <li>
+            Sponsor provides 100 LUSD collateral to mint Short / Long Tokens for USD/EUR-contract with bounds 1.10 - 1.30 USD.
+          </li>
+          <li>User A buys the Long Tokens from the Sponsor for 51 LUSD</li>
+          <li>User B buys the Short Tokens from the Sponsor for 51 LUSD</li>
+          <li>Contract Expires</li>
+          <li>Value of 1.25 is returned by price oracle</li>
+          <li>
+            Payout User A: 100 LUSD * (1.25-1.10)/(1.30-1.1) = 75 LUSD 
+          </li>
+          <li>
+            Payout User B: 100 LUSD * (1.30-1.25)/(1.30-1.1) = 25 LUSD 
+          </li>
+        </ol>
+
+        <br />
+        <h2>Wait but why? </h2>
+        <ol>
+          <li>
+            Sponsors can earn returns through trading fees
+          </li>
+          <li>Users get leveraged exposure to the currency of their choice to:</li>
+          <ol>
+            <li>Hedge an existing currency risk exposure (e.g. USD income but EUR expenditures)</li>
+            <li>Maximise profitability of their currency speculation</li>
+          </ol>
+        </ol>
+
+
+
       </v-col>
     </v-row>
   </v-container>
@@ -54,9 +87,16 @@ export default class Index extends Vue {}
 ul {
   margin-top: 20px;
 }
+ol {
+  margin-top: 20px;
+}
 
-li {
+ul li {
   list-style: none !important;
+  padding: 10px 0;
+}
+
+ol li {
   padding: 10px 0;
 }
 
