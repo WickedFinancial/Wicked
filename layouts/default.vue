@@ -71,7 +71,7 @@ export default class DefaultLayout extends Vue {
   get items(): Array<object> {
     const contractItems = this.syntheticNames.map((syntheticName) => {
       return {
-        icon: "mdi-file-document-edit-outline",
+        icon: "mdi-candle",
         title: syntheticName,
         to: `/contract/${syntheticName}`,
       }
