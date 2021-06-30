@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Action, Module, Mutation, VuexModule } from "vuex-module-decorators"
 import { ethers } from "ethers"
 import LSPAbi from "~/abis/LSP.json"
@@ -5,9 +6,9 @@ import { getCurrentProvider } from "~/store/web3"
 import {
   ExpiryData,
   LSPConfiguration,
-  SyntheticTokenContractMapping,
-  SyntheticTokenBalances,
   SyntheticTokenAddresses,
+  SyntheticTokenBalances,
+  SyntheticTokenContractMapping,
 } from "~/types"
 
 const abis: Record<string, Array<string>> = require("~/abis")
@@ -44,30 +45,6 @@ export default class contracts extends VuexModule {
 
   get syntheticNames() {
     return this.contractConfigs.map((config) => config.syntheticName)
-  }
-
-  get getCollateralTokenBalances(): Record<string, number> {
-    return this.collateralTokenBalances
-  }
-
-  get getCollateralAllowances(): Record<string, ethers.BigNumber> {
-    return this.collateralAllowances
-  }
-
-  get getSyntheticTokenBalances(): Record<string, SyntheticTokenBalances> {
-    return this.syntheticTokenBalances
-  }
-
-  get getSyntheticTokenAddresses(): Record<string, SyntheticTokenAddresses> {
-    return this.syntheticTokenAddresses
-  }
-
-  get getContractStatuses(): Record<string, number> {
-    return this.contractStatuses
-  }
-
-  get getExpiryData(): Record<string, ExpiryData> {
-    return this.expiryData
   }
 
   @Mutation
@@ -210,7 +187,7 @@ export default class contracts extends VuexModule {
       const lspContract = lspContracts[syntheticName].connect(signer)
       const expireTx = await lspContract.expire()
       await expireTx.wait()
-      this.context.dispatch("updateContractStatuses")
+      await this.context.dispatch("updateContractStatuses")
     }
   }
 

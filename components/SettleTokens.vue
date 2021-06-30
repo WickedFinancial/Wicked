@@ -121,11 +121,11 @@ export default class SettleTokens extends Vue {
     syntheticName: string
   }) => Promise<void>
 
-  @contracts.Getter
-  getSyntheticTokenBalances!: Record<string, SyntheticTokenBalances>
+  @contracts.State
+  syntheticTokenBalances!: Record<string, SyntheticTokenBalances>
 
-  @contracts.Getter
-  getExpiryData!: Record<string, ExpiryData>
+  @contracts.State
+  expiryData!: Record<string, ExpiryData>
 
   get returnedCollateral(): number {
     return (
@@ -135,7 +135,7 @@ export default class SettleTokens extends Vue {
   }
 
   get collateralPerShort(): number | undefined {
-    const percentagePerLong: number = this.getExpiryData[
+    const percentagePerLong: number = this.expiryData[
       this.contractDetails.syntheticName
     ].percentageLong
     const percentagePerShort = 1 - percentagePerLong
@@ -145,7 +145,7 @@ export default class SettleTokens extends Vue {
   }
 
   get collateralPerLong(): number | undefined {
-    const percentagePerLong: number = this.getExpiryData[
+    const percentagePerLong: number = this.expiryData[
       this.contractDetails.syntheticName
     ].percentageLong
     return (
@@ -154,11 +154,11 @@ export default class SettleTokens extends Vue {
   }
 
   get expiryPrice(): number | undefined {
-    return this.getExpiryData[this.contractDetails.syntheticName].price
+    return this.expiryData[this.contractDetails.syntheticName].price
   }
 
   get anyRuleViolated(): boolean {
-    const tokenBalances = this.getSyntheticTokenBalances[
+    const tokenBalances = this.syntheticTokenBalances[
       this.contractDetails.syntheticName
     ]
     return (
@@ -170,7 +170,7 @@ export default class SettleTokens extends Vue {
   }
 
   get rulesShort() {
-    const tokenBalances = this.getSyntheticTokenBalances[
+    const tokenBalances = this.syntheticTokenBalances[
       this.contractDetails.syntheticName
     ]
 
@@ -186,7 +186,7 @@ export default class SettleTokens extends Vue {
   }
 
   get rulesLong() {
-    const tokenBalances = this.getSyntheticTokenBalances[
+    const tokenBalances = this.syntheticTokenBalances[
       this.contractDetails.syntheticName
     ]
 

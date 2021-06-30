@@ -75,12 +75,12 @@ export default class RedeemTokens extends Vue {
     syntheticName: string
   }) => Promise<void>
 
-  @contracts.Getter
-  getSyntheticTokenBalances!: Record<string, SyntheticTokenBalances>
+  @contracts.State
+  syntheticTokenBalances!: Record<string, SyntheticTokenBalances>
 
   get tokenPairs(): number {
     const tokenBalances =
-      this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
+      this.syntheticTokenBalances[this.contractDetails.syntheticName]
     if (tokenBalances === undefined) return 0
     else {
       console.log("Balances: ", tokenBalances)

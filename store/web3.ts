@@ -101,10 +101,15 @@ export default class web3 extends VuexModule {
   registerListeners(metamaskProvider: MetaMaskInpageProvider) {
     if (metamaskProvider.isMetaMask) {
       console.log("Registering account listener")
-      metamaskProvider.on("accountsChanged", (accounts) => {
+      metamaskProvider.on("accountsChanged", async (accounts) => {
         const account = (accounts as Array<string>)[0]
         console.log("Detected account update: %s", account)
         this.context.commit("setSelectedAccount", account)
+        await this.context.dispatch(
+          "contracts/updateContractData",
+          {},
+          { root: true }
+        )
       })
 
       // Note that this will not be triggered if we change between networks with the same chain id

@@ -1,7 +1,7 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="600px">
+  <v-dialog v-model="dialog" max-width="600px" persistent>
     <template #activator="{ on, attrs }">
-      <v-btn color="primary" text v-bind="attrs" v-on="on"> Mint</v-btn>
+      <v-btn v-bind="attrs" v-on="on" color="primary" text> Mint</v-btn>
     </template>
     <v-card>
       <v-card-title>
@@ -14,10 +14,10 @@
               <v-col cols="12">
                 <v-text-field
                   v-model="syntheticTokens"
-                  label="Synthetic Tokens to create"
-                  type="number"
                   :rules="rules"
+                  label="Synthetic Tokens to create"
                   required
+                  type="number"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -81,8 +81,8 @@
 
 <script lang="ts">
 import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
-import { LSPConfiguration } from "~/types"
 import { ethers } from "ethers"
+import { LSPConfiguration } from "~/types"
 
 const contracts = namespace("contracts")
 
@@ -110,8 +110,8 @@ export default class mintTokens extends Vue {
     syntheticName: string
   }) => Promise<void>
 
-  @contracts.Getter
-  getCollateralAllowances!: Record<string, ethers.BigNumber>
+  @contracts.State
+  collateralAllowances!: Record<string, ethers.BigNumber>
 
   get collateralAmount(): number {
     return (
@@ -129,7 +129,7 @@ export default class mintTokens extends Vue {
 
   get collateralApproved(): boolean {
     const collateralAllowance =
-      this.getCollateralAllowances[this.contractDetails.syntheticName]
+      this.collateralAllowances[this.contractDetails.syntheticName]
     if (collateralAllowance === undefined) {
       return false
     } else {
@@ -139,15 +139,18 @@ export default class mintTokens extends Vue {
 
   get rules() {
     let self = this
+
     function enoughCollateral(value: number): boolean | string {
       return (
         value * parseFloat(self.contractDetails.collateralPerPair) <=
           self.collateralTokens || "Not enough collateral"
       )
     }
+
     function positive(value: number): boolean | string {
       return value > 0 || "Number of tokens must be positive"
     }
+
     return [positive, enoughCollateral]
   }
 
