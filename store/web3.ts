@@ -47,7 +47,11 @@ export default class web3 extends VuexModule {
   selectedAccountAddress = ""
   networkInfo: ethers.providers.Network = { name: "", chainId: -1 }
   correctNetwork = "kovan"
+  blockTimestamp = 0
 
+  get getBlockTimestamp(): number {
+    return this.blockTimestamp
+  }
   get selectedAccount(): string {
     return this.selectedAccountAddress
   }
@@ -55,7 +59,6 @@ export default class web3 extends VuexModule {
   get getConnectionStatus(): boolean {
     return this.isConnected
   }
-
 
   get onCorrectNetwork() {
     return this.networkInfo.name === this.correctNetwork
@@ -97,6 +100,11 @@ export default class web3 extends VuexModule {
   @Mutation
   setConnectionStatus(status: boolean) {
     this.isConnected = status
+  }
+
+  @Mutation
+  setBlockTimestamp(timestamp: number) {
+    this.blockTimestamp = timestamp
   }
 
   @Mutation
@@ -176,6 +184,17 @@ export default class web3 extends VuexModule {
       window.ethereum.on("chainChanged", () => {
         console.log("Detected network change, reload page")
         window.location.reload()
+      })
+    }
+    let self = this
+    const provider = getCurrentProvider()
+    if (provider !== undefined) {
+      console.log("Registering new block listener")
+      provider.on("block", async function (blockNumber) {
+        console.log("New Block: " + blockNumber)
+        const block = await provider.getBlock(blockNumber)
+        console.log("Block timestamp: ", block.timestamp)
+        self.context.commit("setBlockTimestamp", block.timestamp)
       })
     }
   }
