@@ -30,7 +30,9 @@
       <v-toolbar-title v-text="title" />
       <wicked-logo id="Logo" />
       <v-spacer />
-      {{ selectedAccount }}
+      <div v-if="isConnected" class="connected" :title="selectedAccount">
+        Connected: {{ selectedAccount }}
+      </div>
       <web3-btn></web3-btn>
     </v-app-bar>
 
@@ -69,7 +71,7 @@ export default class DefaultLayout extends Vue {
   get items(): Array<object> {
     const contractItems = this.syntheticNames.map((syntheticName) => {
       return {
-        icon: "mdi-file-document-edit-outline",
+        icon: "mdi-candle",
         title: syntheticName,
         to: `/contract/${syntheticName}`,
       }
@@ -81,7 +83,7 @@ export default class DefaultLayout extends Vue {
 
 <style type="text/css" scoped>
 header {
-  background: transparent !important;
+  background: #151e2a !important;
   box-shadow: none !important;
 }
 
@@ -94,4 +96,17 @@ header {
   background: #151e2a !important;
   background: linear-gradient(to top left, #295059, #151e2a) !important;
 }
+
+.connected {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: #ffffff11;
+  margin: 0 10px;
+  padding: 6px 15px;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
 </style>
