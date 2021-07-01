@@ -4,22 +4,10 @@ import {
   VuexModule,
   VuexMutation as Mutation,
 } from "nuxt-property-decorator"
-import Web3modal from "web3modal"
 import { ethers } from "ethers"
 import { MetaMaskInpageProvider } from "@metamask/providers"
 
-let web3Modal: Web3modal
 let currentProvider: ethers.providers.Web3Provider | undefined
-
-function initializeModal() {
-  // window must be available so we delay instantiating till later
-  if (!web3Modal)
-    web3Modal = new Web3modal({
-      network: "kovan",
-      cacheProvider: false,
-    })
-  return web3Modal
-}
 
 export const getCurrentProvider = () => {
   return currentProvider
@@ -73,9 +61,9 @@ export default class web3 extends VuexModule {
   }
 
   @Mutation
-  setEthersProvider(provider: any) {
+  setEthersProvider(provider: MetaMaskInpageProvider) {
     try {
-      currentProvider = new ethers.providers.Web3Provider(provider)
+      currentProvider = new ethers.providers.Web3Provider(provider as never)
       this.providerSet = true
     } catch (e: unknown) {
       console.log(
@@ -138,10 +126,8 @@ export default class web3 extends VuexModule {
   @Action({ rawError: true })
   async connectWeb3() {
     this.context.commit("setModalInitializing", true)
-    const webModal = initializeModal()
-    let provider: typeof webModal.connect
+    const provider = (window as any).ethereum as MetaMaskInpageProvider
     try {
-      provider = await webModal.connect()
       this.context.commit("setEthersProvider", provider)
       this.context.commit("setConnectionStatus", true)
       await this.context.dispatch("registerListeners", provider)
