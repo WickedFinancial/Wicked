@@ -3,60 +3,59 @@
     <v-card-title>Tokens</v-card-title>
     <v-card-text>
       <v-list-item>
-        <v-list-item-title> Collateral Balance </v-list-item-title>
-        <v-list-item-subtitle>{{ this.collateralTokens }}</v-list-item-subtitle>
+        <v-list-item-title> Collateral Balance</v-list-item-title>
+        <v-list-item-subtitle>{{ collateralTokens }}</v-list-item-subtitle>
       </v-list-item>
 
       <v-list-item>
         <v-list-item-title
           ><a :href="etherscanLinkLongToken"> Long Balance</a>
         </v-list-item-title>
-        <v-list-item-subtitle>{{
-          this.syntheticTokens.longBalance
-        }}</v-list-item-subtitle>
+        <v-list-item-subtitle
+          >{{ syntheticTokens.longBalance }}
+        </v-list-item-subtitle>
       </v-list-item>
 
       <v-list-item>
         <v-list-item-title
           ><a :href="etherscanLinkShortToken"> Short Balance</a>
         </v-list-item-title>
-        <v-list-item-subtitle>{{
-          this.syntheticTokens.shortBalance
-        }}</v-list-item-subtitle>
+        <v-list-item-subtitle
+          >{{ syntheticTokens.shortBalance }}
+        </v-list-item-subtitle>
       </v-list-item>
     </v-card-text>
 
     <v-card-actions class="justify-between">
       <MintTokens
-        :contractDetails="contractDetails"
-        :collateralTokens="collateralTokens"
         v-if="contractState === 0"
+        :contract-details="contractDetails"
+        :collateral-tokens="collateralTokens"
       />
       <RedeemTokens
-        :contractDetails="contractDetails"
-        :collateralTokens="collateralTokens"
         v-if="contractState === 0"
+        :contract-details="contractDetails"
+        :collateral-tokens="collateralTokens"
       />
       <!-- TODO: Later (when done with testing) we will want to show this only if the current date is past the expiry date  -->
       <ExpireContract
         v-if="contractState === 0"
-        :contractDetails="contractDetails"
+        :contract-details="contractDetails"
       />
       <SettleTokens
         v-if="contractState === 1 || contractState === 2"
-        :contractDetails="contractDetails"
+        :contract-details="contractDetails"
       />
     </v-card-actions>
   </v-card>
 </template>
 
 <script lang="ts">
-import { Vue, Component, namespace, Prop } from "nuxt-property-decorator"
+import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
 import {
   LSPConfiguration,
-  SyntheticTokenContractMapping,
-  SyntheticTokenBalances,
   SyntheticTokenAddresses,
+  SyntheticTokenBalances,
 } from "~/types"
 
 const addresses: Record<string, string> = require("@/addresses.json")
@@ -70,28 +69,28 @@ export default class contractTokens extends Vue {
   @Prop()
   contractState!: number | undefined
 
-  @contracts.Getter
-  getCollateralTokenBalances!: Record<string, number>
+  @contracts.State
+  collateralTokenBalances!: Record<string, number>
 
-  @contracts.Getter
-  getSyntheticTokenAddresses!: Record<string, SyntheticTokenAddresses>
+  @contracts.State
+  syntheticTokenAddresses!: Record<string, SyntheticTokenAddresses>
 
-  @contracts.Getter
-  getSyntheticTokenBalances!: Record<string, SyntheticTokenBalances>
+  @contracts.State
+  syntheticTokenBalances!: Record<string, SyntheticTokenBalances>
 
   @contracts.State
   tokenBalancesLoaded!: boolean
 
   get etherscanLinkShortToken(): string | undefined {
     return `https://kovan.etherscan.io/address/${
-      this.getSyntheticTokenAddresses[this.contractDetails.syntheticName]
+      this.syntheticTokenAddresses[this.contractDetails.syntheticName]
         .shortAddress
     }`
   }
 
   get etherscanLinkLongToken(): string | undefined {
     return `https://kovan.etherscan.io/address/${
-      this.getSyntheticTokenAddresses[this.contractDetails.syntheticName]
+      this.syntheticTokenAddresses[this.contractDetails.syntheticName]
         .longAddress
     }`
   }
@@ -103,14 +102,14 @@ export default class contractTokens extends Vue {
   }
 
   get collateralTokens(): number {
-    const collateralBalances = this.getCollateralTokenBalances
+    const collateralBalances = this.collateralTokenBalances
     if (this.contractDetails.collateralToken in collateralBalances)
       return collateralBalances[this.contractDetails.collateralToken]
     else return -1
   }
 
   get syntheticTokens(): SyntheticTokenBalances {
-    const syntheticBalances = this.getSyntheticTokenBalances
+    const syntheticBalances = this.syntheticTokenBalances
     return syntheticBalances[this.contractDetails.syntheticName]
   }
 

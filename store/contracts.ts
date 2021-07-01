@@ -5,18 +5,20 @@ import { getCurrentProvider } from "~/store/web3"
 import {
   ExpiryData,
   LSPConfiguration,
-  SyntheticTokenContractMapping,
-  SyntheticTokenBalances,
   SyntheticTokenAddresses,
+  SyntheticTokenBalances,
+  SyntheticTokenContractMapping,
 } from "~/types"
 
-const abis: Record<string, Array<string>> = require("~/abis")
-const addresses: Record<string, string> = require("~/addresses.json")
+import * as abis from "~/abis"
+
+import addresses from "~/addresses.json"
+
+type SyntheticTokenContracts = Record<string, SyntheticTokenContractMapping>
 
 const lspContracts: Record<string, ethers.Contract> = {}
 const collateralContracts: Record<string, ethers.Contract> = {}
-const syntheticTokenContracts: Record<string, SyntheticTokenContractMapping> =
-  {}
+const syntheticTokenContracts: SyntheticTokenContracts = {}
 
 @Module({
   stateFactory: true,
@@ -30,56 +32,32 @@ export default class contracts extends VuexModule {
   expiryData: Record<string, ExpiryData> = {}
   collateralTokenBalances: Record<string, number> = {}
   contractStatuses: Record<string, number> = {}
-  tokenBalancesLoaded: boolean = false
+  tokenBalancesLoaded = false
   collateralAllowances: Record<string, ethers.BigNumber> = {}
 
   get canUpdate(): boolean {
     return (
-      this.context.rootGetters["web3/getConnectionStatus"] &&
+      this.context.rootState.web3?.isConnected &&
       this.context.rootGetters["web3/onCorrectNetwork"]
     )
   }
-  get syntheticNames() {
+
+  get syntheticNames(): Array<string> {
     return this.contractConfigs.map((config) => config.syntheticName)
   }
 
-  get getCollateralTokenBalances(): Record<string, number> {
-    return this.collateralTokenBalances
-  }
-
-  get getCollateralAllowances(): Record<string, ethers.BigNumber> {
-    return this.collateralAllowances
-  }
-
-  get getSyntheticTokenBalances(): Record<string, SyntheticTokenBalances> {
-    return this.syntheticTokenBalances
-  }
-
-  get getSyntheticTokenAddresses(): Record<string, SyntheticTokenAddresses> {
-    return this.syntheticTokenAddresses
-  }
-
-  get getContractStatuses(): Record<string, number> {
-    return this.contractStatuses
-  }
-
-  get getExpiryData(): Record<string, ExpiryData> {
-    return this.expiryData
-  }
-
-
   @Mutation
-  resetContractStatuses() {
+  resetContractStatuses(): void {
     this.contractStatuses = {}
   }
 
   @Mutation
-  resetExpiryData() {
+  resetExpiryData(): void {
     this.expiryData = {}
   }
 
   @Mutation
-  resetTokenBalances() {
+  resetTokenBalances(): void {
     this.syntheticTokenBalances = {}
     this.collateralTokenBalances = {}
     this.collateralAllowances = {}
@@ -87,7 +65,7 @@ export default class contracts extends VuexModule {
   }
 
   @Mutation
-  setContractStatus(payload: { syntheticName: string; status: number }) {
+  setContractStatus(payload: { syntheticName: string; status: number }): void {
     const { syntheticName, status } = payload
     console.log(`Setting state of contract ${syntheticName} to ${status}`)
     const newValues: Record<string, number> = {}
@@ -96,7 +74,7 @@ export default class contracts extends VuexModule {
   }
 
   @Mutation
-  setTokenBalancesLoaded(loaded: boolean) {
+  setTokenBalancesLoaded(loaded: boolean): void {
     this.tokenBalancesLoaded = loaded
   }
 
@@ -104,12 +82,12 @@ export default class contracts extends VuexModule {
   setCollateralAllowance(payload: {
     syntheticName: string
     collateralAllowance: ethers.BigNumber
-  }) {
+  }): void {
     const { syntheticName, collateralAllowance } = payload
     console.log(
       `Set collateral allowance of ${syntheticName} to ${collateralAllowance}`
     )
-    let newValues: Record<string, ethers.BigNumber> = {}
+    const newValues: Record<string, ethers.BigNumber> = {}
     newValues[syntheticName] = collateralAllowance
     this.collateralAllowances = Object.assign(
       {},
@@ -122,12 +100,12 @@ export default class contracts extends VuexModule {
   setCollateralTokenBalance(payload: {
     collateralName: string
     collateralBalance: number
-  }) {
+  }): void {
     const { collateralName, collateralBalance } = payload
     console.log(
       `Set collateral balance of ${collateralName} to ${collateralBalance}`
     )
-    let newValues: Record<string, number> = {}
+    const newValues: Record<string, number> = {}
     newValues[collateralName] = collateralBalance
     this.collateralTokenBalances = Object.assign(
       {},
@@ -141,7 +119,7 @@ export default class contracts extends VuexModule {
     syntheticName: string
     longAddress: string
     shortAddress: string
-  }) {
+  }): void {
     const { syntheticName, longAddress, shortAddress } = payload
     console.log(
       `Setting long / short addresses for ${syntheticName} to:`,
@@ -149,7 +127,7 @@ export default class contracts extends VuexModule {
       shortAddress
     )
 
-    let newValues: Record<string, SyntheticTokenAddresses> = {}
+    const newValues: Record<string, SyntheticTokenAddresses> = {}
     newValues[syntheticName] = { longAddress, shortAddress }
 
     this.syntheticTokenAddresses = Object.assign(
@@ -160,21 +138,22 @@ export default class contracts extends VuexModule {
   }
 
   @Mutation
-  setExpiryData(payload: { syntheticName: string; data: ExpiryData }) {
+  setExpiryData(payload: { syntheticName: string; data: ExpiryData }): void {
     const { syntheticName, data } = payload
     console.log(`Setting expiry data for ${syntheticName} to:`, data)
 
-    let newValues: Record<string, ExpiryData> = {}
+    const newValues: Record<string, ExpiryData> = {}
     newValues[syntheticName] = data
 
     this.expiryData = Object.assign({}, this.expiryData, newValues)
   }
+
   @Mutation
   setSyntheticTokenBalances(payload: {
     syntheticName: string
     longBalance: number
     shortBalance: number
-  }) {
+  }): void {
     const { syntheticName, longBalance, shortBalance } = payload
     console.log(
       `Setting long / short balances for ${syntheticName} to:`,
@@ -182,7 +161,7 @@ export default class contracts extends VuexModule {
       shortBalance
     )
 
-    let newValues: Record<string, SyntheticTokenBalances> = {}
+    const newValues: Record<string, SyntheticTokenBalances> = {}
     newValues[syntheticName] = { longBalance, shortBalance }
 
     this.syntheticTokenBalances = Object.assign(
@@ -193,13 +172,13 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  clearContracts() {
+  clearContracts(): void {
     this.context.commit("resetContractStatuses")
     this.context.commit("resetTokenBalances")
   }
 
   @Action({ rawError: true })
-  async expireContract(syntheticName: string) {
+  async expireContract(syntheticName: string): Promise<void> {
     console.log(`Expiring contract ${syntheticName}`)
     const signer = this.context.rootGetters["web3/signer"]
     console.log("Using signer: ", signer)
@@ -207,7 +186,7 @@ export default class contracts extends VuexModule {
       const lspContract = lspContracts[syntheticName].connect(signer)
       const expireTx = await lspContract.expire()
       await expireTx.wait()
-      this.context.dispatch("updateContractStatuses")
+      await this.context.dispatch("updateContractStatuses")
     }
   }
 
@@ -215,15 +194,15 @@ export default class contracts extends VuexModule {
   async approveCollateral(payload: {
     collateralName: string
     syntheticName: string
-  }) {
+  }): Promise<void> {
     const { collateralName, syntheticName } = payload
     console.log(`Approving tokens of ${collateralName} to ${syntheticName}`)
     const lspAddress = lspContracts[syntheticName].address
     const signer = this.context.rootGetters["web3/signer"]
     console.log("Using signer: ", signer)
     if (signer !== undefined) {
-      const collateralContract =
-        collateralContracts[collateralName].connect(signer)
+      let collateralContract = collateralContracts[collateralName]
+      collateralContract = collateralContract.connect(signer)
       const amount = ethers.constants.MaxUint256
       console.log("Parsed values: ", {
         lspAddress,
@@ -240,7 +219,10 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async mintTokens(payload: { amount: number; syntheticName: string }) {
+  async mintTokens(payload: {
+    amount: number
+    syntheticName: string
+  }): Promise<void> {
     const { amount, syntheticName } = payload
     console.log(`Minting ${amount} tokens of ${syntheticName}`)
     const signer = this.context.rootGetters["web3/signer"]
@@ -258,7 +240,7 @@ export default class contracts extends VuexModule {
     }
   }
 
-  @Action
+  @Action({ rawError: true })
   async settleTokens(payload: {
     longTokens: number
     shortTokens: number
@@ -289,7 +271,10 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async redeemTokens(payload: { amount: number; syntheticName: string }) {
+  async redeemTokens(payload: {
+    amount: number
+    syntheticName: string
+  }): Promise<void> {
     const { amount, syntheticName } = payload
     console.log(`Redeeming ${amount} tokens of ${syntheticName}`)
     const signer = this.context.rootGetters["web3/signer"]
@@ -308,7 +293,7 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async updateContractData() {
+  async updateContractData(): Promise<void> {
     this.context.commit("setTokenBalancesLoaded", false)
     if (this.canUpdate) {
       await this.context.dispatch("updateCollateralTokenBalances")
@@ -321,9 +306,8 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async updateSyntheticTokenBalances() {
-    const selectedAccount = this.context.rootGetters["web3/selectedAccount"]
-
+  async updateSyntheticTokenBalances(): Promise<void> {
+    const selectedAccount = this.context.rootState.web3.selectedAccount
     for (const [
       syntheticName,
       { shortContract, longContract },
@@ -345,8 +329,8 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async updateCollateralTokenBalances() {
-    const selectedAccount = this.context.rootGetters["web3/selectedAccount"]
+  async updateCollateralTokenBalances(): Promise<void> {
+    const selectedAccount = this.context.rootState.web3.selectedAccount
     for (const [collateralName, collateralContract] of Object.entries(
       collateralContracts
     )) {
@@ -363,8 +347,8 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async updateCollateralAllowances() {
-    const selectedAccount = this.context.rootGetters["web3/selectedAccount"]
+  async updateCollateralAllowances(): Promise<void> {
+    const selectedAccount = this.context.rootState.web3.selectedAccount
     for (const config of this.contractConfigs) {
       const collateralName = config.collateralToken
       const collateralContract = collateralContracts[collateralName]
@@ -380,7 +364,7 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async updateContractStatuses() {
+  async updateContractStatuses(): Promise<void> {
     this.context.commit("resetContractStatuses")
     for (const [syntheticName, lspContract] of Object.entries(lspContracts)) {
       const contractState = await lspContract.contractState()
@@ -392,7 +376,7 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async updateExpiryData() {
+  async updateExpiryData(): Promise<void> {
     this.context.commit("resetExpiryData")
     for (const [syntheticName, lspContract] of Object.entries(lspContracts)) {
       const percentageLong = parseFloat(
@@ -407,12 +391,11 @@ export default class contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async initializeContracts() {
+  async initializeContracts(): Promise<void> {
     this.context.commit("resetContractStatuses")
     if (this.canUpdate) {
       console.log("Connecting to contracts")
-      const provider: ethers.providers.Web3Provider | undefined =
-        getCurrentProvider()
+      const provider = getCurrentProvider()
       if (provider === undefined) {
         throw new Error("Provider is undefined - cannot initialize contracts")
       } else {
@@ -432,8 +415,9 @@ export default class contracts extends VuexModule {
 
               // Instantiate Collateral Contract
               const collateralName = config.collateralToken
-              const collateralAddress = addresses[collateralName]
-              const collateralAbi = abis[collateralName]
+              const collateralAddress =
+                addresses[collateralName as keyof typeof addresses]
+              const collateralAbi = abis[collateralName as keyof typeof abis]
               console.log(
                 `Connecting to collateral ${collateralName} at ${collateralAddress} with abi: `,
                 collateralAbi
@@ -475,10 +459,10 @@ export default class contracts extends VuexModule {
                 longAddress,
               })
 
-              console.log(`Connected to contract ${syntheticName} succesfully`)
+              console.log(`Connected to contract ${syntheticName} successfully`)
             } catch (e) {
               console.log(
-                `Couldnt connect to contract ${config.syntheticName} due to exception: `,
+                `Couldn't connect to contract ${config.syntheticName} due to exception: `,
                 e
               )
             }
