@@ -28,18 +28,18 @@
 
     <v-card-actions class="justify-between">
       <MintTokens
-        v-if="contractState === 0"
+        v-if="contractState === 0 && !pastExpiry"
         :contract-details="contractDetails"
         :collateral-tokens="collateralTokens"
       />
       <RedeemTokens
-        v-if="contractState === 0"
+        v-if="contractState === 0 && !pastExpiry"
         :contract-details="contractDetails"
         :collateral-tokens="collateralTokens"
       />
       <!-- TODO: Later (when done with testing) we will want to show this only if the current date is past the expiry date  -->
       <ExpireContract
-        v-if="contractState === 0"
+        v-if="contractState === 0 && pastExpiry"
         :contract-details="contractDetails"
       />
       <SettleTokens
@@ -60,6 +60,7 @@ import {
 
 const addresses: Record<string, string> = require("@/addresses.json")
 const contracts = namespace("contracts")
+const web3 = namespace("web3")
 
 @Component
 export default class contractTokens extends Vue {
@@ -80,6 +81,15 @@ export default class contractTokens extends Vue {
 
   @contracts.State
   tokenBalancesLoaded!: boolean
+
+  @web3.State
+  blockTimestamp!: number
+
+  get pastExpiry() {
+    const expirationTimestamp =
+      new Date(this.contractDetails.expirationTime).getTime() / 1000
+    return expirationTimestamp < this.blockTimestamp
+  }
 
   get etherscanLinkShortToken(): string | undefined {
     return `https://kovan.etherscan.io/address/${
