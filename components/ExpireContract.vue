@@ -1,7 +1,7 @@
 <template>
-  <v-dialog v-model="dialog" v-if="pastExpiry" persistent max-width="600px">
+  <v-dialog v-if="pastExpiry" v-model="dialog" max-width="600px" persistent>
     <template #activator="{ on, attrs }">
-      <v-btn color="primary" text v-bind="attrs" v-on="on"> Expire</v-btn>
+      <v-btn v-bind="attrs" color="primary" text v-on="on"> Expire</v-btn>
     </template>
     <v-card>
       <v-card-title>
@@ -16,14 +16,14 @@
           <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
 
           <v-btn
+            :disabled="loading"
+            :loading="loading"
             color="blue darken-1"
             type="button"
             @click.prevent="expire"
-            :loading="loading"
-            :disabled="loading"
           >
             Expire
-            <template v-slot:loader>
+            <template #loader>
               <span>Loading...</span>
             </template>
           </v-btn>
@@ -51,13 +51,13 @@ export default class expireContract extends Vue {
   @contracts.Action
   expireContract!: (syntheticName: string) => Promise<void>
 
-  @web3.Getter
-  getBlockTimestamp!: number
+  @web3.State
+  blockTimestamp!: number
 
-
-  get pastExpiry(){
-      const expirationTimestamp = new Date(this.contractDetails.expirationTime).getTime() / 1000
-      return expirationTimestamp < this.getBlockTimestamp
+  get pastExpiry() {
+    const expirationTimestamp =
+      new Date(this.contractDetails.expirationTime).getTime() / 1000
+    return expirationTimestamp < this.blockTimestamp
   }
 
   async expire() {

@@ -38,6 +38,7 @@ export default class web3 extends VuexModule {
   correctNetwork = "kovan"
   activeNetwork = ""
   selectedAccount = ""
+  blockTimestamp = 0
 
   get onCorrectNetwork() {
     return this.networkInfo.name === this.correctNetwork
@@ -97,6 +98,11 @@ export default class web3 extends VuexModule {
     this.isConnected = false
   }
 
+  @Mutation
+  setBlockTimestamp(timestamp: number) {
+    this.blockTimestamp = timestamp
+  }
+
   @Action({ rawError: true })
   registerListeners(metamaskProvider: MetaMaskInpageProvider) {
     if (metamaskProvider.isMetaMask) {
@@ -114,6 +120,14 @@ export default class web3 extends VuexModule {
         window.location.reload()
       })
     }
+    const ethersProvider = new ethers.providers.Web3Provider(
+      metamaskProvider as any
+    )
+    ethersProvider.on("block", async (blockNumber) => {
+      const block = await ethersProvider.getBlock(blockNumber)
+      console.log("Block timestamp:", block.timestamp)
+      this.context.commit("setBlockTimestamp", block.timestamp)
+    })
   }
 
   @Action({ rawError: true })
