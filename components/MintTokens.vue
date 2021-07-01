@@ -160,7 +160,7 @@ export default class mintTokens extends Vue {
         syntheticName: this.contractDetails.syntheticName,
       })
     } catch (e) {
-      console.log("Approval failed with exception: ", e)
+      console.error("Approval failed with exception: ", e)
     } finally {
       this.loading = false
     }
@@ -176,7 +176,7 @@ export default class mintTokens extends Vue {
       })
       this.dialog = false
     } catch (e) {
-      console.log("Mint failed with exception: ", e)
+      console.error("Mint failed with exception: ", e)
     } finally {
       this.loading = false
     }

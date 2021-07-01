@@ -211,7 +211,7 @@ export default class SettleTokens extends Vue {
       })
       this.dialog = false
     } catch (e) {
-      console.log("Settlement failed with exception: ", e)
+      console.error("Settlement failed with exception: ", e)
     } finally {
       this.loading = false
     }

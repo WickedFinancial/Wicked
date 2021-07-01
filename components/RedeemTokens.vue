@@ -113,7 +113,7 @@ export default class RedeemTokens extends Vue {
       })
       this.dialog = false
     } catch (e) {
-      console.log("Redeem failed with exception: ", e)
+      console.error("Redeem failed with exception: ", e)
     } finally {
       this.loading = false
     }

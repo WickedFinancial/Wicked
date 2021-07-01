@@ -66,7 +66,7 @@ export default class expireContract extends Vue {
       await this.expireContract(this.contractDetails.syntheticName)
       this.dialog = false
     } catch (e) {
-      console.log("Expiry failed with exception: ", e)
+      console.error("Expiry failed with exception: ", e)
     } finally {
       this.loading = false
     }
