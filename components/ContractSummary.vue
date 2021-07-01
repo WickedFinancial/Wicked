@@ -48,8 +48,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "nuxt-property-decorator"
 import { LSPConfiguration } from "~/types"
-
-const addresses = require("~/addresses.json")
+import addresses from "~/addresses.json"
 
 const readableLibraryNames = {
   LinearLongShortPairFinancialProductLibrary: "Linear Payout Contract",
@@ -68,7 +67,7 @@ type parameterInfo = {
   value: string
 }
 
-@Component()
+@Component
 export default class contractSummary extends Vue {
   @Prop()
   contractDetails!: LSPConfiguration
@@ -98,7 +97,10 @@ export default class contractSummary extends Vue {
   get libraryConfiguration(): Array<parameterInfo> | object {
     const params = this.contractDetails.financialProductLibraryParameters
     const financialProductLibrary =
-      libraryParameters[this.contractDetails.financialProductLibrary]
+      libraryParameters[
+        this.contractDetails
+          .financialProductLibrary as keyof typeof libraryParameters
+      ]
 
     return params.map((value: string, index: number) => {
       return {
@@ -114,16 +116,22 @@ export default class contractSummary extends Vue {
   }
 
   get etherscanLinkCollateral(): string | undefined {
-    const address = addresses[this.contractDetails.collateralToken]
+    const address =
+      addresses[this.contractDetails.collateralToken as keyof typeof addresses]
     return `https://kovan.etherscan.io/address/${address}`
   }
 
   get priceFeedLink(): string {
-    return priceFeedLinks[this.contractDetails.priceIdentifier]
+    return priceFeedLinks[
+      this.contractDetails.priceIdentifier as keyof typeof priceFeedLinks
+    ]
   }
 
   get contractType(): string {
-    return readableLibraryNames[this.contractDetails.financialProductLibrary]
+    return readableLibraryNames[
+      this.contractDetails
+        .financialProductLibrary as keyof typeof readableLibraryNames
+    ]
   }
 
   get collateralToken(): string {

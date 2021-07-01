@@ -8,7 +8,7 @@ interface AppError {
   statusCode: number
 }
 
-@Component({
+@Component<ErrorLayout>({
   head() {
     const title = this.otherError
     return { title }
