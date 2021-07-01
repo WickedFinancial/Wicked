@@ -159,6 +159,8 @@ export default class mintTokens extends Vue {
         collateralName: this.contractDetails.collateralToken,
         syntheticName: this.contractDetails.syntheticName,
       })
+    } catch (e) {
+      console.log("Approval failed with exception: ", e)
     } finally {
       this.loading = false
     }
@@ -173,6 +175,8 @@ export default class mintTokens extends Vue {
         syntheticName: this.contractDetails.syntheticName,
       })
       this.dialog = false
+    } catch (e) {
+      console.log("Mint failed with exception: ", e)
     } finally {
       this.loading = false
     }

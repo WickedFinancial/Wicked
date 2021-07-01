@@ -210,6 +210,8 @@ export default class SettleTokens extends Vue {
         syntheticName: this.contractDetails.syntheticName,
       })
       this.dialog = false
+    } catch (e) {
+      console.log("Settlement failed with exception: ", e)
     } finally {
       this.loading = false
     }
