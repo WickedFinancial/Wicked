@@ -1,23 +1,32 @@
 <template>
   <div v-if="isConnected">
-    <v-alert v-if="onCorrectNetwork" color="green" class="mb-0" dense>
-      Successfully connected to network {{ getNetworkInfo.name }}</v-alert
-    >
-    <v-alert v-else color="red lighten-2" class="mb-0" dense>
+    <v-banner v-if="onCorrectNetwork" color="green" single-line>
+      Successfully connected to network {{ activeNetwork }}
+      <template #actions="{ dismiss }">
+        <v-btn text @click="dismiss"> Dismiss</v-btn>
+      </template>
+    </v-banner>
+    <v-banner v-else color="red lighten-2" single-line>
       The contracts for this app are currently only deployed on the
       {{ correctNetwork }} network, whereas your wallet is connected to the
-      {{ getNetworkInfo.name }} network. Please change your network accordingly and reconnect.
-    </v-alert>
+      {{ activeNetwork }} network. Please change your network accordingly and
+      reconnect.
+      <template #actions="{ dismiss }">
+        <v-btn text @click="dismiss"> Dismiss</v-btn>
+      </template>
+    </v-banner>
   </div>
-  <v-alert v-else color="red lighten-2" class="mb-0" dense>
+  <v-banner v-else color="red lighten-2" single-line>
     To use most features of this Dapp you will have to connect an ethereum
     wallet. Please do so by pressing the connect button on the top of the page.
-  </v-alert>
+    <template #actions="{ dismiss }">
+      <v-btn text @click="dismiss"> Dismiss</v-btn>
+    </template>
+  </v-banner>
 </template>
 
 <script lang="ts">
 import { Component, namespace, Vue } from "nuxt-property-decorator"
-import { ethers } from "ethers"
 
 const web3 = namespace("web3")
 
@@ -29,12 +38,10 @@ export default class NetworkStatusBanner extends Vue {
   @web3.State
   correctNetwork!: string
 
-  @web3.Getter
-  getNetworkInfo!: ethers.providers.Network
+  @web3.State
+  activeNetwork?: string
 
   @web3.Getter
   onCorrectNetwork!: boolean
-
-
 }
 </script>

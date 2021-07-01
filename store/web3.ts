@@ -4,18 +4,9 @@ import {
   VuexModule,
   VuexMutation as Mutation,
 } from "nuxt-property-decorator"
-import WalletConnectProvider from "@walletconnect/web3-provider"
 import Web3modal from "web3modal"
 import { ethers } from "ethers"
-
-const providerOptions = {
-  walletconnect: {
-    package: WalletConnectProvider,
-    options: {
-      infuraId: "3ce35c3d389a4461bffd073fbf27d23e",
-    },
-  },
-}
+import { MetaMaskInpageProvider } from "@metamask/providers"
 
 let web3Modal: Web3modal
 let currentProvider: ethers.providers.Web3Provider | undefined
@@ -26,7 +17,6 @@ function initializeModal() {
     web3Modal = new Web3modal({
       network: "kovan",
       cacheProvider: false,
-      providerOptions,
     })
   return web3Modal
 }
@@ -44,45 +34,14 @@ export default class web3 extends VuexModule {
   isConnected = false
   modalInitializing = false
   providerSet = false
-  selectedAccountAddress = ""
   networkInfo: ethers.providers.Network = { name: "", chainId: -1 }
   correctNetwork = "kovan"
-
-  get selectedAccount(): string {
-    return this.selectedAccountAddress
-  }
-
-  get getConnectionStatus(): boolean {
-    return this.isConnected
-  }
-
+  activeNetwork = ""
+  selectedAccount = ""
+  blockTimestamp = 0
 
   get onCorrectNetwork() {
     return this.networkInfo.name === this.correctNetwork
-  }
-
-  get getNetworkInfo(): ethers.providers.Network {
-    return this.networkInfo
-  }
-
-  @Mutation
-  setNetworkInfo(networkInfo: ethers.providers.Network) {
-    this.networkInfo = networkInfo
-  }
-
-  @Mutation
-  setSelectedAccount(selectedAccount: string | undefined) {
-    if (selectedAccount === undefined) {
-      selectedAccount = ""
-      if (this.isConnected) {
-        const modalProvider = getCurrentProvider()
-        const provider = modalProvider?.provider as any
-        selectedAccount = provider.selectedAddress
-      }
-    }
-
-    console.log("Setting selected account to: ", selectedAccount)
-    this.selectedAccountAddress = selectedAccount || ""
   }
 
   get signer() {
@@ -95,12 +54,23 @@ export default class web3 extends VuexModule {
   }
 
   @Mutation
-  setConnectionStatus(status: boolean) {
-    this.isConnected = status
+  setNetworkInfo(networkInfo: ethers.providers.Network) {
+    const provider: unknown = getCurrentProvider()?.provider
+    const metamaskProvider = provider as MetaMaskInpageProvider
+    this.selectedAccount = metamaskProvider.selectedAddress ?? ""
+    this.networkInfo = networkInfo
+    this.activeNetwork = networkInfo.name
   }
 
   @Mutation
-  setNetwork() {}
+  setSelectedAccount(address: string) {
+    this.selectedAccount = address
+  }
+
+  @Mutation
+  setConnectionStatus(status: boolean) {
+    this.isConnected = status
+  }
 
   @Mutation
   setEthersProvider(provider: any) {
@@ -128,6 +98,43 @@ export default class web3 extends VuexModule {
     this.isConnected = false
   }
 
+  @Mutation
+  setBlockTimestamp(timestamp: number) {
+    this.blockTimestamp = timestamp
+  }
+
+  @Action({ rawError: true })
+  registerListeners(metamaskProvider: MetaMaskInpageProvider) {
+    if (metamaskProvider.isMetaMask) {
+      console.log("Registering account listener")
+      metamaskProvider.on("accountsChanged", async (accounts) => {
+        const account = (accounts as Array<string>)[0]
+        console.log("Detected account update: %s", account)
+        this.context.commit("setSelectedAccount", account)
+        await this.context.dispatch(
+          "contracts/updateContractData",
+          {},
+          { root: true }
+        )
+      })
+
+      // Note that this will not be triggered if we change between networks with the same chain id
+      // Tried this but did not work: https://docs.ethers.io/v5/concepts/best-practices/#best-practices
+      metamaskProvider.on("chainChanged", () => {
+        console.log("Detected network change, reload page")
+        window.location.reload()
+      })
+    }
+    const ethersProvider = new ethers.providers.Web3Provider(
+      metamaskProvider as any
+    )
+    ethersProvider.on("block", async (blockNumber) => {
+      const block = await ethersProvider.getBlock(blockNumber)
+      console.log("Block timestamp:", block.timestamp)
+      this.context.commit("setBlockTimestamp", block.timestamp)
+    })
+  }
+
   @Action({ rawError: true })
   async connectWeb3() {
     this.context.commit("setModalInitializing", true)
@@ -137,7 +144,7 @@ export default class web3 extends VuexModule {
       provider = await webModal.connect()
       this.context.commit("setEthersProvider", provider)
       this.context.commit("setConnectionStatus", true)
-      this.context.commit("setSelectedAccount")
+      await this.context.dispatch("registerListeners", provider)
       await this.context.dispatch("updateNetworkInfo")
     } catch (e: unknown) {
       console.log("Error connecting to Web3")
@@ -149,34 +156,10 @@ export default class web3 extends VuexModule {
 
   @Action({ rawError: true })
   async updateNetworkInfo() {
-    if (this.providerSet) {
-      const provider = getCurrentProvider()
-      const networkInfo = await provider?.getNetwork()
+    const ethersWeb3Provider = getCurrentProvider()
+    if (this.providerSet && ethersWeb3Provider) {
+      const networkInfo = await ethersWeb3Provider.getNetwork()
       this.context.commit("setNetworkInfo", networkInfo)
-    }
-  }
-
-  @Action({ rawError: true })
-  async registerListeners() {
-    // TODO: Find equivalent ethers.provider event to avoid relying on metamask api
-    if (window.ethereum) {
-      console.log("Registering account listener")
-      window.ethereum.on("accountsChanged", async () => {
-        console.log("Detected account update")
-        await this.context.dispatch("connectWeb3")
-        await this.context.dispatch(
-          "contracts/updateTokenBalances",
-          {},
-          { root: true }
-        )
-      })
-
-      // Note that this will not be triggered if we change between networks with the same chain id
-      // Tried this but did not work: https://docs.ethers.io/v5/concepts/best-practices/#best-practices
-      window.ethereum.on("chainChanged", () => {
-        console.log("Detected network change, reload page")
-        window.location.reload()
-      })
     }
   }
 }

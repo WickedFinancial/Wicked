@@ -1,47 +1,37 @@
 <template>
   <v-card class="mx-auto my-12" max-width="500">
     <v-card-title
-      ><a :href="etherscanLinkContract">{{
-        this.contractName
-      }}</a></v-card-title
+      ><a :href="etherscanLinkContract">{{ contractName }}</a></v-card-title
     >
-    <v-card-subtitle>{{ this.contractType }}</v-card-subtitle>
+    <v-card-subtitle>{{ contractType }}</v-card-subtitle>
     <v-card-text>
       <v-list-item>
-        <v-list-item-title> Expiration Time </v-list-item-title>
-        <v-list-item-subtitle>{{ this.expirationTime }}</v-list-item-subtitle>
+        <v-list-item-title> Expiration Time</v-list-item-title>
+        <v-list-item-subtitle>{{ expirationTime }}</v-list-item-subtitle>
       </v-list-item>
 
       <v-list-item>
-        <v-list-item-title> Collateral </v-list-item-title>
-        <v-list-item-subtitle
-          ><a :href="etherscanLinkCollateral">{{
-            this.contractDetails.collateralToken
-          }}</a></v-list-item-subtitle
-        >
+        <v-list-item-title> Collateral</v-list-item-title>
+        <v-list-item-subtitle>
+          <a :href="etherscanLinkCollateral">{{ collateralToken }}</a>
+        </v-list-item-subtitle>
       </v-list-item>
 
       <v-list-item>
         <v-list-item-title> Collateral Per Pair</v-list-item-title>
-        <v-list-item-subtitle>{{
-          this.contractDetails.collateralPerPair
-        }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ collateralPerPair }}</v-list-item-subtitle>
       </v-list-item>
 
       <v-list-item>
-        <v-list-item-title> Price Feed </v-list-item-title>
-        <v-list-item-subtitle
-          ><a :href="priceFeedLink">{{
-            this.contractDetails.priceIdentifier
-          }}</a></v-list-item-subtitle
-        >
+        <v-list-item-title> Price Feed</v-list-item-title>
+        <v-list-item-subtitle>
+          <a :href="priceFeedLink">{{ priceIdentifier }}</a>
+        </v-list-item-subtitle>
       </v-list-item>
 
       <v-list-item>
         <v-list-item-title>Contract State</v-list-item-title>
-        <v-list-item-subtitle>{{
-          this.contractStateLabel
-        }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ contractStateLabel }}</v-list-item-subtitle>
       </v-list-item>
 
       <v-list-item
@@ -56,21 +46,25 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from "nuxt-property-decorator"
+import { Component, Prop, Vue } from "nuxt-property-decorator"
 import { LSPConfiguration } from "~/types"
+import addresses from "~/addresses.json"
 
-const addresses: Record<string, string> = require("~/addresses.json")
-
-const readableLibraryNames: Record<string, string> = {
+const readableLibraryNames = {
   LinearLongShortPairFinancialProductLibrary: "Linear Payout Contract",
 }
 
-const libraryParameters: Record<string, Array<string>> = {
+const libraryParameters = {
   LinearLongShortPairFinancialProductLibrary: ["Upper Bound", "Lower Bound"],
 }
 
-const priceFeedLinks: Record<string, string> = {
-  USDETH: "https://github.com/UMAprotocol/UMIPs/blob/master/UMIPs/umip-6.md",
+const priceFeedLinks = {
+  EURUSD: "https://github.com/UMAprotocol/UMIPs/blob/master/UMIPs/umip-29.md",
+}
+
+type parameterInfo = {
+  name: string
+  value: string
 }
 
 @Component
@@ -96,43 +90,60 @@ export default class contractSummary extends Vue {
       : "Not Connected"
   }
 
-  get expirationTime(): string | undefined {
-    return new Date(this.contractDetails.expirationTime).toLocaleString()
+  get expirationTime(): string {
+      return new Date(this.contractDetails.expirationTime).toLocaleString('en-US', {timeZoneName: "short"})
   }
 
-  get libraryConfiguration(): Array<object> | undefined {
-    return this.contractDetails.financialProductLibraryParameters.map(
-      (value: string, index: number) => {
-        if (this.contractDetails) {
-          return {
-            name: libraryParameters[
-              this.contractDetails.financialProductLibrary
-            ][index],
-            value,
-          }
-        } else {
-          return {}
-        }
+  get libraryConfiguration(): Array<parameterInfo> {
+    const params = this.contractDetails.financialProductLibraryParameters
+    const financialProductLibrary =
+      libraryParameters[
+        this.contractDetails
+          .financialProductLibrary as keyof typeof libraryParameters
+      ]
+
+    return params.map((value: string, index: number) => {
+      return {
+        name: financialProductLibrary[index],
+        value,
       }
-    )
+    })
   }
 
   get etherscanLinkContract(): string | undefined {
-    return `https://kovan.etherscan.io/address/${this.contractDetails.address}`
+    const address = this.contractDetails.address
+    return `https://kovan.etherscan.io/address/${address}`
   }
 
   get etherscanLinkCollateral(): string | undefined {
-    return `https://kovan.etherscan.io/address/${
-      addresses[this.contractDetails.collateralToken]
-    }`
+    const address =
+      addresses[this.contractDetails.collateralToken as keyof typeof addresses]
+    return `https://kovan.etherscan.io/address/${address}`
   }
 
-  get priceFeedLink(): string | undefined {
-    return priceFeedLinks[this.contractDetails.priceIdentifier]
+  get priceFeedLink(): string {
+    return priceFeedLinks[
+      this.contractDetails.priceIdentifier as keyof typeof priceFeedLinks
+    ]
   }
 
-  get contractType(): string | undefined {
-    return readableLibraryNames[this.contractDetails.financialProductLibrary]
+  get contractType(): string {
+    return readableLibraryNames[
+      this.contractDetails
+        .financialProductLibrary as keyof typeof readableLibraryNames
+    ]
+  }
+
+  get collateralToken(): string {
+    return this.contractDetails.collateralToken
+  }
+
+  get collateralPerPair(): string {
+    return this.contractDetails.collateralPerPair
+  }
+
+  get priceIdentifier(): string {
+    return this.contractDetails.priceIdentifier
   }
 }
 </script>

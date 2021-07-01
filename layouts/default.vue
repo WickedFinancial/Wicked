@@ -2,10 +2,10 @@
   <v-app id="app" dark>
     <v-navigation-drawer
       v-model="drawer"
-      class="navigationdrawer"
       :clipped="clipped"
-      stateless
       app
+      class="navigationdrawer"
+      stateless
     >
       <v-list>
         <v-list-item
@@ -24,13 +24,15 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-app-bar :clipped-left="clipped" fixed app>
+    <v-app-bar :clipped-left="clipped" app fixed>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
 
       <v-toolbar-title v-text="title" />
       <wicked-logo id="Logo" />
       <v-spacer />
-      {{ selectedAccount }}
+      <div v-if="isConnected" :title="selectedAccount" class="connected">
+        Connected: {{ selectedAccount }}
+      </div>
       <web3-btn></web3-btn>
     </v-app-bar>
 
@@ -54,7 +56,7 @@ export default class DefaultLayout extends Vue {
   @web3.State
   isConnected!: boolean
 
-  @web3.Getter
+  @web3.State
   selectedAccount!: string
 
   clipped = true
@@ -69,7 +71,7 @@ export default class DefaultLayout extends Vue {
   get items(): Array<object> {
     const contractItems = this.syntheticNames.map((syntheticName) => {
       return {
-        icon: "mdi-file-document-edit-outline",
+        icon: "mdi-candle",
         title: syntheticName,
         to: `/contract/${syntheticName}`,
       }
@@ -79,9 +81,9 @@ export default class DefaultLayout extends Vue {
 }
 </script>
 
-<style type="text/css" scoped>
+<style scoped>
 header {
-  background: transparent !important;
+  background: #151e2a !important;
   box-shadow: none !important;
 }
 
@@ -93,5 +95,17 @@ header {
 #app {
   background: #151e2a !important;
   background: linear-gradient(to top left, #295059, #151e2a) !important;
+}
+
+.connected {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: #ffffff11;
+  margin: 0 10px;
+  padding: 6px 15px;
+  border-radius: 15px;
+  cursor: pointer;
 }
 </style>

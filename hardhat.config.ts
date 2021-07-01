@@ -1,16 +1,17 @@
+/* eslint-disable no-console */
 import "@nomiclabs/hardhat-ethers"
 import "hardhat-jest-plugin"
 import "hardhat-deploy"
 import fs from "fs"
 import { readdir, readFile, writeFile } from "fs/promises"
 import { HardhatUserConfig } from "hardhat/types"
-import { task, types } from "hardhat/config"
-import { Address } from "hardhat-deploy/dist/types"
+import { subtask, task, types } from "hardhat/config"
 import { Contract } from "ethers"
 import { LSPConfiguration } from "./types"
+
 const contractConfigs: Array<LSPConfiguration> = require("./contractConfigs.json")
 const deployedContractConfigs: Array<LSPConfiguration> = require("./deployedContractConfigs.json")
-const addresses: Record<string, Address> = require("./addresses.json")
+const addresses = require("./addresses.json")
 const abis = require("./abis")
 
 function mnemonic() {
@@ -58,9 +59,10 @@ task(
   "convert",
   "Convert all json abis to human readable format",
   async (_, { ethers }) => {
-    const path = "~/abis/"
+    const path = "./abis/"
     const files = await readdir(path)
     for (const file of files) {
+      if (file === "index.ts") continue
       const jsonBuffer = await readFile(path.concat(file))
       const jsonAbi = JSON.parse(jsonBuffer.toString())
       const iface = new ethers.utils.Interface(jsonAbi)
@@ -76,7 +78,7 @@ task("collateral", "Mint Collateral Tokens for use in tests")
   .addOptionalParam(
     "amount",
     "Amount of Ether for which to generate collateral",
-    "1"
+    "10"
   )
   .addOptionalParam(
     "gasprice",
@@ -87,24 +89,51 @@ task("collateral", "Mint Collateral Tokens for use in tests")
   .setAction(
     async (
       { collateralName, amount, gasprice },
-      { ethers, getNamedAccounts }
+      { ethers, getNamedAccounts, run }
     ) => {
-      const collateralContract = await ethers.getContractAt(
-        abis[collateralName],
-        addresses[collateralName]
-      )
+      if (collateralName === "LUSD") {
+        await run("LUSD", { amount })
+      } else {
+        const collateralContract = await ethers.getContractAt(
+          abis[collateralName],
+          addresses[collateralName]
+        )
 
-      const namedAccounts = await getNamedAccounts()
-      const transactionOptions = {
-        gasPrice: gasprice, // gasprice arg * 1 GWEI
-        from: namedAccounts.deployer,
-        value: ethers.utils.parseUnits(amount),
+        const namedAccounts = await getNamedAccounts()
+        const transactionOptions = {
+          gasPrice: gasprice, // gasprice arg * 1 GWEI
+          from: namedAccounts.deployer,
+          value: ethers.utils.parseUnits(amount),
+        }
+        const depositTx = await collateralContract.deposit(transactionOptions)
+        await depositTx.wait()
+        console.log(`Deposited ${amount} in ${collateralName}`)
       }
-      const depositTx = await collateralContract.deposit(transactionOptions)
-      await depositTx.wait()
-      console.log(`Deposited ${amount} in ${collateralName}`)
     }
   )
+subtask("LUSD", "mint lusd")
+  .addParam("amount", "Amount of Ether for which to generate collateral", "10")
+  .setAction(async ({ amount }, { ethers, getNamedAccounts }) => {
+    const namedAccounts = await getNamedAccounts()
+    const transactionOptions = {
+      from: namedAccounts.deployer,
+      value: ethers.utils.parseUnits(amount),
+    }
+    const borrowerOperations = await ethers.getContractAt(
+      abis.BorrowerOperations,
+      addresses.BorrowerOperations
+    )
+
+    // Todo : implement getting real hints https://github.com/liquity/dev#example-borrower-operations-with-hints
+    const openTroveTx = await borrowerOperations.openTrove(
+      ethers.utils.parseUnits(".75"),
+      ethers.utils.parseUnits("2000"),
+      namedAccounts.deployer,
+      namedAccounts.deployer,
+      transactionOptions
+    )
+    await openTroveTx.wait()
+  })
 
 task("synthetic", "Mint Synthetic Tokens for use in tests")
   .addParam("syntheticName", "Name of Synthetic to mint")
@@ -178,7 +207,7 @@ task("launch", "Launch all configured LSP contracts")
     50 * 100000000,
     types.int
   )
-  .setAction(async ({ gasprice }, { ethers, getNamedAccounts }) => {
+  .setAction(async ({ gasprice }, { ethers, getNamedAccounts, run }) => {
     const LSPCreator = await ethers.getContractAt(
       abis.LSPCreator,
       addresses.LSPCreator
@@ -220,26 +249,32 @@ task("launch", "Launch all configured LSP contracts")
 
         // Get Collateral Contract instance if not present already
         if (!(contractConfiguration.collateralToken in contracts)) {
-          contracts[contractConfiguration.collateralToken] =
-            await ethers.getContractAt(
-              abis[contractConfiguration.collateralToken],
-              collateralTokenAddress
-            )
+          contracts[
+            contractConfiguration.collateralToken
+          ] = await ethers.getContractAt(
+            abis[contractConfiguration.collateralToken],
+            collateralTokenAddress
+          )
         }
 
         // Create and Approve collateral for the proposer reward
         const collateralContract =
           contracts[contractConfiguration.collateralToken]
-        const depositTx = await collateralContract.deposit({
-          value: prepaidProposerReward.mul(
-            contractConfiguration.collateralPriceInEth
-          ),
-          ...transactionOptions,
-        })
-        await depositTx.wait()
-        console.log(
-          `Deposited ${prepaidProposerReward} in ${contractConfiguration.collateralToken}`
-        )
+
+        if (contractConfiguration.collateralToken === "LUSD") {
+          await run("LUSD", { amount: "10" })
+        } else {
+          const depositTx = await collateralContract.deposit({
+            value: prepaidProposerReward.mul(
+              contractConfiguration.collateralPriceInEth
+            ),
+            ...transactionOptions,
+          })
+          await depositTx.wait()
+          console.log(
+            `Deposited ${prepaidProposerReward} in ${contractConfiguration.collateralToken}`
+          )
+        }
 
         const approveTx = await collateralContract.approve(
           addresses.LSPCreator,
@@ -289,11 +324,12 @@ task("launch", "Launch all configured LSP contracts")
         // Configure Financial ProductLibrary
         // Get Financial Product Library instance if not present already
         if (!(contractConfiguration.financialProductLibrary in contracts)) {
-          contracts[contractConfiguration.financialProductLibrary] =
-            await ethers.getContractAt(
-              abis[contractConfiguration.financialProductLibrary],
-              financialProductLibraryAddress
-            )
+          contracts[
+            contractConfiguration.financialProductLibrary
+          ] = await ethers.getContractAt(
+            abis[contractConfiguration.financialProductLibrary],
+            financialProductLibraryAddress
+          )
         }
 
         // Set Parameters
@@ -302,7 +338,12 @@ task("launch", "Launch all configured LSP contracts")
 
         await financialProductLibraryContract.setLongShortPairParameters(
           lspAddress,
-          ...contractConfiguration.financialProductLibraryParameters,
+          ethers.utils.parseUnits(
+            contractConfiguration.financialProductLibraryParameters[0]
+          ),
+          ethers.utils.parseUnits(
+            contractConfiguration.financialProductLibraryParameters[1]
+          ),
           transactionOptions
         )
         console.log(
@@ -371,7 +412,7 @@ task("settle:oracle", "Settle on oracle")
         addresses.OptimisticOracle
       )
 
-      //Send Settlement Transaction
+      // Send Settlement Transaction
       const requester = contractConfig.address
       const identifier = ethers.utils.formatBytes32String(
         contractConfig.priceIdentifier
@@ -397,18 +438,10 @@ task("settle:oracle", "Settle on oracle")
 task("settle:lsp", "Settle on lsp contract")
   .addParam(
     "syntheticName",
-    "Name of the contract for which you want to propose a settlement price"
+    "Name of the contract for which you want to settle tokens"
   )
-  .addOptionalParam(
-    "longTokens",
-    "Amount of long tokens to redeem",
-    "0"
-  )
-  .addOptionalParam(
-    "shortTokens",
-    "Amount of short tokens to redeem",
-    "0"
-  )
+  .addOptionalParam("longTokens", "Amount of long tokens to redeem", "0")
+  .addOptionalParam("shortTokens", "Amount of short tokens to redeem", "0")
   .setAction(async ({ longTokens, shortTokens, syntheticName }, { ethers }) => {
     const contractConfig = deployedContractConfigs.find(
       (config) => config.syntheticName === syntheticName
@@ -420,7 +453,10 @@ task("settle:lsp", "Settle on lsp contract")
       )
       const longTokensParsed = ethers.utils.parseUnits(longTokens)
       const shortTokensParsed = ethers.utils.parseUnits(shortTokens)
-      const settleTx = await lspContract.settle(longTokensParsed, shortTokensParsed)
+      const settleTx = await lspContract.settle(
+        longTokensParsed,
+        shortTokensParsed
+      )
       await settleTx.wait()
     }
   })
@@ -456,12 +492,12 @@ task("propose", "Propose price for given contract")
 
       const approveTx = await collateralContract.approve(
         addresses.OptimisticOracle,
-        ethers.constants.MaxUint256,
+        ethers.constants.MaxUint256
       )
       await approveTx.wait()
       console.log("Approved collateral")
 
-      //Send Proposal
+      // Send Proposal
       const requester = contractConfig.address
       const identifier = ethers.utils.formatBytes32String(
         contractConfig.priceIdentifier
@@ -478,10 +514,9 @@ task("propose", "Propose price for given contract")
         identifier,
         timestamp,
         ancillaryData,
-        proposedPrice
+        ethers.utils.parseUnits(proposedPrice)
       )
       await proposeTx.wait()
       console.log("Proposed Price")
     }
   })
-

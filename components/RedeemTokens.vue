@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="600px">
+  <v-dialog v-if="tokenPairs > 0" v-model="dialog" persistent max-width="600px">
     <template #activator="{ on, attrs }">
       <v-btn color="primary" text v-bind="attrs" v-on="on"> Redeem</v-btn>
     </template>
@@ -25,7 +25,7 @@
               <v-col cols="12">
                 <v-list-item>
                   <v-list-item-title> Available Token Pairs</v-list-item-title>
-                  <v-list-item-subtitle>{{ tokenPairs }} </v-list-item-subtitle>
+                  <v-list-item-subtitle>{{ tokenPairs }}</v-list-item-subtitle>
                 </v-list-item>
               </v-col>
             </v-row>
@@ -38,12 +38,12 @@
           <v-btn
             color="blue darken-1"
             type="button"
-            @click.prevent="redeem"
             :loading="loading"
             :disabled="loading || anyRuleViolated"
+            @click.prevent="redeem"
           >
             Redeem
-            <template v-slot:loader>
+            <template #loader>
               <span>Loading...</span>
             </template>
           </v-btn>
@@ -55,8 +55,7 @@
 
 <script lang="ts">
 import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
-import { SyntheticTokenBalances, LSPConfiguration } from "~/types"
-import { ethers } from "ethers"
+import { LSPConfiguration, SyntheticTokenBalances } from "~/types"
 
 const contracts = namespace("contracts")
 
@@ -75,12 +74,13 @@ export default class RedeemTokens extends Vue {
     syntheticName: string
   }) => Promise<void>
 
-  @contracts.Getter
-  getSyntheticTokenBalances!: Record<string, SyntheticTokenBalances>
+  @contracts.State
+  syntheticTokenBalances!: Record<string, SyntheticTokenBalances>
 
   get tokenPairs(): number {
-    const tokenBalances =
-      this.getSyntheticTokenBalances[this.contractDetails.syntheticName]
+    const tokenBalances = this.syntheticTokenBalances[
+      this.contractDetails.syntheticName
+    ]
     if (tokenBalances === undefined) return 0
     else {
       console.log("Balances: ", tokenBalances)
@@ -93,13 +93,14 @@ export default class RedeemTokens extends Vue {
   }
 
   get rules() {
-    let self = this
-    function enoughCollateral(value: number): boolean | string {
-      return value <= self.tokenPairs || "Not enough pairs of synthetic tokens"
+    const enoughCollateral = (value: number): boolean | string => {
+      return value <= this.tokenPairs || "Not enough pairs of synthetic tokens"
     }
-    function positive(value: number): boolean | string {
+
+    const positive = (value: number): boolean | string => {
       return value > 0 || "Number of tokens must be positive"
     }
+
     return [positive, enoughCollateral]
   }
 
@@ -112,6 +113,8 @@ export default class RedeemTokens extends Vue {
         syntheticName: this.contractDetails.syntheticName,
       })
       this.dialog = false
+    } catch (e) {
+      console.error("Redeem failed with exception: ", e)
     } finally {
       this.loading = false
     }

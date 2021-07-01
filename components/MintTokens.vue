@@ -1,7 +1,7 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="600px">
+  <v-dialog v-model="dialog" max-width="600px" persistent>
     <template #activator="{ on, attrs }">
-      <v-btn color="primary" text v-bind="attrs" v-on="on"> Mint</v-btn>
+      <v-btn v-bind="attrs" color="primary" text v-on="on"> Mint</v-btn>
     </template>
     <v-card>
       <v-card-title>
@@ -56,7 +56,7 @@
             :disabled="loading || anyRuleViolated"
           >
             Mint
-            <template v-slot:loader>
+            <template #loader>
               <span>Loading...</span>
             </template>
           </v-btn>
@@ -69,7 +69,7 @@
             :disabled="loading || anyRuleViolated"
           >
             Approve
-            <template v-slot:loader>
+            <template #loader>
               <span>Loading...</span>
             </template>
           </v-btn>
@@ -81,8 +81,8 @@
 
 <script lang="ts">
 import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
-import { LSPConfiguration } from "~/types"
 import { ethers } from "ethers"
+import { LSPConfiguration } from "~/types"
 
 const contracts = namespace("contracts")
 
@@ -110,8 +110,8 @@ export default class mintTokens extends Vue {
     syntheticName: string
   }) => Promise<void>
 
-  @contracts.Getter
-  getCollateralAllowances!: Record<string, ethers.BigNumber>
+  @contracts.State
+  collateralAllowances!: Record<string, ethers.BigNumber>
 
   get collateralAmount(): number {
     return (
@@ -128,8 +128,8 @@ export default class mintTokens extends Vue {
   }
 
   get collateralApproved(): boolean {
-    const collateralAllowance =
-      this.getCollateralAllowances[this.contractDetails.syntheticName]
+    const synthName = this.contractDetails.syntheticName
+    const collateralAllowance = this.collateralAllowances[synthName]
     if (collateralAllowance === undefined) {
       return false
     } else {
@@ -138,16 +138,17 @@ export default class mintTokens extends Vue {
   }
 
   get rules() {
-    let self = this
-    function enoughCollateral(value: number): boolean | string {
+    const enoughCollateral = (value: number): boolean | string => {
       return (
-        value * parseFloat(self.contractDetails.collateralPerPair) <=
-          self.collateralTokens || "Not enough collateral"
+        value * parseFloat(this.contractDetails.collateralPerPair) <=
+          this.collateralTokens || "Not enough collateral"
       )
     }
-    function positive(value: number): boolean | string {
+
+    const positive = (value: number): boolean | string => {
       return value > 0 || "Number of tokens must be positive"
     }
+
     return [positive, enoughCollateral]
   }
 
@@ -159,6 +160,8 @@ export default class mintTokens extends Vue {
         collateralName: this.contractDetails.collateralToken,
         syntheticName: this.contractDetails.syntheticName,
       })
+    } catch (e) {
+      console.error("Approval failed with exception: ", e)
     } finally {
       this.loading = false
     }
@@ -173,6 +176,8 @@ export default class mintTokens extends Vue {
         syntheticName: this.contractDetails.syntheticName,
       })
       this.dialog = false
+    } catch (e) {
+      console.error("Mint failed with exception: ", e)
     } finally {
       this.loading = false
     }
