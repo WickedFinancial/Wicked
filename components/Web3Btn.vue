@@ -1,8 +1,14 @@
 <template>
   <div>
-    <v-btn role="button" text outlined :loading="loading" @click.p="connectToWeb3">
+    <v-btn
+      :loading="loading"
+      outlined
+      role="button"
+      text
+      @click.p="connectToWeb3"
+    >
       {{ btnAction }}
-      <template v-slot:loader>
+      <template #loader>
         <span>Loading...</span>
       </template>
     </v-btn>
@@ -16,7 +22,7 @@ const contracts = namespace("contracts")
 
 @Component
 export default class Web3Btn extends Vue {
-  loading: boolean = false
+  loading = false
   @web3.State
   isConnected!: boolean
 
@@ -25,9 +31,6 @@ export default class Web3Btn extends Vue {
 
   @web3.Action
   connectWeb3!: () => Promise<void>
-
-  @web3.Action
-  registerListeners!: () => Promise<void>
 
   @web3.Mutation
   clearProvider!: () => void
@@ -41,7 +44,6 @@ export default class Web3Btn extends Vue {
   @contracts.Action
   clearContracts!: () => void
 
-
   get btnAction() {
     return this.isConnected ? "Disconnect" : "+ Connect"
   }
@@ -50,7 +52,6 @@ export default class Web3Btn extends Vue {
     this.loading = true
     try {
       await this.connectWeb3()
-      await this.registerListeners()
       await this.initializeContracts()
       await this.updateContractData()
     } finally {

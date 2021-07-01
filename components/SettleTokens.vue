@@ -121,11 +121,11 @@ export default class SettleTokens extends Vue {
     syntheticName: string
   }) => Promise<void>
 
-  @contracts.Getter
-  getSyntheticTokenBalances!: Record<string, SyntheticTokenBalances>
+  @contracts.State
+  syntheticTokenBalances!: Record<string, SyntheticTokenBalances>
 
-  @contracts.Getter
-  getExpiryData!: Record<string, ExpiryData>
+  @contracts.State
+  expiryData!: Record<string, ExpiryData>
 
   get returnedCollateral(): number {
     return (
@@ -135,9 +135,8 @@ export default class SettleTokens extends Vue {
   }
 
   get collateralPerShort(): number | undefined {
-    const percentagePerLong: number = this.getExpiryData[
-      this.contractDetails.syntheticName
-    ].percentageLong
+    const synthExpiry = this.expiryData[this.contractDetails.syntheticName]
+    const percentagePerLong: number = synthExpiry.percentageLong
     const percentagePerShort = 1 - percentagePerLong
     return (
       percentagePerShort * parseFloat(this.contractDetails.collateralPerPair)
@@ -145,22 +144,20 @@ export default class SettleTokens extends Vue {
   }
 
   get collateralPerLong(): number | undefined {
-    const percentagePerLong: number = this.getExpiryData[
-      this.contractDetails.syntheticName
-    ].percentageLong
+    const synthExpiry = this.expiryData[this.contractDetails.syntheticName]
+    const percentagePerLong: number = synthExpiry.percentageLong
     return (
       percentagePerLong * parseFloat(this.contractDetails.collateralPerPair)
     )
   }
 
   get expiryPrice(): number | undefined {
-    return this.getExpiryData[this.contractDetails.syntheticName].price
+    return this.expiryData[this.contractDetails.syntheticName].price
   }
 
   get anyRuleViolated(): boolean {
-    const tokenBalances = this.getSyntheticTokenBalances[
-      this.contractDetails.syntheticName
-    ]
+    const synthName = this.contractDetails.syntheticName
+    const tokenBalances = this.syntheticTokenBalances[synthName]
     return (
       this.longTokens > tokenBalances.longBalance ||
       this.longTokens < 0 ||
@@ -170,9 +167,8 @@ export default class SettleTokens extends Vue {
   }
 
   get rulesShort() {
-    const tokenBalances = this.getSyntheticTokenBalances[
-      this.contractDetails.syntheticName
-    ]
+    const synthName = this.contractDetails.syntheticName
+    const tokenBalances = this.syntheticTokenBalances[synthName]
 
     function enoughTokens(value: number): boolean | string {
       return value <= tokenBalances.shortBalance || "Not enough tokens"
@@ -186,9 +182,8 @@ export default class SettleTokens extends Vue {
   }
 
   get rulesLong() {
-    const tokenBalances = this.getSyntheticTokenBalances[
-      this.contractDetails.syntheticName
-    ]
+    const synthName = this.contractDetails.syntheticName
+    const tokenBalances = this.syntheticTokenBalances[synthName]
 
     function enoughTokens(value: number): boolean | string {
       return value <= tokenBalances.longBalance || "Not enouth tokens"
@@ -222,4 +217,3 @@ export default class SettleTokens extends Vue {
   }
 }
 </script>
-
