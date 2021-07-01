@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="contractDetails">
     <contract-summary
       :contractDetails="contractDetails"
       :contractName="contractName"
@@ -19,7 +19,13 @@ import { LSPConfiguration } from "~/types"
 
 const contracts = namespace("contracts")
 
-@Component
+@Component({
+  beforeMount() {
+    if (!this.$route.params.contract || !this.contractDetails) {
+      this.$router.replace("/")
+    }
+  },
+})
 export default class Contract extends Vue {
   @contracts.State
   contractConfigs!: Array<LSPConfiguration>
