@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-if="pastExpiry" v-model="dialog" max-width="600px" persistent>
+  <v-dialog v-model="dialog" max-width="600px" persistent>
     <template #activator="{ on, attrs }">
       <v-btn v-bind="attrs" color="primary" text v-on="on"> Expire</v-btn>
     </template>
@@ -38,7 +38,6 @@ import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
 import { LSPConfiguration } from "~/types"
 
 const contracts = namespace("contracts")
-const web3 = namespace("web3")
 
 @Component
 export default class expireContract extends Vue {
@@ -50,15 +49,6 @@ export default class expireContract extends Vue {
 
   @contracts.Action
   expireContract!: (syntheticName: string) => Promise<void>
-
-  @web3.State
-  blockTimestamp!: number
-
-  get pastExpiry() {
-    const expirationTimestamp =
-      new Date(this.contractDetails.expirationTime).getTime() / 1000
-    return expirationTimestamp < this.blockTimestamp
-  }
 
   async expire(): Promise<void> {
     try {
