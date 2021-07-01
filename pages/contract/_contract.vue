@@ -1,14 +1,14 @@
 <template>
-  <v-container>
+  <v-container v-if="contractDetails">
     <contract-summary
-      :contractDetails="contractDetails"
-      :contractName="contractName"
-      :contractState="contractState"
+      :contract-details="contractDetails"
+      :contract-name="contractName"
+      :contract-state="contractState"
     />
     <contract-tokens
       v-if="contractState !== undefined"
-      :contractDetails="contractDetails"
-      :contractState="contractState"
+      :contract-details="contractDetails"
+      :contract-state="contractState"
     />
   </v-container>
 </template>
@@ -19,16 +19,22 @@ import { LSPConfiguration } from "~/types"
 
 const contracts = namespace("contracts")
 
-@Component
+@Component<Contract>({
+  beforeMount() {
+    if (!this.$route.params.contract || !this.contractDetails) {
+      this.$router.replace("/")
+    }
+  },
+})
 export default class Contract extends Vue {
   @contracts.State
   contractConfigs!: Array<LSPConfiguration>
 
-  @contracts.Getter
-  getContractStatuses!: Record<string, number>
+  @contracts.State
+  contractStatuses!: Record<string, number>
 
   get contractState(): number | undefined {
-    return this.getContractStatuses[this.contractName]
+    return this.contractStatuses[this.contractName]
   }
 
   get contractDetails(): LSPConfiguration | undefined {

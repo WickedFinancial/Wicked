@@ -115,7 +115,8 @@
           </ul>
 
           <li>
-            <a href="https://www.liquity.org/">Liquity</a>(LUSD) used as collateral stable-coin for contracts
+            <a href="https://www.liquity.org/">Liquity</a>(LUSD) used as
+            collateral stable-coin for contracts
           </li>
         </ol>
       </v-col>
@@ -132,6 +133,7 @@ export default class Index extends Vue {}
 ul {
   margin-top: 20px;
 }
+
 ol {
   margin-top: 20px;
 }

@@ -60,7 +60,7 @@ export default class expireContract extends Vue {
     return expirationTimestamp < this.blockTimestamp
   }
 
-  async expire() {
+  async expire(): Promise<void> {
     try {
       this.loading = true
       await this.expireContract(this.contractDetails.syntheticName)
@@ -70,7 +70,7 @@ export default class expireContract extends Vue {
     }
   }
 
-  close() {
+  close(): void {
     this.dialog = false
   }
 }
