@@ -91,7 +91,7 @@ export default class contractSummary extends Vue {
   }
 
   get expirationTime(): string {
-    return new Date(this.contractDetails.expirationTime).toLocaleString()
+      return new Date(this.contractDetails.expirationTime).toLocaleString('en-US', {timeZoneName: "short"})
   }
 
   get libraryConfiguration(): Array<parameterInfo> {

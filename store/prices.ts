@@ -33,6 +33,7 @@ export default class prices extends VuexModule {
 
   @Action
   async updatePriceValue(priceFeed: string) {
+    try{
     console.log("Updating price feed: ", priceFeed)
     const apiIdentifiers = this.context.getters["getAPIIdentifiers"]
     const apiIdentifier = apiIdentifiers[priceFeed]
@@ -46,5 +47,9 @@ export default class prices extends VuexModule {
 
     const value = apiResponse.data.quotes[0].mid
     this.context.commit("setPriceValue", { priceFeed, value })
+    }
+    catch(e){
+        console.error("Tradermade price update failed with", e)
+    }
   }
 }

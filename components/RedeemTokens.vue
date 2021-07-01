@@ -113,6 +113,8 @@ export default class RedeemTokens extends Vue {
         syntheticName: this.contractDetails.syntheticName,
       })
       this.dialog = false
+    } catch (e) {
+      console.error("Redeem failed with exception: ", e)
     } finally {
       this.loading = false
     }
