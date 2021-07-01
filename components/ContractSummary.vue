@@ -94,7 +94,7 @@ export default class contractSummary extends Vue {
     return new Date(this.contractDetails.expirationTime).toLocaleString()
   }
 
-  get libraryConfiguration(): Array<parameterInfo> | object {
+  get libraryConfiguration(): Array<parameterInfo> {
     const params = this.contractDetails.financialProductLibraryParameters
     const financialProductLibrary =
       libraryParameters[

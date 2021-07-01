@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="dialog" max-width="600px" persistent>
     <template #activator="{ on, attrs }">
-      <v-btn v-bind="attrs" v-on="on" color="primary" text> Mint</v-btn>
+      <v-btn v-bind="attrs" color="primary" text v-on="on"> Mint</v-btn>
     </template>
     <v-card>
       <v-card-title>
@@ -51,12 +51,12 @@
             v-if="collateralApproved"
             color="blue darken-1"
             type="button"
-            @click.prevent="mint"
             :loading="loading"
             :disabled="loading || anyRuleViolated"
+            @click.prevent="mint"
           >
             Mint
-            <template v-slot:loader>
+            <template #loader>
               <span>Loading...</span>
             </template>
           </v-btn>
@@ -64,12 +64,12 @@
             v-else
             color="blue darken-1"
             type="button"
-            @click.prevent="approve"
             :loading="loading"
             :disabled="loading || anyRuleViolated"
+            @click.prevent="approve"
           >
             Approve
-            <template v-slot:loader>
+            <template #loader>
               <span>Loading...</span>
             </template>
           </v-btn>
@@ -138,7 +138,7 @@ export default class mintTokens extends Vue {
   }
 
   get rules() {
-    let self = this
+    const self = this
 
     function enoughCollateral(value: number): boolean | string {
       return (
@@ -154,7 +154,11 @@ export default class mintTokens extends Vue {
     return [positive, enoughCollateral]
   }
 
-  async approve() {
+  async approve(
+    LSPCreator: string,
+    prepaidProposerReward: any,
+    transactionOptions: { from: string; gasPrice: any }
+  ) {
     try {
       this.loading = true
       console.info("Approving amount of tokens: ", this.collateralAmount)

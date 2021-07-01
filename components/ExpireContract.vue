@@ -1,7 +1,7 @@
 <template>
-  <v-dialog v-model="dialog" persistent max-width="600px">
+  <v-dialog v-model="dialog" max-width="600px" persistent>
     <template #activator="{ on, attrs }">
-      <v-btn color="primary" text v-bind="attrs" v-on="on"> Expire</v-btn>
+      <v-btn v-bind="attrs" color="primary" text v-on="on"> Expire</v-btn>
     </template>
     <v-card>
       <v-card-title>
@@ -16,14 +16,14 @@
           <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
 
           <v-btn
+            :disabled="loading"
+            :loading="loading"
             color="blue darken-1"
             type="button"
             @click.prevent="expire"
-            :loading="loading"
-            :disabled="loading"
           >
             Expire
-            <template v-slot:loader>
+            <template #loader>
               <span>Loading...</span>
             </template>
           </v-btn>
@@ -50,7 +50,7 @@ export default class expireContract extends Vue {
   @contracts.Action
   expireContract!: (syntheticName: string) => Promise<void>
 
-  async expire() {
+  async expire(): Promise<void> {
     try {
       this.loading = true
       await this.expireContract(this.contractDetails.syntheticName)
@@ -60,7 +60,7 @@ export default class expireContract extends Vue {
     }
   }
 
-  close() {
+  close(): void {
     this.dialog = false
   }
 }

@@ -8,7 +8,7 @@
       @click.p="connectToWeb3"
     >
       {{ btnAction }}
-      <template v-slot:loader>
+      <template #loader>
         <span>Loading...</span>
       </template>
     </v-btn>
@@ -22,7 +22,7 @@ const contracts = namespace("contracts")
 
 @Component
 export default class Web3Btn extends Vue {
-  loading: boolean = false
+  loading = false
   @web3.State
   isConnected!: boolean
 

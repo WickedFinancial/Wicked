@@ -2,7 +2,7 @@
   <div v-if="isConnected">
     <v-banner v-if="onCorrectNetwork" color="green" single-line>
       Successfully connected to network {{ activeNetwork }}
-      <template v-slot:actions="{ dismiss }">
+      <template #actions="{ dismiss }">
         <v-btn text @click="dismiss"> Dismiss</v-btn>
       </template>
     </v-banner>
@@ -11,7 +11,7 @@
       {{ correctNetwork }} network, whereas your wallet is connected to the
       {{ activeNetwork }} network. Please change your network accordingly and
       reconnect.
-      <template v-slot:actions="{ dismiss }">
+      <template #actions="{ dismiss }">
         <v-btn text @click="dismiss"> Dismiss</v-btn>
       </template>
     </v-banner>
@@ -19,7 +19,7 @@
   <v-banner v-else color="red lighten-2" single-line>
     To use most features of this Dapp you will have to connect an ethereum
     wallet. Please do so by pressing the connect button on the top of the page.
-    <template v-slot:actions="{ dismiss }">
+    <template #actions="{ dismiss }">
       <v-btn text @click="dismiss"> Dismiss</v-btn>
     </template>
   </v-banner>

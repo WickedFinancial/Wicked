@@ -38,12 +38,12 @@
           <v-btn
             color="blue darken-1"
             type="button"
-            @click.prevent="redeem"
             :loading="loading"
             :disabled="loading || anyRuleViolated"
+            @click.prevent="redeem"
           >
             Redeem
-            <template v-slot:loader>
+            <template #loader>
               <span>Loading...</span>
             </template>
           </v-btn>
@@ -55,8 +55,8 @@
 
 <script lang="ts">
 import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
-import { SyntheticTokenBalances, LSPConfiguration } from "~/types"
 import { ethers } from "ethers"
+import { SyntheticTokenBalances, LSPConfiguration } from "~/types"
 
 const contracts = namespace("contracts")
 
@@ -79,8 +79,9 @@ export default class RedeemTokens extends Vue {
   syntheticTokenBalances!: Record<string, SyntheticTokenBalances>
 
   get tokenPairs(): number {
-    const tokenBalances =
-      this.syntheticTokenBalances[this.contractDetails.syntheticName]
+    const tokenBalances = this.syntheticTokenBalances[
+      this.contractDetails.syntheticName
+    ]
     if (tokenBalances === undefined) return 0
     else {
       console.log("Balances: ", tokenBalances)
@@ -93,7 +94,7 @@ export default class RedeemTokens extends Vue {
   }
 
   get rules() {
-    let self = this
+    const self = this
     function enoughCollateral(value: number): boolean | string {
       return value <= self.tokenPairs || "Not enough pairs of synthetic tokens"
     }
