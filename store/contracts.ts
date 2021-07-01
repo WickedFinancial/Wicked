@@ -239,7 +239,7 @@ export default class contracts extends VuexModule {
     }
   }
 
-  @Action
+  @Action({ rawError: true })
   async settleTokens(payload: {
     longTokens: number
     shortTokens: number
