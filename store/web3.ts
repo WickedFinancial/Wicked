@@ -120,6 +120,9 @@ export default class web3 extends VuexModule {
       const block = await ethersProvider.getBlock(blockNumber)
       console.log("Block timestamp:", block.timestamp)
       this.context.commit("setBlockTimestamp", block.timestamp)
+      await this.context.dispatch("prices/updatePriceValue", "EURUSD", {
+        root: true,
+      })
     })
   }
 
