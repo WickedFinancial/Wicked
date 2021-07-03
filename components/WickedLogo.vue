@@ -1,7 +1,7 @@
 <template>
   <v-img
     id="Logo"
-    max-width="35"
+    max-width="30"
     alt="Wicked Logo"
     src="/wicked-logo.svg"
     position="left center"

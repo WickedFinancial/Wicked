@@ -27,7 +27,7 @@
     <v-app-bar :clipped-left="clipped" app fixed>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
 
-      <v-toolbar-title v-text="title" />
+      <wicked id="Wicked" />
       <wicked-logo id="Logo" />
       <v-spacer />
       <div v-if="isConnected" :title="selectedAccount" class="connected">
