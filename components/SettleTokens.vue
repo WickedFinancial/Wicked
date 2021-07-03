@@ -100,6 +100,7 @@
 
 <script lang="ts">
 import { Component, namespace, Prop, Vue } from "nuxt-property-decorator"
+import { formatUnits, parseUnits } from "ethers/lib/utils"
 import { ExpiryData, LSPConfiguration, SyntheticTokenBalances } from "~/types"
 
 const contracts = namespace("contracts")
@@ -151,8 +152,13 @@ export default class SettleTokens extends Vue {
     )
   }
 
-  get expiryPrice(): number | undefined {
-    return this.expiryData[this.contractDetails.syntheticName].price
+  get expiryPrice(): string | undefined {
+    return formatUnits(
+      parseUnits(
+        this.expiryData[this.contractDetails.syntheticName].price.toString(),
+        "wei"
+      )
+    )
   }
 
   get anyRuleViolated(): boolean {
