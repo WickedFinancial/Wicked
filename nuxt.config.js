@@ -20,7 +20,32 @@ export default {
         content: "Manage exchange rate risk using on-chain derivatives.",
       },
       { property: "og:site_name", content: "Wicked" },
-      { hid: "og:type", property: "og:type", content: "website" },
+      { hid: "og:type", property: "og:type", content: "object" },
+      {
+        hid: "twitter:image:src",
+        property: "twitter:image:src",
+        content: "https://wicked.financial/wicked-og-image.png",
+      },
+      {
+        hid: "twitter:site",
+        property: "twitter:site",
+        content: "@wickedfinancial",
+      },
+      {
+        hid: "twitter:card",
+        property: "twitter:card",
+        content: "summary_large_image",
+      },
+      {
+        hid: "twitter:title",
+        property: "twitter:title",
+        content: "Wicked: DeFi Currency Hedging Made Simple",
+      },
+      {
+        hid: "twitter:description",
+        property: "twitter:description",
+        content: "Manage exchange rate risk using on-chain derivatives.",
+      },
       {
         hid: "og:url",
         property: "og:url",
@@ -39,7 +64,7 @@ export default {
       {
         hid: "og:image",
         property: "og:image",
-        content: "/wicked-og-image.png",
+        content: "https://wicked.financial/wicked-og-image.png",
       },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
