@@ -13,7 +13,7 @@ export default class prices extends VuexModule {
   }
 
   APIURL = "https://marketdata.tradermade.com/api/v1/live"
-  APIKEY = "di3exneCe82OpspL3F5l"
+  APIKEY = "Rfux43IbVuSX9GF5JpS0"
   blockTimestampFetched = 0
   rateLimitSeconds = 180 //  3 minutes
 

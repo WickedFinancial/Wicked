@@ -14,7 +14,7 @@
               <v-col cols="6">
                 <v-text-field
                   v-model="longTokens"
-                  label="Long Tokens to settle"
+                  label="Long tokens to settle"
                   type="number"
                   :rules="rulesLong"
                   required
@@ -23,7 +23,7 @@
               <v-col cols="6">
                 <v-text-field
                   v-model="shortTokens"
-                  label="short Tokens to settle"
+                  label="Short tokens to settle"
                   type="number"
                   :rules="rulesShort"
                   required
@@ -81,8 +81,8 @@
           <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
 
           <v-btn
+            min-width="95"
             color="blue darken-1"
-            type="button"
             :loading="loading"
             :disabled="loading || anyRuleViolated"
             @click.prevent="settle"
@@ -192,7 +192,7 @@ export default class SettleTokens extends Vue {
     const tokenBalances = this.syntheticTokenBalances[synthName]
 
     function enoughTokens(value: number): boolean | string {
-      return value <= tokenBalances.longBalance || "Not enouth tokens"
+      return value <= tokenBalances.longBalance || "Not enough tokens"
     }
 
     function positive(value: number): boolean | string {
@@ -206,8 +206,12 @@ export default class SettleTokens extends Vue {
     try {
       this.loading = true
       await this.settleTokens({
-        longTokens: this.longTokens,
-        shortTokens: this.shortTokens,
+        longTokens: isNaN(parseInt(this.longTokens.toString()))
+          ? 0
+          : parseInt(this.longTokens.toString()),
+        shortTokens: isNaN(parseInt(this.shortTokens.toString()))
+          ? 0
+          : parseInt(this.shortTokens.toString()),
         syntheticName: this.contractDetails.syntheticName,
       })
       this.dialog = false
