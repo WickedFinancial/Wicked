@@ -131,6 +131,8 @@ export default class web3 extends VuexModule {
     this.context.commit("setModalInitializing", true)
     const provider = (window as any).ethereum as MetaMaskInpageProvider
     try {
+      // prompts user to connect accounts, https://docs.metamask.io/guide/ethereum-provider.html#ethereum-enable-deprecated
+      await provider.request({ method: "eth_requestAccounts" })
       this.context.commit("setEthersProvider", provider)
       this.context.commit("setConnectionStatus", true)
       await this.context.dispatch("registerListeners", provider)
