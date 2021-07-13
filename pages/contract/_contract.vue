@@ -10,10 +10,6 @@
       :contract-details="contractDetails"
       :contract-state="contractState"
     />
-    <price-dashboard
-      v-if="contractState === undefined || contractState === 0"
-      :contractDetails="contractDetails"
-    />
   </v-container>
 </template>
 
