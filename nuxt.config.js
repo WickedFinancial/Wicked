@@ -14,7 +14,60 @@ export default {
     meta: [
       { charset: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { hid: "description", name: "description", content: "" },
+      {
+        hid: "description",
+        name: "description",
+        content: "Manage exchange rate risk using on-chain derivatives.",
+      },
+      { property: "og:site_name", content: "Wicked" },
+      { hid: "og:type", property: "og:type", content: "object" },
+      {
+        hid: "twitter:image:src",
+        property: "twitter:image:src",
+        content: "https://wicked.financial/wicked-og-image.png",
+      },
+      {
+        hid: "twitter:site",
+        property: "twitter:site",
+        content: "@wickedfinancial",
+      },
+      {
+        hid: "twitter:card",
+        property: "twitter:card",
+        content: "summary_large_image",
+      },
+      {
+        hid: "twitter:title",
+        property: "twitter:title",
+        content: "Wicked: DeFi Currency Hedging Made Simple",
+      },
+      {
+        hid: "twitter:description",
+        property: "twitter:description",
+        content: "Manage exchange rate risk using on-chain derivatives.",
+      },
+      {
+        hid: "og:url",
+        property: "og:url",
+        content: "https://wicked.financial",
+      },
+      {
+        hid: "og:title",
+        property: "og:title",
+        content: "Wicked: DeFi Currency Hedging Made Simple",
+      },
+      {
+        hid: "og:description",
+        property: "og:description",
+        content: "Manage exchange rate risk using on-chain derivatives.",
+      },
+      {
+        hid: "og:image",
+        property: "og:image",
+        content: "https://wicked.financial/wicked-og-image.png",
+      },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
     ],
     link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
   },

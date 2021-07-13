@@ -120,9 +120,6 @@ export default class web3 extends VuexModule {
       const block = await ethersProvider.getBlock(blockNumber)
       console.log("Block timestamp:", block.timestamp)
       this.context.commit("setBlockTimestamp", block.timestamp)
-      await this.context.dispatch("prices/updatePriceValue", "EURUSD", {
-        root: true,
-      })
     })
   }
 
@@ -131,6 +128,8 @@ export default class web3 extends VuexModule {
     this.context.commit("setModalInitializing", true)
     const provider = (window as any).ethereum as MetaMaskInpageProvider
     try {
+      // prompts user to connect accounts, https://docs.metamask.io/guide/ethereum-provider.html#ethereum-enable-deprecated
+      await provider.request({ method: "eth_requestAccounts" })
       this.context.commit("setEthersProvider", provider)
       this.context.commit("setConnectionStatus", true)
       await this.context.dispatch("registerListeners", provider)

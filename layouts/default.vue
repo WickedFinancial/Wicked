@@ -26,9 +26,7 @@
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" app fixed>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-
-      <v-toolbar-title v-text="title" />
-      <wicked-logo id="Logo" />
+      <wicked></wicked>
       <v-spacer />
       <div v-if="isConnected" :title="selectedAccount" class="connected">
         Connected: {{ selectedAccount }}
@@ -68,7 +66,7 @@ export default class DefaultLayout extends Vue {
   @contracts.Getter
   syntheticNames!: Array<string>
 
-  get items(): Array<object> {
+  get items(): { icon: string; title: string; to: string }[] {
     const contractItems = this.syntheticNames.map((syntheticName) => {
       return {
         icon: "mdi-candle",
