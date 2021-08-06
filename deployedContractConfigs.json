@@ -50,6 +50,7 @@
     "customAncillaryData": "",
     "prepaidProposerReward": "200",
     "collateralPriceInEth": 1,
+    "address": "0x160DB0973f0894820384C25dcB45dBfAF190e808",
     "success": true
   },
   {
@@ -67,6 +68,7 @@
     "customAncillaryData": "",
     "prepaidProposerReward": "50",
     "collateralPriceInEth": 1,
+    "address": "0xec993514bc4f83a44279068D68eA9c479A2Ded85",
     "success": true
   }
 ]
