@@ -112,18 +112,23 @@ However this might result in spending significant amount of ETH from the wallet 
 #### Generate Collateral
 
 Creating / Minting synthetic tokens for a given contract will require you to provide the configured collateral.
-To generate collateral of the respective Token (in this case WETH) you can run:
-
-```bash
-$ yarn hardhat collateral --amount 100 --collateral-name WETH --network localhost
+To generate collateral of the respective Token (in this case LUSD) you can visit a liquity front-end on kovan:
 ```
+### Some liquity front-ends to get some LUSD
+### Remember that we are currently only on Kovan
+
+https://eth.liquity.fi/
+https://liquityapp.com/
+https://app.liquity.gg/#/
+```
+
 
 #### Fast Forward to Expiry time (only on local network)
 
 To forward the block timestamp to the expiry date of a contract identified by its `synthetic-name` run:
 
 ```bash
-$ yarn hardhat time:expiry --synthetic-name USDETH-Linear-210701 --network localhost
+$ yarn hardhat time:expiry --synthetic-name EURUSD-210701 --network localhost
 ```
 
 #### Propose Price to Optimistc Oracle
@@ -131,7 +136,7 @@ $ yarn hardhat time:expiry --synthetic-name USDETH-Linear-210701 --network local
 To propose a settlement price for the price feed of a given contract to the Optimistic Oracle run:
 
 ```bash
-$ yarn hardhat propose --synthetic-name USDETH-Linear-210701 --proposed-price 3000 --network localhost
+$ yarn hardhat propose --synthetic-name EURUSD-210701 --proposed-price 1.25 --network localhost
 ```
 
 #### Fast Forward past Dispute Liveness (only on local network)
@@ -147,7 +152,7 @@ $ yarn hardhat time:dispute --network localhost
 If a price has been proposed (and not disputed) and the liveness period has past you can settle synthetic tokens that you have created before
 
 ```bash
-$ yarn hardhat settle:lsp --synthetic-name USDETH-Linear-210701 --long-tokens 0 --short-tokens 0 --network localhost
+$ yarn hardhat settle:lsp --synthetic-name EURUSD-210701 --long-tokens 0 --short-tokens 0 --network localhost
 ```
 
 ## Documentation 📚

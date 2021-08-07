@@ -34,5 +34,41 @@
     "collateralPriceInEth": 1,
     "address": "0xADcD09372F9255dfdaB202dCF1CFeD31d2caf2AB",
     "success": true
+  },
+  {
+    "expirationTime": "2021-09-01T16:00:00.000Z",
+    "collateralPerPair": "1",
+    "priceIdentifier": "EURUSD",
+    "syntheticName": "EURUSD-210901",
+    "syntheticSymbol": "EURUSD2191",
+    "collateralToken": "LUSD",
+    "financialProductLibrary": "LinearLongShortPairFinancialProductLibrary",
+    "financialProductLibraryParameters": [
+      "1.21",
+      "1.15"
+    ],
+    "customAncillaryData": "",
+    "prepaidProposerReward": "200",
+    "collateralPriceInEth": 1,
+    "address": "0x160DB0973f0894820384C25dcB45dBfAF190e808",
+    "success": true
+  },
+  {
+    "expirationTime": "2021-10-01T16:00:00.000Z",
+    "collateralPerPair": "1",
+    "priceIdentifier": "EURUSD",
+    "syntheticName": "EURUSD-211001",
+    "syntheticSymbol": "EURUSD21101",
+    "collateralToken": "LUSD",
+    "financialProductLibrary": "LinearLongShortPairFinancialProductLibrary",
+    "financialProductLibraryParameters": [
+      "1.21",
+      "1.15"
+    ],
+    "customAncillaryData": "",
+    "prepaidProposerReward": "50",
+    "collateralPriceInEth": 1,
+    "address": "0xec993514bc4f83a44279068D68eA9c479A2Ded85",
+    "success": true
   }
 ]

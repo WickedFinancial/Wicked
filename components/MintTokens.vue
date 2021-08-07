@@ -48,6 +48,7 @@
           <v-btn color="blue darken-1" text @click="close"> Cancel</v-btn>
 
           <v-btn
+            min-width="95"
             v-if="collateralApproved"
             color="blue darken-1"
             type="button"
@@ -61,6 +62,7 @@
             </template>
           </v-btn>
           <v-btn
+            min-width="95"
             v-else
             color="blue darken-1"
             type="button"
