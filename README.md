@@ -1,6 +1,6 @@
 # Wicked
 
-This is the repo of the [wicked.financial](https://wicked.financial/) dapp for
+This is the repo of the [wicked.financial](https://wickedfinancial.netlify.app/) dapp for
 creating, redeeming and settling synthetich tokens based on UMA
 [LSP](https://medium.com/uma-project/introducing-umas-long-short-pair-lsp-financial-primitive-84596803864f) (Long Short Position)
 contracts.
