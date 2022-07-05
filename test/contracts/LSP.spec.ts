@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { ethers, getNamedAccounts } from "hardhat"
+import { config, ethers, getNamedAccounts } from "hardhat"
 import { waffleJest } from "@ethereum-waffle/jest"
 import { Address } from "hardhat-deploy/dist/types"
 import { BigNumber, Contract } from "ethers"
@@ -10,20 +10,25 @@ import WETHAbi from "~/abis/WETH.json"
 import LSPABI from "~/abis/LSP.json"
 import LSPCreatorABI from "~/abis/LSPCreator.json"
 import ERC20ABI from "~/abis/ERC20.json"
+import OptimisticOracle from "~/abis/OptomisticOracle.json"
 import LinearLongShortPairABI from "~/abis/LinearLongShortPairFinancialProductLibrary.json"
 
 jest.setTimeout(40000)
 expect.extend(waffleJest)
 
 describe("LSP", function () {
-  const addresses: Record<string, Address> = {
+  const addresses = {
     WETH: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
     LSPCreator: "0x4C68829DBD07FEbB250B90f5624d4a5C30BBeC2c",
     LinearLongShortPairFinancialProductLibrary:
       "0x46b541E0fE2E817340A1A88740607329fF5ED279",
+    OptimisticOracle: "0xB1d3A89333BBC3F5e98A991d6d4C1910802986BC",
+    LSP: "",
+    longToken: "",
+    shortToken: "",
   }
-  const contracts: Record<string, Contract> = {}
-  let namedAccounts: Record<string, Address>
+  let contracts: Record<keyof typeof addresses, Contract>
+  let namedAccounts: Record<keyof typeof config.namedAccounts, Address>
 
   const gasprice = 50
   const prepaidProposerReward = ethers.utils.parseUnits("0.01")
@@ -33,6 +38,7 @@ describe("LSP", function () {
   const collateralPerPair = ethers.utils.parseUnits("1")
   const tokensToKeep = tokensToCreate.sub(tokensToTransfer)
   const tokensToRedeem = ethers.utils.parseUnits("1")
+  const tokensToSettle = ethers.utils.parseUnits("1")
 
   beforeAll(async () => {
     namedAccounts = await getNamedAccounts()
@@ -85,7 +91,7 @@ describe("LSP", function () {
 
     const approvePromise = new Promise<void>((resolve) => {
       contracts.WETH.once(
-        contracts.WETH.filters.Approval(null, addresses.EMP),
+        contracts.WETH.filters.Approval(null, addresses.LSP),
         (_1, _2, allowance) => {
           expect(allowance).toEqBN(prepaidProposerReward)
           resolve()
@@ -257,7 +263,7 @@ describe("LSP", function () {
     )
     expect(syntheticBalanceDeployer).toEqBN(tokensToKeep)
   })
-  it("Sponsor can redeem remaining tokens", async function () {
+  it("Sponsor can redeem some tokens", async function () {
     // Transaction parameters
     const transactionOptions = {
       gasPrice: gasprice * 1000000000, // gasprice arg * 1 GWEI
@@ -292,5 +298,74 @@ describe("LSP", function () {
     )
     const expectedCollateralBalance = oldCollateralBalance.add(tokensToRedeem)
     expect(newCollateralBalance).toEqBN(expectedCollateralBalance)
+  })
+  it("Should change state to ExpiredPriceRequested after expire", async function () {
+    // Check that sponsor still has enough L / S Tokens
+    const syntheticBalances = await contracts.LSP.getPositionTokens(
+      namedAccounts.deployer
+    )
+    expect(syntheticBalances[0]).toBeGteBN(tokensToSettle)
+    expect(syntheticBalances[1]).toBeGteBN(tokensToSettle)
+
+    // Check contract state
+    const ContractState = {
+      Open: 0,
+      ExpiredPriceRequested: 1,
+      ExpiredPriceReceived: 2,
+    }
+
+    let contractState: number = await contracts.LSP.contractState()
+
+    expect(contractState).toEqual(ContractState.Open)
+
+    // fast forward 350 seconds
+    await ethers.provider.send("evm_increaseTime", [350])
+    await ethers.provider.send("evm_mine", [])
+
+    // expire the contract
+    const expireTx = await contracts.LSP.expire()
+
+    await expireTx.wait()
+    contractState = await contracts.LSP.contractState()
+
+    expect(contractState).toEqual(ContractState.ExpiredPriceRequested)
+  })
+
+  it("Should change the contract state after calling expire", async function () {
+    // Check that sponsor still has enough L / S Tokens
+    const syntheticBalances = await contracts.LSP.getPositionTokens(
+      namedAccounts.deployer
+    )
+    expect(syntheticBalances[0]).toBeGteBN(tokensToSettle)
+    expect(syntheticBalances[1]).toBeGteBN(tokensToSettle)
+
+    // Check contract state
+    enum ContractState {
+      Open,
+      ExpiredPriceRequested,
+      ExpiredPriceReceived,
+    }
+
+    let contractState: number = await contracts.LSP.contractState()
+
+    expect(contractState).toEqual(ContractState.Open)
+
+    // fast forward 350 seconds
+    await ethers.provider.send("evm_increaseTime", [350])
+    await ethers.provider.send("evm_mine", [])
+
+    // expire the contract
+    const expireTx = await contracts.LSP.expire()
+
+    await expireTx.wait()
+    contractState = await contracts.LSP.contractState()
+
+    expect(contractState).toEqual(ContractState.ExpiredPriceRequested)
+  })
+  it("Should settle tokens after receiving expired price. ", async () => {
+    contracts.OptimisticOracle = await ethers.getContractAt(
+      OptimisticOracle,
+      addresses.OptimisticOracle
+    )
   })
 })
